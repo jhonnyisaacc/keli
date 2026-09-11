@@ -4,6 +4,7 @@ import type { CodingDelegate } from "../core/types.ts";
 import { ModelLoop } from "../model/loop.ts";
 import { DelegateService } from "../model/delegate-service.ts";
 import { FixtureModelProvider } from "../model/provider.ts";
+import { resolveProvider, listProviders } from "../model/provider-registry.ts";
 import { requireInitialized } from "../state/init.ts";
 import { getProjectById, projectScope } from "../state/repos.ts";
 import { resolveStateDir } from "../state/paths.ts";
@@ -33,8 +34,12 @@ export async function openApp(
     provider = new FixtureModelProvider(globals.fixtureEndpoint);
   } else if (globals.fixture) {
     throw new Error("Fixture mode requires --fixture-endpoint or internal test harness");
+  } else if (process.env.KELI_FIXTURE_URL) {
+    provider = resolveProvider("fixture") as FixtureModelProvider;
+  } else if (requireProvider && listProviders().some((p) => p.available)) {
+    provider = resolveProvider() as FixtureModelProvider;
   } else if (requireProvider) {
-    throw new Error("Live providers not configured in 0.1-A. Use --fixture.");
+    throw new Error("No provider configured. Use --fixture or set KELI_FIXTURE_URL.");
   }
 
   const scope = projectScope(project.id);
@@ -66,6 +71,7 @@ export async function openApp(
     provider,
     delegateService,
     workspace,
+    config,
   );
 
   return {

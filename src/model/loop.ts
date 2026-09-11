@@ -6,7 +6,10 @@ import type { ModelProvider, ProviderMode } from "./provider.ts";
 import type { DelegateService } from "./delegate-service.ts";
 import { KeliError } from "../core/errors.ts";
 import { projectScope } from "../state/repos.ts";
-import type { CodingDelegate } from "../core/types.ts";
+import type { CodingDelegate, RunOverrideDelegate } from "../core/types.ts";
+import type { KeliConfig } from "../state/config.ts";
+import { routingFromConfig, selectProviderForTurn } from "./routing.ts";
+import { resolveProvider } from "./provider-registry.ts";
 
 export type TurnResult = {
   kind: "correction" | "action" | "override" | "blocked" | "error";
@@ -25,6 +28,7 @@ export class ModelLoop {
     private readonly provider?: ModelProvider,
     private readonly delegateService?: DelegateService,
     private readonly workspace = "/tmp",
+    private readonly config?: KeliConfig | null,
   ) {}
 
   async runTurn(prompt: string, options?: { mode?: ProviderMode; undo?: boolean }): Promise<TurnResult> {
@@ -93,13 +97,14 @@ export class ModelLoop {
     prompt: string,
     scope: string,
     key: string,
-    runOverride?: CodingDelegate,
+    runOverride?: RunOverrideDelegate,
     mode?: ProviderMode,
   ): Promise<TurnResult> {
     const rule = this.behavior.requireRule(scope, key);
-    const effectiveValue = (runOverride ?? rule.value) as CodingDelegate;
+    const effectiveValue = (runOverride ?? rule.value) as CodingDelegate | "Grok";
+    const useProviderPath = runOverride === "Grok" || !this.delegateService;
 
-    const result = this.delegateService
+    const result = !useProviderPath && this.delegateService
       ? await this.gate.actWithDelegate(
           prompt,
           scope,
@@ -139,26 +144,38 @@ export class ModelLoop {
     prompt: string,
     scope: string,
     key: string,
-    runOverride?: CodingDelegate,
+    runOverride?: RunOverrideDelegate,
     mode?: ProviderMode,
-    effectiveValue?: CodingDelegate,
+    effectiveValue?: CodingDelegate | "Grok",
   ) {
-    if (!this.provider) {
+    const routing = routingFromConfig(this.config ?? null);
+    const providerId =
+      runOverride === "Grok"
+        ? "grok"
+        : selectProviderForTurn(routing, "action", process.env.KELI_PROVIDER_ID ?? "fixture");
+    const provider =
+      runOverride === "Grok" || providerId !== "fixture"
+        ? resolveProvider(providerId)
+        : this.provider;
+    if (!provider) {
       throw new KeliError("Provider required for action turns", "provider_required");
     }
-    const delegate = effectiveValue ?? this.behavior.requireRule(scope, key).value as CodingDelegate;
+    const delegate =
+      effectiveValue === "Grok"
+        ? "Grok"
+        : (effectiveValue ?? this.behavior.requireRule(scope, key).value as CodingDelegate);
     return this.gate.act(
       prompt,
       scope,
       key,
       async (req) => {
-        const response = await this.provider!.propose(
-          runOverride ? { ...req, value: delegate } : req,
+        const response = await provider.propose(
+          runOverride ? { ...req, value: String(delegate) } : req,
           mode,
         );
         return response;
       },
-      { effectiveDelegate: runOverride },
+      { effectiveDelegate: runOverride === "Grok" ? "Grok" : runOverride },
     );
   }
 }

@@ -97,6 +97,34 @@ describe("migrations", () => {
     db.close();
   });
 
+  test("v8 adds notes and skill_pins", () => {
+    const db = new Database(":memory:");
+    migrate(db, 8);
+    expect(getSchemaVersion(db)).toBe(8);
+    const notes = db
+      .query("SELECT name FROM sqlite_master WHERE type='table' AND name='notes'")
+      .all();
+    expect(notes.length).toBe(1);
+    const pins = db
+      .query("SELECT name FROM sqlite_master WHERE type='table' AND name='skill_pins'")
+      .all();
+    expect(pins.length).toBe(1);
+    db.close();
+  });
+
+  test("v9 extends runs and adds helper_runs", () => {
+    const db = new Database(":memory:");
+    migrate(db, 9);
+    expect(getSchemaVersion(db)).toBe(9);
+    const cols = db.query("PRAGMA table_info(runs)").all() as { name: string }[];
+    expect(cols.some((c) => c.name === "requests_max")).toBe(true);
+    const helpers = db
+      .query("SELECT name FROM sqlite_master WHERE type='table' AND name='helper_runs'")
+      .all();
+    expect(helpers.length).toBe(1);
+    db.close();
+  });
+
   test("v2 adds artifacts table", () => {
     const db = new Database(":memory:");
     migrate(db, 2);

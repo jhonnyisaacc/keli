@@ -110,6 +110,67 @@ export function startIntegrationFixture(): IntegrationFixture {
         });
       }
 
+      if (path.startsWith("/honcho/") && req.method === "POST") {
+        const op = path.replace("/honcho/", "");
+        if (process.env.KELI_FIXTURE_HONCHO_OUTAGE === "1") {
+          return new Response("honcho outage", { status: 503 });
+        }
+        const body = (await req.json()) as { scope: string; key?: string; content?: string; query?: string };
+        const store = (globalThis as { __honchoStore?: Map<string, string> }).__honchoStore ?? new Map();
+        (globalThis as { __honchoStore?: Map<string, string> }).__honchoStore = store;
+        const recordKey = `${body.scope}:${body.key ?? body.query ?? ""}`;
+        if (op === "store" && body.key && body.content) {
+          store.set(`${body.scope}:${body.key}`, body.content);
+          return Response.json({ ok: true });
+        }
+        if (op === "query") {
+          const matches = [...store.entries()]
+            .filter(([k]) => k.startsWith(`${body.scope}:`))
+            .map(([k, content]) => ({ key: k.split(":").slice(1).join(":"), content }));
+          return Response.json({ ok: true, records: matches });
+        }
+        if (op === "delete" && body.key) {
+          store.delete(`${body.scope}:${body.key}`);
+          return Response.json({ ok: true });
+        }
+        return Response.json({ ok: false, error: { code: "invalid_request", message: "unknown honcho op" } });
+      }
+
+      if (path === "/browser/session" && req.method === "POST") {
+        const body = (await req.json()) as { url: string; authenticated?: boolean };
+        return Response.json({
+          sessionId: `session-${crypto.randomUUID()}`,
+          title: body.authenticated ? "Authenticated fixture" : "Anonymous fixture",
+          url: body.url,
+        });
+      }
+
+      if (path === "/chat/completions" && req.method === "POST") {
+        const body = (await req.json()) as {
+          model?: string;
+          messages?: Array<{ content?: string }>;
+        };
+        const userContent = body.messages?.[0]?.content ?? "{}";
+        let parsed: Record<string, unknown> = {};
+        try {
+          parsed = JSON.parse(userContent) as Record<string, unknown>;
+        } catch {
+          parsed = {};
+        }
+        const action = (parsed.action ?? {}) as Record<string, unknown>;
+        const rule = (parsed.rule ?? {}) as Record<string, unknown>;
+        const candidate = {
+          id: action.id ?? crypto.randomUUID(),
+          scope: action.scope ?? rule.scope,
+          key: action.key ?? rule.key,
+          revision: action.revision ?? rule.revision,
+          delegate: rule.value ?? "Grok",
+        };
+        return Response.json({
+          choices: [{ finish_reason: "stop", message: { content: JSON.stringify(candidate) } }],
+        });
+      }
+
       return new Response("not found", { status: 404 });
     },
   });

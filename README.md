@@ -2,9 +2,9 @@
 
 Keli (כלי) is a personal-first agent: teach it how to work once, and durable scoped corrections govern future execution across restarts and upgrades.
 
-This repository implements the **v0.1.0** product on branch `feat/v0.1.0` in vertical increments. **0.1-A through 0.1-E** are implemented (core runtime, capabilities, jobs/transports, packaging/ops). **0.1-F through 0.1-I** remain before the `v0.1.0` tag (Honcho and broader integrations, routing/budgets/skills, helper fan-out, then release evidence).
+This repository implements the **v0.1.0** product on branch `feat/v0.1.0` in vertical increments. **0.1-A through 0.1-I** are implemented in code (core runtime, capabilities, jobs/transports, packaging/ops, memory/providers, routing/budgets/skills, helper fan-out, release harness). **Do not tag `v0.1.0`** until human gates are recorded (notarization, live held-out eval, five-user check, native four-target smoke).
 
-Current code includes: Bun runtime, SQLite state, authority gates, Linux Landlock sandbox, capability dispatch (files/shell/HTTP/web/search/browser/MCP/delegate/jobs), durable jobs and transports (Discord/Telegram stubs), install/update/backup/restore, global pause, delegate conformance in the gate loop, fixture provider, and a Grok Build-style CLI.
+Current code includes: Bun runtime, SQLite state, authority gates, Linux Landlock sandbox, capability dispatch (files/shell/HTTP/web/search/browser/MCP/delegate/jobs/helpers), local notes and optional Honcho fixture adapter, provider routing and run budgets, durable skill pins, durable jobs and transports (Discord/Telegram stubs), install/update/backup/restore, global pause, delegate conformance in the gate loop, fixture provider, and a Grok Build-style CLI.
 
 Human-only release gates (increment **0.1-I**): macOS notarization, held-out correction eval, five-user usability check.
 
@@ -51,6 +51,8 @@ Contains `state.sqlite`, `config.json`, and cache subdirectories.
 | `keli discord` | Discord transport: `send`, `ingest`, `process` (fixture-backed) |
 | `keli telegram` | Telegram transport: `send`, `ingest`, `process` (fixture-backed) |
 | `keli routes` | Transport route bindings: `list`, `bind` |
+| `keli notes` | Local advisory notes: `add`, `list`, `search` |
+| `keli providers` | List configured model providers (`list`) |
 | `keli version` | Version and build metadata |
 | `keli update` | Check (`--check`), install (`--install`), or rollback |
 | `keli backup` / `keli restore` | State backup/restore (no credentials; restore pauses jobs) |

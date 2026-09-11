@@ -70,5 +70,7 @@ export async function requireInitialized(stateDir?: string) {
     db.close();
     throw new Error("Owner record missing. Run: keli init");
   }
+  const { setSkillPinDatabase } = await import("../skills/pin.ts");
+  setSkillPinDatabase(db);
   return { stateDir: dir, config, db, owner };
 }

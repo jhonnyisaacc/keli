@@ -10,11 +10,18 @@ import { browserNavigate } from "../adapters/browser.ts";
 import { mcpCallTool, mcpListTools } from "../adapters/mcp.ts";
 import { delegateRun } from "../adapters/delegate.ts";
 import { jobsObserve } from "../adapters/jobs.ts";
+import { browserSessionConnect } from "../adapters/browser-session.ts";
+import { helpersSpawn } from "../adapters/helpers-spawn.ts";
 import { KeliError } from "../core/errors.ts";
+import { consumeToolCallBudget } from "../core/budgets.ts";
 import { assertNotCancelled, consumeBudget } from "../core/run-control.ts";
 import type { DispatchContext } from "./dispatch-context.ts";
 import type { ResourcePolicy } from "./policy.ts";
 import type { CodingDelegate } from "../core/types.ts";
+
+function descriptorNeedsToolBudget(capabilityId: string): boolean {
+  return capabilityId === "mcp.tools/call" || capabilityId === "helpers.spawn";
+}
 
 function estimateResultBytes(result: CapabilityResult): number {
   if (!result.output) return 0;
@@ -53,6 +60,21 @@ export async function dispatchCapability(
 ): Promise<CapabilityResult> {
   if (ctx.run) {
     assertNotCancelled(ctx.run.db, ctx.run.runId, ctx.run.cancelEpoch);
+    if (descriptorNeedsToolBudget(proposal.capabilityId)) {
+      try {
+        consumeToolCallBudget(ctx.run.db, ctx.run.runId);
+      } catch (e) {
+        const keli = e instanceof KeliError ? e : null;
+        return {
+          capabilityId: proposal.capabilityId,
+          ok: false,
+          error: {
+            code: keli?.code ?? "quota_exceeded",
+            message: keli?.message ?? String(e),
+          },
+        };
+      }
+    }
   }
 
   const descriptor = registry.get(proposal.capabilityId);
@@ -123,6 +145,19 @@ export async function dispatchCapability(
         ...ctx.browser,
         fixtureUrl: ctx.browser?.fixtureUrl ?? fixtures.browser,
       });
+      break;
+    case "browser.session":
+      result = await browserSessionConnect(
+        proposal.input as { url: string; credentialRef?: { id: string; service: string } },
+        fixtures.browser ?? process.env.KELI_BROWSER_SESSION_FIXTURE_URL,
+      );
+      break;
+    case "helpers.spawn":
+      result = await helpersSpawn(
+        proposal.input as { capabilityId: string; input: Record<string, unknown> },
+        ctx,
+        registry,
+      );
       break;
     case "mcp.tools/list":
       result = await mcpListTools(fixtures.mcp);

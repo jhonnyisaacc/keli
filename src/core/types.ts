@@ -64,8 +64,10 @@ export type CorrectionIntent = {
   sourceText: string;
 };
 
+export type RunOverrideDelegate = CodingDelegate | "Grok";
+
 export type RunOverride = {
-  delegate: CodingDelegate;
+  delegate: RunOverrideDelegate;
   sourceText: string;
 };
 

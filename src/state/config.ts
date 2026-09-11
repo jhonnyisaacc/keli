@@ -4,6 +4,7 @@ import { statePaths, resolveStateDir } from "./paths.ts";
 
 import type { BrowserBackendKind } from "../execution/browser-backends.ts";
 import type { CodingDelegate } from "../core/types.ts";
+import type { ProviderRouting } from "../model/routing.ts";
 
 export type KeliConfig = {
   version: number;
@@ -31,6 +32,8 @@ export type KeliConfig = {
     transport?: "discord" | "telegram";
     calibrationSkipped?: boolean;
   };
+  /** Provider role routing (0.1-G). */
+  routing?: ProviderRouting;
   /** Durable global execution control (0.1-E). */
   control?: {
     autonomyPaused?: boolean;

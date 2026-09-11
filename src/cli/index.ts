@@ -15,6 +15,8 @@ import { setupCommand } from "./commands/setup.ts";
 import { backupCommand, restoreCommand } from "./commands/backup.ts";
 import { pauseCommand, resumeCommand, stopCommand } from "./commands/pause.ts";
 import { updateCommand } from "./commands/update.ts";
+import { notesCommand } from "./commands/notes.ts";
+import { providersCommand } from "./commands/providers.ts";
 import {
   loginCommand,
   logoutCommand,
@@ -107,6 +109,8 @@ function createMain(globals: CliGlobals) {
       login: loginCommand(globals),
       logout: logoutCommand(globals),
       update: updateCommand(globals),
+      notes: notesCommand(globals),
+      providers: providersCommand(globals),
       version: versionCommand(globals),
       sessions: sessionsCommand(globals),
       agent: agentCommand(globals),

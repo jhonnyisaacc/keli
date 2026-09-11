@@ -23,6 +23,9 @@ export type DispatchContext = {
   browser?: BrowserBackendConfig;
   cwd?: string;
   run?: RunDispatchContext;
+  jobId?: string;
+  stateDir?: string;
+  ownerId?: string;
 };
 
 export const DEFAULT_ALLOWED_HOSTS = ["127.0.0.1", "localhost"];

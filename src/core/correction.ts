@@ -1,11 +1,12 @@
-import type { CorrectionIntent, RunOverride } from "./types.ts";
+import type { CorrectionIntent, RunOverride, RunOverrideDelegate } from "./types.ts";
 import { isCodingDelegate } from "./types.ts";
+import { isRunOverrideDelegate, normalizeOverrideDelegate } from "../model/provider-registry.ts";
 
 const REVISE_PATTERN =
-  /^(.+?)\s+changes?\s+use\s+(Codex|OpenCode)\s*$/i;
+  /^(.+?)\s+changes?\s+use\s+(Codex|OpenCode|Grok)\s*$/i;
 
 const RUN_OVERRIDE_PATTERN =
-  /^use\s+(Codex|OpenCode)\s+(?:only\s+)?this\s+time\s*$/i;
+  /^use\s+(Codex|OpenCode|Grok)\s+(?:only\s+)?this\s+time\s*$/i;
 
 const ACTION_PATTERN = /perform|next|coding action/i;
 
@@ -20,6 +21,7 @@ export function parsePrompt(text: string): {
   const revise = REVISE_PATTERN.exec(trimmed);
   if (revise) {
     const delegate = revise[2];
+    if (delegate.toLowerCase() === "grok") return { kind: "unknown" };
     if (!isCodingDelegate(delegate)) return { kind: "unknown" };
     return {
       kind: "correction",
@@ -35,11 +37,11 @@ export function parsePrompt(text: string): {
   const override = RUN_OVERRIDE_PATTERN.exec(trimmed);
   if (override) {
     const delegate = override[1];
-    if (!isCodingDelegate(delegate)) return { kind: "unknown" };
+    if (!isRunOverrideDelegate(delegate)) return { kind: "unknown" };
     return {
       kind: "override",
       override: {
-        delegate: capitalizeDelegate(delegate),
+        delegate: normalizeOverrideDelegate(delegate) as RunOverrideDelegate,
         sourceText: trimmed,
       },
     };

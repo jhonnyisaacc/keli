@@ -142,6 +142,39 @@ const BUILTIN: CapabilityDescriptor[] = [
     },
   },
   {
+    id: "browser.session",
+    version: "0.1.0",
+    summary: "Connect an authenticated browser session via credential reference",
+    actionClass: "read",
+    resources: ["url"],
+    schema: {
+      type: "object",
+      properties: {
+        url: { type: "string" },
+        credentialRef: {
+          type: "object",
+          properties: { id: { type: "string" }, service: { type: "string" } },
+        },
+      },
+      required: ["url"],
+    },
+  },
+  {
+    id: "helpers.spawn",
+    version: "0.1.0",
+    summary: "Spawn a bounded helper child run for one capability",
+    actionClass: "read",
+    resources: ["capabilityId"],
+    schema: {
+      type: "object",
+      properties: {
+        capabilityId: { type: "string" },
+        input: { type: "object" },
+      },
+      required: ["capabilityId", "input"],
+    },
+  },
+  {
     id: "delegate.run",
     version: "0.1.0",
     summary: "Run a coding delegate handoff (Codex/OpenCode)",

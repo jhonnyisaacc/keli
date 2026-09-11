@@ -1,6 +1,6 @@
 import type { Database } from "bun:sqlite";
 
-export const CURRENT_SCHEMA_VERSION = 7;
+export const CURRENT_SCHEMA_VERSION = 9;
 
 const MIGRATIONS: Record<number, string> = {
   1: `
@@ -191,6 +191,80 @@ const MIGRATIONS: Record<number, string> = {
     );
 
     INSERT OR IGNORE INTO preservation_cursor(id) VALUES ('default');
+  `,
+  8: `
+    CREATE TABLE IF NOT EXISTS notes (
+      id TEXT PRIMARY KEY,
+      scope TEXT NOT NULL,
+      title TEXT NOT NULL,
+      body TEXT NOT NULL,
+      source_ref TEXT,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING fts5(
+      note_id UNINDEXED,
+      scope UNINDEXED,
+      title,
+      body
+    );
+
+    CREATE TABLE IF NOT EXISTS conversations (
+      id TEXT PRIMARY KEY,
+      scope TEXT NOT NULL,
+      transport TEXT,
+      external_id TEXT,
+      summary TEXT,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS task_checkpoints (
+      id TEXT PRIMARY KEY,
+      scope TEXT NOT NULL,
+      goal TEXT NOT NULL,
+      state_json TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS skill_pins (
+      id TEXT NOT NULL,
+      version INTEGER NOT NULL,
+      scope TEXT NOT NULL,
+      source TEXT NOT NULL,
+      content TEXT NOT NULL,
+      license TEXT,
+      activation_status TEXT NOT NULL DEFAULT 'draft',
+      comparable_uses INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL,
+      PRIMARY KEY (id, version)
+    );
+
+    CREATE INDEX IF NOT EXISTS notes_scope_idx ON notes(scope);
+    CREATE INDEX IF NOT EXISTS skill_pins_scope_idx ON skill_pins(scope);
+  `,
+  9: `
+    ALTER TABLE runs ADD COLUMN requests_max INTEGER NOT NULL DEFAULT 20;
+    ALTER TABLE runs ADD COLUMN requests_used INTEGER NOT NULL DEFAULT 0;
+    ALTER TABLE runs ADD COLUMN tokens_max INTEGER;
+    ALTER TABLE runs ADD COLUMN tokens_used INTEGER NOT NULL DEFAULT 0;
+    ALTER TABLE runs ADD COLUMN tool_calls_max INTEGER;
+    ALTER TABLE runs ADD COLUMN tool_calls_used INTEGER NOT NULL DEFAULT 0;
+    ALTER TABLE runs ADD COLUMN parent_run_id TEXT;
+    ALTER TABLE runs ADD COLUMN monetary_budget_cents INTEGER;
+    ALTER TABLE runs ADD COLUMN monetary_used_cents INTEGER NOT NULL DEFAULT 0;
+
+    CREATE TABLE IF NOT EXISTS helper_runs (
+      id TEXT PRIMARY KEY,
+      parent_run_id TEXT NOT NULL,
+      child_run_id TEXT NOT NULL,
+      capability_id TEXT NOT NULL,
+      status TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (parent_run_id) REFERENCES runs(id),
+      FOREIGN KEY (child_run_id) REFERENCES runs(id)
+    );
+
+    CREATE INDEX IF NOT EXISTS helper_runs_parent_idx ON helper_runs(parent_run_id);
   `,
 };
 

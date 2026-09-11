@@ -7,7 +7,9 @@ import { defaultNetworkPolicy, fixtureEndpointsFromEnv } from "../execution/disp
 import type { ResourcePolicy } from "../execution/policy.ts";
 import { storeArtifact } from "../state/artifacts.ts";
 import { KeliError } from "./errors.ts";
+import { consumeRequestBudget } from "./budgets.ts";
 import { createRun, getRun, assertNotCancelled, finishRun } from "./run-control.ts";
+import { parentHasRunningHelpers } from "../execution/helpers.ts";
 import { readControl, isEffectfulBlocked } from "../ops/control.ts";
 import { jobAllowsActionClass } from "../jobs/grants.ts";
 
@@ -122,6 +124,23 @@ export class CapabilityGate {
     }
     const cancelEpoch = run.cancel_epoch;
 
+    try {
+      consumeRequestBudget(this.db, runId);
+    } catch (e) {
+      const keli = e instanceof KeliError ? e : null;
+      const actionId = this.prepare(proposal, scope, runId);
+      const result = await this.finish(actionId, {
+        capabilityId: proposal.capabilityId,
+        ok: false,
+        error: {
+          code: keli?.code ?? "quota_exceeded",
+          message: keli?.message ?? String(e),
+        },
+      });
+      finishRun(this.db, runId, "failed");
+      return { actionId, runId, result };
+    }
+
     const actionId = this.prepare(proposal, scope, runId);
     const ctx: DispatchContext = {
       policy,
@@ -130,6 +149,9 @@ export class CapabilityGate {
       browser: options?.browser,
       cwd,
       run: { db: this.db, runId, cancelEpoch },
+      jobId: options?.jobId,
+      stateDir: this.stateDir,
+      ownerId: this.ownerId,
     };
 
     let raw: CapabilityResult;
@@ -165,7 +187,9 @@ export class CapabilityGate {
 
     const result = await this.finish(actionId, raw);
     if (result.ok) {
-      finishRun(this.db, runId, "completed");
+      if (!parentHasRunningHelpers(this.db, runId)) {
+        finishRun(this.db, runId, "completed");
+      }
     } else if (result.error?.code !== "cancelled") {
       finishRun(this.db, runId, "failed");
     }

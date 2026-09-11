@@ -6,6 +6,7 @@ import { migrate } from "../../src/state/migrate.ts";
 import { recoverInterruptedActions } from "../../src/state/db.ts";
 import { createOwner, createProject, projectScope } from "../../src/state/repos.ts";
 import { writeConfig, defaultConfig } from "../../src/state/config.ts";
+import { setSkillPinDatabase } from "../../src/skills/pin.ts";
 import { BehaviorService } from "../../src/core/behavior.ts";
 import { GateService } from "../../src/core/gate.ts";
 import { ModelLoop } from "../../src/model/loop.ts";
@@ -50,6 +51,7 @@ export async function createTestEnv(): Promise<TestEnv> {
   const behavior = new BehaviorService(db, ownerId);
   const gate = new GateService(db, behavior);
   const loop = new ModelLoop(behavior, gate, rocketId, "Rocket", provider);
+  setSkillPinDatabase(db);
 
   return {
     stateDir,
@@ -63,6 +65,7 @@ export async function createTestEnv(): Promise<TestEnv> {
     fixture,
     provider,
     close: () => {
+      setSkillPinDatabase(undefined);
       db.close();
       fixture.stop();
     },

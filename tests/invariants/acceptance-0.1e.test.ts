@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { createTestEnv, projectScope } from "../helpers/setup.ts";
+import { pinSkill, reusePinnedSkill, setSkillPinDatabase } from "../../src/skills/pin.ts";
+import { createTestEnv, projectScope, reopenDb } from "../helpers/setup.ts";
 import { CapabilityGate } from "../../src/core/capability-gate.ts";
 import { defaultRegistry } from "../../src/capabilities/registry.ts";
 import { createJob, setJobStatus } from "../../src/jobs/store.ts";
@@ -7,7 +8,6 @@ import { grantJobCapabilities } from "../../src/jobs/grants.ts";
 import { bindTransportRoute, resolveDiscordThreadRoute } from "../../src/transports/routes.ts";
 import { markOutboxUnknown } from "../../src/transports/outbox.ts";
 import { enqueueOutbox } from "../../src/transports/outbox.ts";
-import { pinSkill, reusePinnedSkill } from "../../src/skills/pin.ts";
 import { advancePreservationCursor, readPreservationCursor } from "../../src/preservation/cursor.ts";
 import { cancelRun, createRun } from "../../src/core/run-control.ts";
 import { dispatchCapability } from "../../src/execution/dispatch.ts";
@@ -126,9 +126,17 @@ describe("0.1-E acceptance gates", () => {
     env.close();
   });
 
-  test("A27/A28 skill pin and reuse", () => {
+  test("A27/A28 skill pin and reuse survive restart", async () => {
+    const env = await createTestEnv();
     pinSkill({ id: "lint", version: "1.0.0", source: "local", license: "MIT" });
-    expect(reusePinnedSkill("lint").version).toBe("1.0.0");
+    expect(reusePinnedSkill("lint").version).toBe("1");
+    env.close();
+
+    const db = reopenDb(env.stateDir);
+    setSkillPinDatabase(db);
+    expect(reusePinnedSkill("lint").version).toBe("1");
+    setSkillPinDatabase(undefined);
+    db.close();
   });
 
   test("A29 honcho absent — local rules still work", async () => {

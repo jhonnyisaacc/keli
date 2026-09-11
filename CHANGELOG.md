@@ -6,6 +6,32 @@ All notable changes to Keli follow [SemVer](https://semver.org/).
 
 **Release policy:** the full initial PRD product ships as **v0.1.0**. Increments 0.1-A–E are complete in code; 0.1-F–I remain before tagging. See [PRD.md](PRD.md) §11.
 
+### 0.1-I
+
+- `scripts/build.ts --all-targets` emits four cross-compiled artifacts + `SHA256SUMS` (signing hook when `KELI_RELEASE_SIGNING_KEY` set)
+- Held-out fixture suite (≥100 cases) under `tests/acceptance/held-out/` with pass-rate report
+- `docs/SUPPORT_MATRIX.md`, `docs/BOUNDARY_MATRIX.md`, `docs/RELEASE_CHECKLIST.md`
+- **Do not tag v0.1.0** until human gates recorded (notarization, live eval, five-user check, native four-target smoke)
+
+### 0.1-H
+
+- Bounded helper fan-out (`helpers.spawn`, max 4); child runs inherit parent cancel epoch and budget envelope
+- Parent cancel propagates to helper tree (A42); job grants apply to spawned children
+- Schema v9 `helper_runs` table
+
+### 0.1-G
+
+- Configurable provider routing roles (`cheap` / `strong` / `task` / `agent` / `provider`)
+- Run request/token/tool-call budgets on capability path; job mutate grants for recurring writes
+- Durable skill pins in SQLite with activate/rollback; compact index summaries (A41)
+
+### 0.1-F
+
+- Schema v8: local `notes` FTS, `conversations`, `task_checkpoints`, `skill_pins`
+- `keli notes add|list|search`; optional Honcho fixture adapter (`KELI_HONCHO_*`)
+- Provider registry with fixture default; Grok fixture override (A05); named-later providers unavailable
+- `browser.session` via credential reference; `keli providers list`
+
 ### 0.1-E
 
 - POSIX `install/bootstrap.sh`; `keli update --check|--install|--rollback` with manifest checksum verification
