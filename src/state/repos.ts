@@ -126,7 +126,10 @@ export function acquireLease(
   holder: string,
   ttlMs = 30_000,
 ): number {
-  const token = Date.now();
+  const previous = db
+    .query("SELECT fencing_token FROM instance_lease WHERE holder = ?")
+    .get(holder) as { fencing_token: number } | null;
+  const token = Math.max(Date.now(), (previous?.fencing_token ?? 0) + 1);
   const expires = new Date(Date.now() + ttlMs).toISOString();
   db.run(
     "INSERT OR REPLACE INTO instance_lease(holder, fencing_token, expires_at) VALUES (?, ?, ?)",

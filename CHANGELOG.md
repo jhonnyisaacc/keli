@@ -4,6 +4,42 @@ All notable changes to Keli follow [SemVer](https://semver.org/).
 
 ## 0.1.0-alpha (unreleased)
 
+### 0.1-D
+
+- Schema v4–v6: jobs, occurrences, outbox, transport inbox/routes with run/action linkage
+- Durable jobs: schedule parsing, coalesced scheduler tick, gate dispatch via `jobs.observe`, A21 recovery
+- `keli jobs` subcommands; Discord and Telegram transport stubs with outbox receipts and inbox dedupe
+- Transport routes bind immutable external ids to scopes; inbox queue processed on startup and via CLI
+- Outbox reconcile on open; delivery retry for pending Discord/Telegram messages; failed terminalization
+- Explained `keli setup` wizard (interactive + `--non-interactive` for tests); `keli routes` bind/list
+- Acceptance coverage: A15 quiet recurrence, A18/A19 transport paths, A21 non-repeat dispatch, route tests
+- Monotonic fencing tokens on lease acquire (same-ms supersede no longer false-positive valid)
+
+### 0.1-E (next)
+
+- Packaging, signed upgrade/restore, full v0.1.0 acceptance gates
+
+### 0.1-C
+
+- HTTP/web/search/browser/MCP/delegate capabilities with fixture-backed conformance tests
+- Browser complement model: `http.fetch`/`web.fetch` for static pages; pluggable session backends (fixture, Playwright, CDP, MCP)
+- Delegate conformance in gate loop via `actWithDelegate`; primary/fallback with lease fencing (A37)
+- Playwright navigate backend (`scripts/playwright-navigate.ts`)
+- Run budgets and cancellation epochs on capability path
+- Release smoke exercises delegate + `keli invoke web.fetch`
+- Schema v3 `runs` table; network host allowlist for outbound fetch
+
+### 0.1-B
+
+- Capability registry, gated dispatch, and `keli invoke` / `keli capabilities`
+- Linux Landlock sandbox worker; macOS shell fails closed
+- Artifact receipts (schema v2) and `files.write`
+- Typed `KeliError`, provider error normalization, capability gate truth
+- Platform tests: denied-resource (Linux), fail-closed (macOS), secret isolation
+- Fixes: async state-dir creation before SQLite open; headless `--undo` flag parity
+
+### 0.1-A
+
 - Initial repository bootstrap (increment 0.1-A)
 - SQLite state, durable scoped rules, authority gate
 - Grok Build-style CLI: `init`, `doctor`, `inspect`, headless `-p`

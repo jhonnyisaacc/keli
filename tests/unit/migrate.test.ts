@@ -4,7 +4,7 @@ import {
   migrate,
   getSchemaVersion,
   CURRENT_SCHEMA_VERSION,
-  applyTestMigrationV2,
+  applyTestMigrationV3,
 } from "../../src/state/migrate.ts";
 
 describe("migrations", () => {
@@ -12,7 +12,7 @@ describe("migrations", () => {
     const db = new Database(":memory:");
     const version = migrate(db);
     expect(version).toBe(CURRENT_SCHEMA_VERSION);
-    expect(getSchemaVersion(db)).toBe(1);
+    expect(getSchemaVersion(db)).toBe(CURRENT_SCHEMA_VERSION);
     const tables = db
       .query("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
       .all() as { name: string }[];
@@ -20,15 +20,76 @@ describe("migrations", () => {
     db.close();
   });
 
-  test("upgrade harness v2 fixture", () => {
+  test("upgrade harness v3 fixture", () => {
     const db = new Database(":memory:");
-    migrate(db);
-    applyTestMigrationV2(db);
-    expect(getSchemaVersion(db)).toBe(2);
+    migrate(db, 3);
+    applyTestMigrationV3(db);
+    expect(getSchemaVersion(db)).toBe(3);
     const col = db
       .query("PRAGMA table_info(projects)")
       .all() as { name: string }[];
     expect(col.some((c) => c.name === "description")).toBe(true);
+    db.close();
+  });
+
+  test("v4 adds jobs and outbox tables", () => {
+    const db = new Database(":memory:");
+    migrate(db, 4);
+    expect(getSchemaVersion(db)).toBe(4);
+    const tables = db
+      .query("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('jobs','outbox_messages')")
+      .all();
+    expect(tables.length).toBe(2);
+    db.close();
+  });
+
+  test("v3 adds runs table", () => {
+    const db = new Database(":memory:");
+    migrate(db, 3);
+    expect(getSchemaVersion(db)).toBe(3);
+    const tables = db
+      .query("SELECT name FROM sqlite_master WHERE type='table' AND name='runs'")
+      .all();
+    expect(tables.length).toBe(1);
+    db.close();
+  });
+
+  test("v6 adds occurrence run and action linkage", () => {
+    const db = new Database(":memory:");
+    migrate(db, 6);
+    expect(getSchemaVersion(db)).toBe(6);
+    const cols = db
+      .query("PRAGMA table_info(job_occurrences)")
+      .all() as { name: string }[];
+    expect(cols.some((c) => c.name === "run_id")).toBe(true);
+    expect(cols.some((c) => c.name === "action_id")).toBe(true);
+    db.close();
+  });
+
+  test("v5 adds transport inbox and occurrence completion columns", () => {
+    const db = new Database(":memory:");
+    migrate(db, 5);
+    expect(getSchemaVersion(db)).toBe(5);
+    const inbox = db
+      .query("SELECT name FROM sqlite_master WHERE type='table' AND name='transport_inbox'")
+      .all();
+    expect(inbox.length).toBe(1);
+    const cols = db
+      .query("PRAGMA table_info(job_occurrences)")
+      .all() as { name: string }[];
+    expect(cols.some((c) => c.name === "completed_at")).toBe(true);
+    expect(cols.some((c) => c.name === "reason")).toBe(true);
+    db.close();
+  });
+
+  test("v2 adds artifacts table", () => {
+    const db = new Database(":memory:");
+    migrate(db, 2);
+    expect(getSchemaVersion(db)).toBe(2);
+    const tables = db
+      .query("SELECT name FROM sqlite_master WHERE type='table' AND name='artifacts'")
+      .all();
+    expect(tables.length).toBe(1);
     db.close();
   });
 });

@@ -1,6 +1,6 @@
 import type { Database } from "bun:sqlite";
 
-export const CURRENT_SCHEMA_VERSION = 1;
+export const CURRENT_SCHEMA_VERSION = 6;
 
 const MIGRATIONS: Record<number, string> = {
   1: `
@@ -78,10 +78,107 @@ const MIGRATIONS: Record<number, string> = {
       expires_at TEXT NOT NULL
     );
   `,
+  2: `
+    CREATE TABLE IF NOT EXISTS artifacts (
+      id TEXT PRIMARY KEY,
+      action_id TEXT,
+      owner_id TEXT NOT NULL,
+      scope TEXT NOT NULL,
+      type TEXT NOT NULL,
+      hash TEXT NOT NULL,
+      path TEXT NOT NULL,
+      retention TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS artifacts_scope_idx ON artifacts(scope);
+    CREATE INDEX IF NOT EXISTS artifacts_hash_idx ON artifacts(hash);
+  `,
+  3: `
+    CREATE TABLE IF NOT EXISTS runs (
+      id TEXT PRIMARY KEY,
+      scope TEXT NOT NULL,
+      status TEXT NOT NULL,
+      cancel_epoch INTEGER NOT NULL DEFAULT 0,
+      budget_bytes_max INTEGER NOT NULL DEFAULT 1048576,
+      budget_bytes_used INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS runs_scope_idx ON runs(scope);
+  `,
+  4: `
+    CREATE TABLE IF NOT EXISTS jobs (
+      id TEXT PRIMARY KEY,
+      owner_id TEXT NOT NULL,
+      scope TEXT NOT NULL,
+      name TEXT NOT NULL,
+      schedule TEXT NOT NULL,
+      status TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS job_occurrences (
+      id TEXT PRIMARY KEY,
+      job_id TEXT NOT NULL,
+      scheduled_at TEXT NOT NULL,
+      status TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (job_id) REFERENCES jobs(id)
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS job_occurrence_dedupe
+      ON job_occurrences(job_id, scheduled_at);
+
+    CREATE TABLE IF NOT EXISTS outbox_messages (
+      id TEXT PRIMARY KEY,
+      scope TEXT NOT NULL,
+      destination TEXT NOT NULL,
+      payload_json TEXT NOT NULL,
+      status TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      delivered_at TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS outbox_status_idx ON outbox_messages(status);
+  `,
+  5: `
+    CREATE TABLE IF NOT EXISTS transport_inbox (
+      id TEXT PRIMARY KEY,
+      transport TEXT NOT NULL,
+      dedupe_key TEXT NOT NULL,
+      payload_json TEXT NOT NULL,
+      scope TEXT,
+      processed_at TEXT,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS transport_inbox_dedupe
+      ON transport_inbox(transport, dedupe_key);
+
+    CREATE TABLE IF NOT EXISTS transport_routes (
+      id TEXT PRIMARY KEY,
+      transport TEXT NOT NULL,
+      external_id TEXT NOT NULL,
+      scope TEXT NOT NULL,
+      metadata_json TEXT,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS transport_route_binding
+      ON transport_routes(transport, external_id);
+
+    ALTER TABLE job_occurrences ADD COLUMN completed_at TEXT;
+    ALTER TABLE job_occurrences ADD COLUMN reason TEXT;
+  `,
+  6: `
+    ALTER TABLE job_occurrences ADD COLUMN run_id TEXT;
+    ALTER TABLE job_occurrences ADD COLUMN action_id TEXT;
+  `,
 };
 
-/** Synthetic v2 migration for upgrade harness tests only. */
-export const MIGRATION_V2_TEST = `
+/** Synthetic v3 migration for upgrade harness tests only. */
+export const MIGRATION_V3_TEST = `
   ALTER TABLE projects ADD COLUMN description TEXT DEFAULT '';
 `;
 
@@ -115,10 +212,10 @@ export function migrate(db: Database, target = CURRENT_SCHEMA_VERSION): number {
   return version;
 }
 
-export function applyTestMigrationV2(db: Database): void {
-  db.exec(MIGRATION_V2_TEST);
+export function applyTestMigrationV3(db: Database): void {
+  db.exec(MIGRATION_V3_TEST);
   db.run(
     "INSERT OR REPLACE INTO schema_meta(version, applied_at) VALUES (?, ?)",
-    [2, new Date().toISOString()],
+    [3, new Date().toISOString()],
   );
 }

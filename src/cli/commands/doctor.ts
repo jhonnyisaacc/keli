@@ -5,6 +5,9 @@ import { getSchemaVersion, CURRENT_SCHEMA_VERSION } from "../../state/migrate.ts
 import { resolveStateDir, statePaths } from "../../state/paths.ts";
 import { emit, emitError } from "../output.ts";
 import type { CliGlobals } from "../context.ts";
+import { probeSandbox } from "../../execution/sandbox.ts";
+import { probeBrowserBackends } from "../../execution/browser-backends.ts";
+import { defaultCredentialSource } from "../../credentials/source.ts";
 
 export function doctorCommand(globals: CliGlobals) {
   return defineCommand({
@@ -23,7 +26,7 @@ export function doctorCommand(globals: CliGlobals) {
 
       let db;
       try {
-        db = openDatabase(stateDir);
+        db = await openDatabase(stateDir);
         const version = getSchemaVersion(db);
         const journal = db.query("PRAGMA journal_mode").get() as { journal_mode: string };
         checks.push({
@@ -46,6 +49,43 @@ export function doctorCommand(globals: CliGlobals) {
         name: "state_path",
         ok: true,
         detail: paths.sqlite,
+      });
+
+      const sandbox = await probeSandbox();
+      checks.push({
+        name: "sandbox",
+        ok: sandbox.available || sandbox.platform !== "linux",
+        detail: sandbox.available
+          ? `${sandbox.platform} backend ready`
+          : `${sandbox.platform}: ${sandbox.reason ?? "unavailable"}`,
+      });
+
+      const browserStatuses = await probeBrowserBackends({
+        primary: config?.browser?.primary,
+        fallback: config?.browser?.fallback,
+      });
+      const browserReady = browserStatuses.filter((s) => s.available);
+      checks.push({
+        name: "browser",
+        ok: true,
+        detail: browserReady.length
+          ? `session backends: ${browserReady.map((s) => s.kind).join(", ")}; static pages: web.fetch`
+          : `no session backend configured; static pages: http.fetch/web.fetch (${browserStatuses.map((s) => s.kind).join(", ")} probed)`,
+      });
+
+      const creds = defaultCredentialSource();
+      checks.push({
+        name: "credentials",
+        ok: creds.available || creds.name === "locked",
+        detail: creds.available ? creds.name : "locked (expected on headless hosts)",
+      });
+
+      checks.push({
+        name: "setup",
+        ok: true,
+        detail: config?.setup?.completedAt
+          ? `completed (${config.setup.transport ?? "unknown transport"})`
+          : "not completed — run: keli setup",
       });
 
       const ok = checks.every((c) => c.ok);

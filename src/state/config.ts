@@ -2,12 +2,35 @@ import { mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 import { statePaths, resolveStateDir } from "./paths.ts";
 
+import type { BrowserBackendKind } from "../execution/browser-backends.ts";
+import type { CodingDelegate } from "../core/types.ts";
+
 export type KeliConfig = {
   version: number;
   ownerId: string;
   defaultProjectId: string;
   primaryModel?: string;
   fallbackModel?: string;
+  /** Pluggable browser session backends; HTTP/web.fetch remain the static-page complement. */
+  browser?: {
+    primary?: BrowserBackendKind;
+    fallback?: BrowserBackendKind;
+  };
+  /** Coding delegate primary/fallback (rule still authoritative for default). */
+  delegates?: {
+    primary?: CodingDelegate;
+    fallback?: CodingDelegate;
+  };
+  /** Transport bindings chosen during setup. */
+  transports?: {
+    discord?: { channelId?: string; threadId?: string };
+    telegram?: { chatId?: string; topicId?: string };
+  };
+  setup?: {
+    completedAt?: string;
+    transport?: "discord" | "telegram";
+    calibrationSkipped?: boolean;
+  };
 };
 
 const DEFAULT_CONFIG: KeliConfig = {

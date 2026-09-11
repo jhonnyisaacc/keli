@@ -5,6 +5,13 @@ import { initCommand } from "./commands/init.ts";
 import { doctorCommand } from "./commands/doctor.ts";
 import { inspectCommand } from "./commands/inspect.ts";
 import { runCommand } from "./commands/run.ts";
+import { capabilitiesCommand } from "./commands/capabilities.ts";
+import { invokeCommand } from "./commands/invoke.ts";
+import { jobsCommand } from "./commands/jobs.ts";
+import { discordCommand } from "./commands/discord.ts";
+import { telegramCommand } from "./commands/telegram.ts";
+import { routesCommand } from "./commands/routes.ts";
+import { setupCommand } from "./commands/setup.ts";
 import {
   loginCommand,
   logoutCommand,
@@ -15,6 +22,7 @@ import {
 } from "./commands/stubs.ts";
 import { emitError } from "./output.ts";
 import { KELI_VERSION } from "../version.ts";
+import { parseHeadlessArgv, needsProvider } from "./parse-run-args.ts";
 
 function buildGlobals(overrides: Partial<CliGlobals> = {}): CliGlobals {
   return {
@@ -24,56 +32,6 @@ function buildGlobals(overrides: Partial<CliGlobals> = {}): CliGlobals {
     fixture: overrides.fixture ?? false,
     fixtureEndpoint: overrides.fixtureEndpoint ?? process.env.KELI_FIXTURE_URL,
   };
-}
-
-function parseHeadlessArgv(argv: string[]): {
-  prompt: string;
-  fixture: boolean;
-  fixtureEndpoint?: string;
-  outputFormat: "plain" | "json";
-  cwd?: string;
-} | null {
-  if (argv.length === 0) return null;
-  let prompt: string | undefined;
-  let i = 0;
-
-  if (argv[0] === "-p" || argv[0] === "--prompt") {
-    prompt = argv[1];
-    i = 2;
-  } else if (argv[0].startsWith("-p") && argv[0].length > 2) {
-    prompt = argv[0].slice(2);
-    i = 1;
-  } else {
-    return null;
-  }
-
-  if (!prompt) return null;
-
-  let fixture = false;
-  let fixtureEndpoint: string | undefined = process.env.KELI_FIXTURE_URL;
-  let outputFormat: "plain" | "json" = "plain";
-  let cwd: string | undefined;
-
-  while (i < argv.length) {
-    const arg = argv[i];
-    if (arg === "--fixture") {
-      fixture = true;
-      i += 1;
-    } else if (arg === "--fixture-endpoint") {
-      fixtureEndpoint = argv[i + 1];
-      i += 2;
-    } else if (arg === "--output-format" || arg === "-output-format") {
-      outputFormat = argv[i + 1] === "json" ? "json" : "plain";
-      i += 2;
-    } else if (arg === "--cwd") {
-      cwd = argv[i + 1];
-      i += 2;
-    } else {
-      i += 1;
-    }
-  }
-
-  return { prompt, fixture, fixtureEndpoint, outputFormat, cwd };
 }
 
 async function runHeadless(argv: string[]) {
@@ -87,7 +45,18 @@ async function runHeadless(argv: string[]) {
     fixtureEndpoint: parsed.fixtureEndpoint,
   });
 
-  if (!globals.fixture && !globals.fixtureEndpoint) {
+  if (!parsed.prompt && parsed.undo) {
+    const run = runCommand(globals);
+    await run.run?.({
+      args: { undo: true, fixture: false },
+      rawArgs: [],
+      cmd: run,
+      data: {},
+    } as never);
+    return true;
+  }
+
+  if (needsProvider(parsed) && !globals.fixture && !globals.fixtureEndpoint) {
     emitError(
       "Headless -p requires --fixture and KELI_FIXTURE_URL or --fixture-endpoint in 0.1-A",
       globals.outputFormat,
@@ -98,8 +67,8 @@ async function runHeadless(argv: string[]) {
   await run.run?.({
     args: {
       p: parsed.prompt,
-      fixture: true,
-      undo: false,
+      fixture: parsed.fixture || !!globals.fixtureEndpoint,
+      undo: parsed.undo,
       "fixture-endpoint": globals.fixtureEndpoint,
     },
     rawArgs: [],
@@ -121,6 +90,13 @@ function createMain(globals: CliGlobals) {
       doctor: doctorCommand(globals),
       inspect: inspectCommand(globals),
       run: runCommand(globals),
+      capabilities: capabilitiesCommand(globals),
+      invoke: invokeCommand(globals),
+      jobs: jobsCommand(globals),
+      discord: discordCommand(globals),
+      telegram: telegramCommand(globals),
+      routes: routesCommand(globals),
+      setup: setupCommand(globals),
       login: loginCommand(globals),
       logout: logoutCommand(globals),
       update: updateCommand(globals),
@@ -141,7 +117,7 @@ function printRootHelp() {
   console.log("  keli doctor            Health checks");
   console.log("  keli inspect --json    Show rules and projects");
   console.log("  keli -p \"...\" --fixture  Headless one-shot");
-  console.log("  keli run -p \"...\"      Same as -p");
+  console.log("  keli run --undo        Undo last rule revision");
   console.log("  keli version           Version info");
   console.log("");
   console.log("Run `keli <command> --help` for details.");
