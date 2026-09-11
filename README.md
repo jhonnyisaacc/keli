@@ -2,7 +2,7 @@
 
 Keli (כלי) is a personal-first agent: teach it how to work once, and durable scoped corrections govern future execution across restarts and upgrades.
 
-This repository implements increment **0.1-A**: Bun runtime, SQLite state, authority gate, fixture provider, and a Grok Build-style CLI.
+This repository implements increments **0.1-A** through **0.1-D** (complete) and **0.1-E** (next): Bun runtime, SQLite state, authority gates, Linux Landlock sandbox, capability dispatch (files/shell/HTTP/web/search/browser/MCP/delegate/jobs), durable jobs and transports (Discord/Telegram stubs), delegate conformance in the gate loop, fixture provider, and a Grok Build-style CLI.
 
 ## Quick start
 
@@ -36,10 +36,17 @@ Contains `state.sqlite`, `config.json`, and cache subdirectories.
 | Command | Purpose |
 |---------|---------|
 | `keli init` | Create state, run migrations, seed owner/project |
+| `keli setup` | Explained wizard: models, one transport, route binding, optional test |
 | `keli doctor` | Health checks (schema, paths, readiness) |
 | `keli inspect [--json]` | Rules, projects, schema version |
 | `keli -p "..."` | Headless one-shot turn |
 | `keli run -p "..."` | Same as `-p` |
+| `keli capabilities` | List indexed capabilities |
+| `keli invoke <cap>` | Run a gated capability (`--path`, `--url`, `--command`, etc.) |
+| `keli jobs` | Scheduled jobs: `list`, `add`, `tick`, `occurrences`, `pause` |
+| `keli discord` | Discord transport: `send`, `ingest`, `process` (fixture-backed) |
+| `keli telegram` | Telegram transport: `send`, `ingest`, `process` (fixture-backed) |
+| `keli routes` | Transport route bindings: `list`, `bind` |
 | `keli version` | Version and build metadata |
 | `keli update --check` | Check for updates (stub in 0.1-A) |
 
