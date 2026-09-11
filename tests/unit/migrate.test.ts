@@ -82,6 +82,21 @@ describe("migrations", () => {
     db.close();
   });
 
+  test("v7 adds job grants and preservation cursor", () => {
+    const db = new Database(":memory:");
+    migrate(db, 7);
+    expect(getSchemaVersion(db)).toBe(7);
+    const grants = db
+      .query("SELECT name FROM sqlite_master WHERE type='table' AND name='job_grants'")
+      .all();
+    expect(grants.length).toBe(1);
+    const cursor = db
+      .query("SELECT last_journal_id FROM preservation_cursor WHERE id = 'default'")
+      .get() as { last_journal_id: string | null };
+    expect(cursor).toBeTruthy();
+    db.close();
+  });
+
   test("v2 adds artifacts table", () => {
     const db = new Database(":memory:");
     migrate(db, 2);

@@ -1,6 +1,6 @@
 import type { Database } from "bun:sqlite";
 
-export const CURRENT_SCHEMA_VERSION = 6;
+export const CURRENT_SCHEMA_VERSION = 7;
 
 const MIGRATIONS: Record<number, string> = {
   1: `
@@ -174,6 +174,23 @@ const MIGRATIONS: Record<number, string> = {
   6: `
     ALTER TABLE job_occurrences ADD COLUMN run_id TEXT;
     ALTER TABLE job_occurrences ADD COLUMN action_id TEXT;
+  `,
+  7: `
+    CREATE TABLE IF NOT EXISTS job_grants (
+      job_id TEXT PRIMARY KEY,
+      mutate_granted INTEGER NOT NULL DEFAULT 0,
+      deploy_granted INTEGER NOT NULL DEFAULT 0,
+      granted_at TEXT,
+      FOREIGN KEY (job_id) REFERENCES jobs(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS preservation_cursor (
+      id TEXT PRIMARY KEY DEFAULT 'default',
+      last_journal_id TEXT,
+      last_archived_at TEXT
+    );
+
+    INSERT OR IGNORE INTO preservation_cursor(id) VALUES ('default');
   `,
 };
 

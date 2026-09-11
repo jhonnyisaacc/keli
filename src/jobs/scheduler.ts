@@ -9,6 +9,7 @@ import {
 import { listJobs } from "./store.ts";
 import type { JobRecord } from "./types.ts";
 import type { JobTickContext } from "./tick-context.ts";
+import { readControl, isExecutionBlocked } from "../ops/control.ts";
 
 export type SchedulerTickResult = {
   scanned: number;
@@ -32,6 +33,11 @@ export async function tickScheduler(
   ctx: JobTickContext,
   now = new Date(),
 ): Promise<SchedulerTickResult> {
+  const control = await readControl(ctx.stateDir);
+  if (isExecutionBlocked(control)) {
+    return { scanned: 0, materialized: [], processed: [], coalesced: 0 };
+  }
+
   const jobs = listJobs(db).filter((j) => j.status === "active");
   const materialized: string[] = [];
   const processed: string[] = [];

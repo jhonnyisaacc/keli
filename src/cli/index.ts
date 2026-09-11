@@ -12,10 +12,12 @@ import { discordCommand } from "./commands/discord.ts";
 import { telegramCommand } from "./commands/telegram.ts";
 import { routesCommand } from "./commands/routes.ts";
 import { setupCommand } from "./commands/setup.ts";
+import { backupCommand, restoreCommand } from "./commands/backup.ts";
+import { pauseCommand, resumeCommand, stopCommand } from "./commands/pause.ts";
+import { updateCommand } from "./commands/update.ts";
 import {
   loginCommand,
   logoutCommand,
-  updateCommand,
   versionCommand,
   sessionsCommand,
   agentCommand,
@@ -97,6 +99,11 @@ function createMain(globals: CliGlobals) {
       telegram: telegramCommand(globals),
       routes: routesCommand(globals),
       setup: setupCommand(globals),
+      backup: backupCommand(globals),
+      restore: restoreCommand(globals),
+      pause: pauseCommand(globals),
+      resume: resumeCommand(globals),
+      stop: stopCommand(globals),
       login: loginCommand(globals),
       logout: logoutCommand(globals),
       update: updateCommand(globals),

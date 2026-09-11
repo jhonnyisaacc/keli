@@ -1,0 +1,13 @@
+Keli third-party notices (0.1.0)
+
+This distribution includes or depends on:
+
+- Bun (MIT) — https://bun.sh
+- citty (MIT) — CLI parsing
+- TypeScript (Apache-2.0) — dev tooling
+- Playwright (Apache-2.0) — optional browser backend tests
+
+Keli source is intended to be Apache-2.0; see LICENSE when present.
+Upstream pins and integration notes are recorded per REPO_GOVERNANCE.md ADOPT → ADAPT → BUILD.
+
+No Honcho or marketplace skill runtime is bundled in 0.1.0.

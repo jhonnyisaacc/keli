@@ -58,6 +58,20 @@ function capitalizeDelegate(value: string): "Codex" | "OpenCode" {
   throw new Error(`Invalid delegate: ${value}`);
 }
 
+/** Ambiguous corrections must ask before any durable change (A07). */
+export function isAmbiguousCorrection(text: string): boolean {
+  const t = text.trim();
+  if (/changes?\s+use\s*$/i.test(t)) return true;
+  if (/changes?\s+use\s+(something|maybe|perhaps|\?)/i.test(t)) return true;
+  if (/^(rocket|other|[\w-]+)\s+changes?\s*$/i.test(t) && !/use\s+(Codex|OpenCode)/i.test(t)) {
+    return true;
+  }
+  if (/changes?\s+use\s+\w+$/i.test(t) && !isCodingDelegate(t.split(/\s+/).pop()!)) {
+    return true;
+  }
+  return false;
+}
+
 /** Quoted or injected instructions must not become durable rules. */
 export function isUntrustedInstruction(text: string): boolean {
   const t = text.trim();

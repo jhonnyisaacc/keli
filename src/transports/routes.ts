@@ -44,6 +44,19 @@ export function bindTransportRoute(
   };
 }
 
+export function resolveDiscordThreadRoute(
+  db: Database,
+  channelId: string,
+  threadId?: string,
+): TransportRoute | null {
+  if (threadId) {
+    const threadRoute = resolveTransportRoute(db, "discord", `thread:${threadId}`);
+    if (threadRoute) return threadRoute;
+    return null;
+  }
+  return resolveTransportRoute(db, "discord", channelId);
+}
+
 export function resolveTransportRoute(
   db: Database,
   transport: string,

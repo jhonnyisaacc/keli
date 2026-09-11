@@ -1,6 +1,6 @@
 import type { BehaviorService } from "../core/behavior.ts";
 import type { GateService } from "../core/gate.ts";
-import { parsePrompt, isUntrustedInstruction } from "../core/correction.ts";
+import { parsePrompt, isUntrustedInstruction, isAmbiguousCorrection } from "../core/correction.ts";
 import { explainSelection } from "../core/explain.ts";
 import type { ModelProvider, ProviderMode } from "./provider.ts";
 import type { DelegateService } from "./delegate-service.ts";
@@ -44,6 +44,14 @@ export class ModelLoop {
       return {
         kind: "blocked",
         message: "Quoted or untrusted instruction ignored; no behavior change committed.",
+      };
+    }
+
+    if (isAmbiguousCorrection(prompt)) {
+      return {
+        kind: "blocked",
+        message:
+          `Ambiguous correction for ${this.projectName}. Which delegate should apply? Example: "${this.projectName} changes use Codex".`,
       };
     }
 

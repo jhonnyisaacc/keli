@@ -31,6 +31,14 @@ export type KeliConfig = {
     transport?: "discord" | "telegram";
     calibrationSkipped?: boolean;
   };
+  /** Durable global execution control (0.1-E). */
+  control?: {
+    autonomyPaused?: boolean;
+    stopAllExecution?: boolean;
+    pausedAt?: string;
+    restoredAt?: string;
+    routesRevalidated?: boolean;
+  };
 };
 
 const DEFAULT_CONFIG: KeliConfig = {

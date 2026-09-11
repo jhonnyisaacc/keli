@@ -35,6 +35,24 @@ export function enqueueOutbox(
   return { ...message, status, createdAt };
 }
 
+export function markOutboxUnknown(db: Database, id: string, reason: string): void {
+  db.run(
+    `UPDATE outbox_messages SET status = 'unknown', delivered_at = ? WHERE id = ?`,
+    [new Date().toISOString(), id],
+  );
+  const row = db.query("SELECT payload_json FROM outbox_messages WHERE id = ?").get(id) as
+    | { payload_json: string }
+    | null;
+  if (row) {
+    const payload = JSON.parse(row.payload_json) as Record<string, unknown>;
+    payload.unknownReason = reason;
+    db.run("UPDATE outbox_messages SET payload_json = ? WHERE id = ?", [
+      JSON.stringify(payload),
+      id,
+    ]);
+  }
+}
+
 export function markOutboxFailed(db: Database, id: string, reason: string): void {
   db.run(
     `UPDATE outbox_messages SET status = 'failed', delivered_at = ? WHERE id = ?`,

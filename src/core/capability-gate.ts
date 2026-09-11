@@ -8,6 +8,8 @@ import type { ResourcePolicy } from "../execution/policy.ts";
 import { storeArtifact } from "../state/artifacts.ts";
 import { KeliError } from "./errors.ts";
 import { createRun, getRun, assertNotCancelled, finishRun } from "./run-control.ts";
+import { readControl, isEffectfulBlocked } from "../ops/control.ts";
+import { jobAllowsActionClass } from "../jobs/grants.ts";
 
 export type CapabilityActionRecord = {
   id: string;
@@ -24,6 +26,8 @@ export type CapabilityRunOptions = {
   fixtures?: DispatchContext["fixtures"];
   browser?: DispatchContext["browser"];
   budgetBytesMax?: number;
+  proposalBytesMax?: number;
+  jobId?: string;
 };
 
 export class CapabilityGate {
@@ -59,6 +63,51 @@ export class CapabilityGate {
     cwd?: string,
     options?: CapabilityRunOptions,
   ): Promise<{ actionId: string; runId: string; result: CapabilityResult }> {
+    const control = await readControl(this.stateDir);
+    const descriptor = this.registry.get(proposal.capabilityId);
+    if (descriptor && descriptor.actionClass !== "read" && isEffectfulBlocked(control)) {
+      const actionId = this.prepare(proposal, scope, options?.runId);
+      const result = await this.finish(actionId, {
+        capabilityId: proposal.capabilityId,
+        ok: false,
+        error: {
+          code: "autonomy_paused",
+          message: "Global pause blocks effectful capabilities",
+        },
+      });
+      return { actionId, runId: options?.runId ?? "", result };
+    }
+
+    if (
+      descriptor &&
+      !jobAllowsActionClass(this.db, options?.jobId, descriptor.actionClass)
+    ) {
+      const actionId = this.prepare(proposal, scope, options?.runId);
+      const result = await this.finish(actionId, {
+        capabilityId: proposal.capabilityId,
+        ok: false,
+        error: {
+          code: "grant_required",
+          message: `Job grant required for ${descriptor.actionClass} capability ${proposal.capabilityId}`,
+        },
+      });
+      return { actionId, runId: options?.runId ?? "", result };
+    }
+
+    const proposalBytes = Buffer.byteLength(JSON.stringify(proposal));
+    if (options?.proposalBytesMax && proposalBytes > options.proposalBytesMax) {
+      const actionId = this.prepare(proposal, scope, options?.runId);
+      const result = await this.finish(actionId, {
+        capabilityId: proposal.capabilityId,
+        ok: false,
+        error: {
+          code: "quota_exceeded",
+          message: `Proposal exceeds pre-dispatch byte guard (${proposalBytes} > ${options.proposalBytesMax})`,
+        },
+      });
+      return { actionId, runId: options?.runId ?? "", result };
+    }
+
     const runId = options?.runId ?? createRun(this.db, scope, options?.budgetBytesMax);
     const run = getRun(this.db, runId);
     if (!run) throw new KeliError(`Unknown run: ${runId}`, "invalid_request");

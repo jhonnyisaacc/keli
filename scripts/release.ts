@@ -6,6 +6,7 @@ import { tmpdir } from "node:os";
 const root = join(import.meta.dir, "..");
 
 await $`bun run scripts/build.ts`.cwd(root);
+await $`bun run scripts/write-manifest.ts`.cwd(root);
 
 const keli = join(root, "dist", "keli");
 const version = await $`${keli} version`.cwd(root).text();

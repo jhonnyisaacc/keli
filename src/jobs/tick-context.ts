@@ -6,6 +6,7 @@ import { dispatchJobOccurrence, type JobDispatchDeps } from "./dispatch.ts";
 import type { JobRecord } from "./types.ts";
 
 export type JobTickContext = {
+  stateDir: string;
   dispatch: (
     db: Database,
     job: JobRecord,
@@ -36,6 +37,7 @@ export function createJobTickContext(input: {
     simulateChanged: input.simulateChanged,
   };
   return {
+    stateDir: input.stateDir,
     dispatch: async (db, job, occurrenceId, missedSlots) => {
       await dispatchJobOccurrence(db, deps, job, occurrenceId, missedSlots);
     },

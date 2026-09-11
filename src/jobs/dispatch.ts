@@ -75,7 +75,7 @@ export async function dispatchJobOccurrence(
     deps.policy,
     job.scope,
     undefined,
-    { budgetBytesMax: 4096 },
+    { budgetBytesMax: 4096, jobId: job.id },
   );
 
   linkOccurrenceRun(db, occurrenceId, runId, actionId);

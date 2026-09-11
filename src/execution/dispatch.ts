@@ -57,12 +57,15 @@ export async function dispatchCapability(
 
   const descriptor = registry.get(proposal.capabilityId);
   if (!descriptor) {
+    const suggestions = registry.discover(proposal.capabilityId).map((c) => c.id);
     return {
       capabilityId: proposal.capabilityId,
       ok: false,
       error: {
         code: "capability_denied",
-        message: `Unknown capability: ${proposal.capabilityId}`,
+        message: suggestions.length
+          ? `Unknown capability: ${proposal.capabilityId}. Did you mean: ${suggestions.join(", ")}?`
+          : `Unknown capability: ${proposal.capabilityId}. Run keli capabilities to discover.`,
       },
     };
   }

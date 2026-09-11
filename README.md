@@ -2,7 +2,9 @@
 
 Keli (כלי) is a personal-first agent: teach it how to work once, and durable scoped corrections govern future execution across restarts and upgrades.
 
-This repository implements increments **0.1-A** through **0.1-D** (complete) and **0.1-E** (next): Bun runtime, SQLite state, authority gates, Linux Landlock sandbox, capability dispatch (files/shell/HTTP/web/search/browser/MCP/delegate/jobs), durable jobs and transports (Discord/Telegram stubs), delegate conformance in the gate loop, fixture provider, and a Grok Build-style CLI.
+This repository implements increments **0.1-A** through **0.1-E** (code complete for v0.1.0): Bun runtime, SQLite state, authority gates, Linux Landlock sandbox, capability dispatch (files/shell/HTTP/web/search/browser/MCP/delegate/jobs), durable jobs and transports (Discord/Telegram stubs), install/update/backup/restore, global pause, delegate conformance in the gate loop, fixture provider, and a Grok Build-style CLI.
+
+Human-only v0.1.0 gates remain: macOS notarization, held-out correction eval, five-user usability check.
 
 ## Quick start
 
@@ -48,9 +50,13 @@ Contains `state.sqlite`, `config.json`, and cache subdirectories.
 | `keli telegram` | Telegram transport: `send`, `ingest`, `process` (fixture-backed) |
 | `keli routes` | Transport route bindings: `list`, `bind` |
 | `keli version` | Version and build metadata |
-| `keli update --check` | Check for updates (stub in 0.1-A) |
+| `keli update` | Check (`--check`), install (`--install`), or rollback |
+| `keli backup` / `keli restore` | State backup/restore (no credentials; restore pauses jobs) |
+| `keli pause` / `keli resume` / `keli stop` | Global execution control |
 
 Stubs reserved for later: `login`, `logout`, `sessions`, `agent stdio`.
+
+See [docs/INSTALL.md](docs/INSTALL.md) and [docs/OPERATIONS.md](docs/OPERATIONS.md).
 
 ## Development
 
