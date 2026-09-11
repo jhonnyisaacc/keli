@@ -44,4 +44,8 @@ Update flow: verify manifest → stage binary → snapshot state → migrate →
 | macOS | arm64 | declared (Landlock N/A; sandbox fail-closed) |
 | macOS | x64 | declared |
 
-macOS release signing/notarization requires Apple credentials outside CI.
+macOS release signing/notarization requires Apple credentials outside CI (increment **0.1-I**).
+
+## Roadmap
+
+The first public release is **v0.1.0** and includes the full initial PRD. Increments **0.1-F–I** (Honcho/integrations, routing/budgets/skills, helper fan-out, release evidence) remain before the tag. See [PRD.md](../PRD.md) §11.

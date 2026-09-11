@@ -2,9 +2,11 @@
 
 Keli (כלי) is a personal-first agent: teach it how to work once, and durable scoped corrections govern future execution across restarts and upgrades.
 
-This repository implements increments **0.1-A** through **0.1-E** (code complete for v0.1.0): Bun runtime, SQLite state, authority gates, Linux Landlock sandbox, capability dispatch (files/shell/HTTP/web/search/browser/MCP/delegate/jobs), durable jobs and transports (Discord/Telegram stubs), install/update/backup/restore, global pause, delegate conformance in the gate loop, fixture provider, and a Grok Build-style CLI.
+This repository implements the **v0.1.0** product on branch `feat/v0.1.0` in vertical increments. **0.1-A through 0.1-E** are implemented (core runtime, capabilities, jobs/transports, packaging/ops). **0.1-F through 0.1-I** remain before the `v0.1.0` tag (Honcho and broader integrations, routing/budgets/skills, helper fan-out, then release evidence).
 
-Human-only v0.1.0 gates remain: macOS notarization, held-out correction eval, five-user usability check.
+Current code includes: Bun runtime, SQLite state, authority gates, Linux Landlock sandbox, capability dispatch (files/shell/HTTP/web/search/browser/MCP/delegate/jobs), durable jobs and transports (Discord/Telegram stubs), install/update/backup/restore, global pause, delegate conformance in the gate loop, fixture provider, and a Grok Build-style CLI.
+
+Human-only release gates (increment **0.1-I**): macOS notarization, held-out correction eval, five-user usability check.
 
 ## Quick start
 

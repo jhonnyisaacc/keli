@@ -6,6 +6,8 @@ Status: implementation-ready plan, 2026-09-11. No repository, workflow, installe
 
 Start with one repository named `keli`, one private-to-the-repo package named `keli`, one `package.json`, one committed `bun.lock`, and one version source beginning at `0.1.0`. “Private” here prevents accidental package-registry publication; the repository and product are open source. Do not claim an unverified npm namespace or GitHub organization. Repository initialization supplies the actual account and security contacts without reopening the product name.
 
+**Release sequence (owner direction, 2026-09-11):** the full initial PRD product ships as **v0.1.0**, built in increments **0.1-A through 0.1-I** on branch `feat/v0.1.0`. Former roadmap labels v0.2.0/v0.3.0/v0.4.0+ are remapped to increments 0.1-F/0.1-G/0.1-H; do **not** tag `v0.1.0` until **0.1-I** completes with §14 release evidence. Normative detail: [PRD.md](PRD.md) §11.
+
 Proposed layout (directories are plans, not files already implemented):
 
 ```text

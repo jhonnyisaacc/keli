@@ -1,6 +1,8 @@
 # Keli — PRD Input and Final Reconciled Handoff
 
-Updated 2026-09-11. Architecture discovery is CLOSED. [PRD.md](PRD.md) is the final, buildable initial-product specification; [DISCOVERY.md](DISCOVERY.md) retains dated research, issue analysis, owner history and final spike evidence. This handoff supersedes the earlier Nanobot-first evaluation plan. No bot implementation or new architecture experiment was performed in this documentation task.
+Updated 2026-09-11. Architecture discovery is CLOSED. [PRD.md](../../PRD.md) is the final, buildable initial-product specification; [DISCOVERY.md](DISCOVERY.md) retains dated research, issue analysis, owner history and final spike evidence. This handoff supersedes the earlier Nanobot-first evaluation plan. No bot implementation or new architecture experiment was performed in this documentation task.
+
+**Versioning note (2026-09-11):** the increment map in [PRD.md](../../PRD.md) §11 supersedes former v0.2.0/v0.3.0/v0.4.0+ milestones below (now 0.1-F/0.1-G/0.1-H/0.1-I). Historical wording in this file is preserved for traceability.
 
 ## Final owner direction
 

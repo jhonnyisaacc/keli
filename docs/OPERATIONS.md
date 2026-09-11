@@ -30,8 +30,9 @@ While paused:
 - Scheduled jobs do not tick
 - Effectful capabilities (`mutate`, `effect`) are blocked at the gate
 
-## Known limits (0.1.0)
+## Known limits (current increments)
 
-- Discord/Telegram use fixture transports in CI; live tokens optional
-- Held-out correction eval and five-user usability check are human gates
-- macOS notarization requires release signing keys
+- **0.1-A–E shipped:** packaging, backup/restore, global pause, fixture-backed transports in CI
+- **0.1-F–I remaining** before `v0.1.0` tag: Honcho adapter, broader providers/delegates, routing/budgets/skills, helper fan-out, release evidence
+- Discord/Telegram live tokens optional until integration validation in 0.1-F
+- Held-out correction eval, five-user usability check, and macOS notarization are **0.1-I** human gates

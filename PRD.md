@@ -88,7 +88,7 @@ Search IDs/aliases/scoped semantic candidates before creating a skill. Automatic
 
 Canonical operational rules/grants/jobs never depend on retrieval or compaction. Local semantic memory is advisory, source-linked and scope-filtered before retrieval. Working state stores the goal, completed/pending actions and evidence pointers independently of transcript length. Index summaries and small metadata first; fetch exact evidence only when needed. Archive required raw evidence before committing a preservation cursor; retain an oversized raw fallback if summarization fails.
 
-Defaults: retain explicit rules, meaningful change history and user-designated deliverables until deletion; retain raw conversation/diagnostic and run-detail records for 90 days; expire temporary scratch after seven days once no active run references it. Retention is configurable and never silently removes evidence referenced by active rules/jobs or unresolved outcomes. Explain when the original source was deliberately deleted while retaining a non-sensitive provenance tombstone. No automatic upload of memory. Honcho remains an optional later adapter; disabling it must never break local operation.
+Defaults: retain explicit rules, meaningful change history and user-designated deliverables until deletion; retain raw conversation/diagnostic and run-detail records for 90 days; expire temporary scratch after seven days once no active run references it. Retention is configurable and never silently removes evidence referenced by active rules/jobs or unresolved outcomes. Explain when the original source was deliberately deleted while retaining a non-sensitive provenance tombstone. No automatic upload of memory. Honcho remains an optional adapter delivered in increment 0.1-F; disabling it must never break local operation.
 
 ### 5.3 Jobs, autonomy and attention
 
@@ -227,9 +227,9 @@ Auto-download/check is optional; activation is an explicit or previously approve
 
 Restore on another machine starts execution paused. Validate export manifest/schema and scopes; reconnect credentials and revalidate routes/permissions before resuming. Keep post-snapshot revocation/delivery information when recovering in place; where unavailable, require explicit reauthorization and reconciliation. No blind replay of previously sent messages or unknown external actions. Use established encryption and SQLite backup/snapshot facilities; copying only a live WAL database file is not a backup contract.
 
-## 11. Incremental delivery and later milestones
+## 11. Incremental delivery and release sequence
 
-Build v0.1.0 in vertical increments, using real integrations only after the gate they require exists. No increment is a separately weakened product promise.
+Build the **full initial product** as **v0.1.0** in vertical increments on one branch (`feat/v0.1.0`). Use real integrations only after the gate they require exists. No increment is a separately weakened product promise. **Do not tag `v0.1.0` until increment 0.1-I completes** with the release evidence in §14.
 
 | Increment | Deliverable | Exit evidence |
 |---|---|---|
@@ -237,13 +237,14 @@ Build v0.1.0 in vertical increments, using real integrations only after the gate
 | 0.1-B | Capability index, gates, sandbox/secret backend integration, shell/files/artifacts and provider normalization | Denied-resource/secret tests on both OSes; typed errors and no fake completion |
 | 0.1-C | Thin web/search/browser/HTTP/MCP and Codex/OpenCode delegate adapters | Real configured smoke/conformance tests, budgets and cancellation/fencing |
 | 0.1-D | Durable jobs/triggers, inbox/outbox, Discord/Telegram, explained wizard/calibration | Quiet recurrence, duplicate/restart/delivery/approval/route tests |
-| 0.1-E | Packaging, signed upgrade/restore, docs, held-out behavior/efficiency validation | All v0.1.0 acceptance and platform gates; support matrix and notices |
+| 0.1-E | Packaging, signed upgrade/restore, backup/restore, global pause, docs, deterministic fixture-backed A-gates | Install/update/restore/pause tests; support matrix and notices; Linux CI |
+| 0.1-F | Optional Honcho adapter; broader validated providers/delegates; stronger authenticated-browser connection workflows | Local operation with Honcho absent (A29); real Honcho outage/upload/deletion tests when enabled; `PRODUCT_RESEARCH.md` evidence refreshed as needed |
+| 0.1-G | Configurable cheap/strong/task/agent/provider routing; richer token/monetary/tool/delegate budgets; advanced skill consolidation; more complex reviewed recurring writes | Routing/budget/skill/recurring-write acceptance tests; basic safety budgets from 0.1-C remain baseline |
+| 0.1-H | Bounded helper fan-out and additional integrations only with inherited authority/resource ownership; remote execution/composition if justified | Fan-out ownership/cancel tests (extends A42); no commitment to rebuilding a framework |
+| 0.1-I | Release evidence and publication | All applicable A01–A46 gates; §14 held-out eval, timing/schema-growth budgets, five-user check; four-target artifacts; signing/notarization; tag `v0.1.0` |
 
-Later SemVer targets express sequence, not dates:
+After v0.1.0 ships:
 
-- **v0.2.0:** optional Honcho adapter, broader validated providers/delegates and stronger authenticated-browser connection workflows. `PRODUCT_RESEARCH.md` exists now under the latest owner addendum; later evidence refreshes accompany relevant changes and do not become a separate prerequisite for implementing v0.1.0.
-- **v0.3.0:** configurable cheap/strong/task/agent/provider routing and richer token/monetary/tool/delegate budgets, advanced skill consolidation and more complex reviewed recurring writes. Basic safety budgets already exist in v0.1.0.
-- **v0.4.0+:** bounded helper fan-out and additional integrations only with inherited authority/resource ownership; remote execution/composition if justified. No commitment to rebuilding a framework.
 - **v1.0.0:** stabilized contracts after real usage and upgrade evidence. Teams/multi-owner policy and multi-machine scheduling are separately scoped later initiatives, not assumed features of 1.0.
 
 Out of initial scope: general UI, marketplace, custom browser/vault/cryptography, generic workflow/policy DSL, model training, agent-written core modifications, mandatory Rust, foundational Nanobot/Hermes embedding, universal exactly-once remote effects, autonomous trading/payments, uncontrolled extension installs. These exclusions do not remove the broad useful capabilities listed in section 4.
@@ -262,7 +263,7 @@ The latest owner direction resolves architecture and authorizes a buildable PRD.
 | D6 | Approved recurrence retained; research/notifications/local artifacts plus explicitly granted reversible mutations. Complex unattended/destructive external workflows remain later. |
 | D7 | Resolved explicit persistence/conservative inference/automatic skill dedup/history retained; adjustable activation defaults in §5. |
 | D8 | Resolved quiet unchanged checks, missed-run coalescing and prompt relevant pause retained. |
-| D9 | Modular sole choice/fallback retained; Codex/OpenCode conformance first, named others later; optional Honcho v0.2.0. No unsupported delegate is advertised as working. |
+| D9 | Modular sole choice/fallback retained; Codex/OpenCode conformance first, named others later; optional Honcho in increment 0.1-F. No unsupported delegate is advertised as working. |
 | D10 | Three outcomes retained; engineering release thresholds in §14 make them testable, not retrospective owner-approved performance promises. |
 | D11 | Resolved local-first, optional remote, configurable retention/export/provenance retained. |
 | D12 | Foundation question resolved by latest owner: native Bun; references only for Nanobot/Hermes; Rust optional. Fully open-source retained. Apache-2.0 is a recommendation pending final redistribution/license clearance. |
@@ -273,7 +274,7 @@ No new owner decision or architecture experiment is required to begin implementa
 
 ## 13. Acceptance scenario traceability
 
-All A01–A46 from Discovery are retained below. Unless specifically noted, each is a v0.1.0 release gate. Product claims are not satisfied by the architecture spikes. Rows involving absent optional integrations require local/default behavior now and the integration-specific variant before that later feature ships.
+All A01–A46 from Discovery are retained below. Unless specifically noted, each is a v0.1.0 release gate (verified at increment 0.1-I). Product claims are not satisfied by the architecture spikes. Rows involving absent optional integrations require local/default behavior in earlier increments and the integration-specific variant in the owning increment (for example Honcho in 0.1-F).
 
 | ID | Trigger | Required observable outcome |
 |---|---|---|
@@ -324,7 +325,7 @@ All A01–A46 from Discovery are retained below. Unless specifically noted, each
 | A45 | Oversized archive batch and interrupted preservation | Unique tail marker preserved or cursor stops before it; retry has no silent hole, including oversized single message/raw fallback and crash between preservation and cursor commit. Nanobot #5377, I7 |
 | A46 | Images/artifacts fit token estimate but exceed aggregate serialized budget | Pre-dispatch byte guard uses actual request representation; bounded reduction/references retain recoverable evidence; retry cannot resend oversize forever; usage estimate/report discrepancies attributed to exact request. Codex #43015, Nanobot #5402, I6 |
 
-Clarifications to inherited scenarios: A14 prevents new dispatch after committed revocation; already-submitted effects are cancelled where possible and otherwise reconciled explicitly, not claimed to be reversed. A05 uses any configured supported alternate in live release tests; the original Grok example can use a deterministic adapter fixture until that named integration is supported. A29 requires disabled/absent Honcho with full local functionality in v0.1.0; real Honcho outage/upload/deletion tests gate v0.2.0. A36 uses §5's explicit pause/stop-all semantics. A40 requires semantically correct context lifetime rather than any specific upstream continuation API. A42 covers delegate/process/MCP ownership now; general subagent fan-out remains later. A26/A44 test the actual enforced profile on each platform, never a prompt-only simulated denial.
+Clarifications to inherited scenarios: A14 prevents new dispatch after committed revocation; already-submitted effects are cancelled where possible and otherwise reconciled explicitly, not claimed to be reversed. A05 uses any configured supported alternate in live release tests; the original Grok example can use a deterministic adapter fixture until that named integration is supported. A29 requires disabled/absent Honcho with full local functionality in increments before 0.1-F; real Honcho outage/upload/deletion tests gate 0.1-F. A36 uses §5's explicit pause/stop-all semantics. A40 requires semantically correct context lifetime rather than any specific upstream continuation API. A42 covers delegate/process/MCP ownership in 0.1-A–E; bounded helper fan-out extends it in 0.1-H. A26/A44 test the actual enforced profile on each platform, never a prompt-only simulated denial.
 
 ## 14. Release verification and definition of done
 
@@ -342,7 +343,7 @@ Engineering acceptance thresholds for v0.1.0:
 
 Release artifacts include executable/source, exact dependency locks/notices and support matrix, operator/user docs, first-run examples, capability readiness/limits, migration/backup/restore instructions, known limitations and acceptance evidence. The dependency review must verify license/maintenance and the interfaces actually used; it is not a new foundational bakeoff. Native fetch is sufficient for the tested slice but may be supplemented by maintained SDKs as required by supported providers.
 
-Implementation may proceed through the increments in §11 now that the PRD exists. Shipping v0.1.0 requires the release evidence above. Do not turn an unavailable macOS sandbox, unusable delegate cancellation or unverified external effect into an exception to the product contract. A concrete failure can block that implementation/release path without reopening resolved owner preferences wholesale.
+Implementation may proceed through the increments in §11 now that the PRD exists. Tagging and shipping **v0.1.0** requires completing increments 0.1-F through 0.1-I plus the release evidence above. Do not turn an unavailable macOS sandbox, unusable delegate cancellation or unverified external effect into an exception to the product contract. A concrete failure can block that implementation/release path without reopening resolved owner preferences wholesale.
 
 ## 15. Documentation and evidence ownership
 
