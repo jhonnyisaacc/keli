@@ -1,6 +1,7 @@
 import { defineCommand } from "citty";
 import { openApp, type CliGlobals } from "../context.ts";
 import { emit, emitError } from "../output.ts";
+import { needsProvider } from "../parse-run-args.ts";
 
 export function runCommand(globals: CliGlobals) {
   return defineCommand({
@@ -53,7 +54,20 @@ export function runCommand(globals: CliGlobals) {
       }
 
       try {
-        const app = await openApp(globals);
+        const resolvedPrompt = args.p ?? args.prompt;
+        const runArgs = {
+          prompt: resolvedPrompt,
+          undo: args.undo,
+          fixture: args.fixture,
+          fixtureEndpoint: globals.fixtureEndpoint,
+        };
+        const app = await openApp(globals, {
+          requireProvider: needsProvider({
+            ...runArgs,
+            outputFormat: globals.outputFormat,
+            cwd: globals.cwd,
+          }),
+        });
         const result = await app.loop.runTurn(prompt ?? "", { undo: args.undo });
         app.close();
         emit(result, globals.outputFormat, result.message);

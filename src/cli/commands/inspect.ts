@@ -27,7 +27,7 @@ export function inspectCommand(globals: CliGlobals) {
           emitError("Not initialized. Run: keli init", format);
         }
 
-        const db = openDatabase(stateDir);
+        const db = await openDatabase(stateDir);
         const payload = {
           schemaVersion: getSchemaVersion(db),
           ownerId: config.ownerId,

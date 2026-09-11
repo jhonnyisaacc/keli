@@ -23,7 +23,7 @@ export async function initializeState(
 
   const existing = await readConfig(dir);
   if (existing?.ownerId) {
-    const db = openDatabase(dir);
+    const db = await openDatabase(dir);
     const owner = getOwner(db);
     db.close();
     if (!owner) throw new Error("Config exists but owner record missing");
@@ -41,7 +41,7 @@ export async function initializeState(
   const projectName = options?.projectName ?? "Rocket";
   const cwd = options?.cwd ?? process.cwd();
 
-  const db = openDatabase(dir);
+  const db = await openDatabase(dir);
   createOwner(db, ownerId);
   createProject(db, projectId, ownerId, projectName, [cwd]);
   db.close();
@@ -64,7 +64,7 @@ export async function requireInitialized(stateDir?: string) {
   if (!config?.ownerId) {
     throw new Error("Keli is not initialized. Run: keli init");
   }
-  const db = openDatabase(dir);
+  const db = await openDatabase(dir);
   const owner = getOwner(db);
   if (!owner) {
     db.close();

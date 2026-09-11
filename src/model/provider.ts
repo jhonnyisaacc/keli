@@ -1,5 +1,6 @@
 import type { ProposalRequest, ProviderResponse } from "../core/gate.ts";
 import type { DelegateCandidate } from "../core/types.ts";
+import { normalizeProviderFailure } from "./normalize.ts";
 
 export type ProviderMode =
   | "normal"
@@ -64,7 +65,9 @@ export class FixtureModelProvider implements ModelProvider {
       });
 
       if (!response.ok) {
-        return { id: request.id, error: `Provider HTTP ${response.status}` };
+        const body = await response.text();
+        const normalized = normalizeProviderFailure(response.status, body);
+        return { id: request.id, error: `${normalized.code}: ${normalized.message}` };
       }
 
       const payload = (await response.json()) as {
