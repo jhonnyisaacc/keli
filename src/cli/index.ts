@@ -1,0 +1,158 @@
+#!/usr/bin/env bun
+import { defineCommand, runMain } from "citty";
+import type { CliGlobals } from "./context.ts";
+import { initCommand } from "./commands/init.ts";
+import { doctorCommand } from "./commands/doctor.ts";
+import { inspectCommand } from "./commands/inspect.ts";
+import { runCommand } from "./commands/run.ts";
+import {
+  loginCommand,
+  logoutCommand,
+  updateCommand,
+  versionCommand,
+  sessionsCommand,
+  agentCommand,
+} from "./commands/stubs.ts";
+import { emitError } from "./output.ts";
+import { KELI_VERSION } from "../version.ts";
+
+function buildGlobals(overrides: Partial<CliGlobals> = {}): CliGlobals {
+  return {
+    cwd: overrides.cwd ?? process.cwd(),
+    stateDir: overrides.stateDir ?? process.env.KELI_STATE_DIR,
+    outputFormat: overrides.outputFormat ?? "plain",
+    fixture: overrides.fixture ?? false,
+    fixtureEndpoint: overrides.fixtureEndpoint ?? process.env.KELI_FIXTURE_URL,
+  };
+}
+
+function parseHeadlessArgv(argv: string[]): {
+  prompt: string;
+  fixture: boolean;
+  fixtureEndpoint?: string;
+  outputFormat: "plain" | "json";
+  cwd?: string;
+} | null {
+  if (argv.length === 0) return null;
+  let prompt: string | undefined;
+  let i = 0;
+
+  if (argv[0] === "-p" || argv[0] === "--prompt") {
+    prompt = argv[1];
+    i = 2;
+  } else if (argv[0].startsWith("-p") && argv[0].length > 2) {
+    prompt = argv[0].slice(2);
+    i = 1;
+  } else {
+    return null;
+  }
+
+  if (!prompt) return null;
+
+  let fixture = false;
+  let fixtureEndpoint: string | undefined = process.env.KELI_FIXTURE_URL;
+  let outputFormat: "plain" | "json" = "plain";
+  let cwd: string | undefined;
+
+  while (i < argv.length) {
+    const arg = argv[i];
+    if (arg === "--fixture") {
+      fixture = true;
+      i += 1;
+    } else if (arg === "--fixture-endpoint") {
+      fixtureEndpoint = argv[i + 1];
+      i += 2;
+    } else if (arg === "--output-format" || arg === "-output-format") {
+      outputFormat = argv[i + 1] === "json" ? "json" : "plain";
+      i += 2;
+    } else if (arg === "--cwd") {
+      cwd = argv[i + 1];
+      i += 2;
+    } else {
+      i += 1;
+    }
+  }
+
+  return { prompt, fixture, fixtureEndpoint, outputFormat, cwd };
+}
+
+async function runHeadless(argv: string[]) {
+  const parsed = parseHeadlessArgv(argv);
+  if (!parsed) return false;
+
+  const globals = buildGlobals({
+    cwd: parsed.cwd,
+    outputFormat: parsed.outputFormat,
+    fixture: parsed.fixture,
+    fixtureEndpoint: parsed.fixtureEndpoint,
+  });
+
+  if (!globals.fixture && !globals.fixtureEndpoint) {
+    emitError(
+      "Headless -p requires --fixture and KELI_FIXTURE_URL or --fixture-endpoint in 0.1-A",
+      globals.outputFormat,
+    );
+  }
+
+  const run = runCommand(globals);
+  await run.run?.({
+    args: {
+      p: parsed.prompt,
+      fixture: true,
+      undo: false,
+      "fixture-endpoint": globals.fixtureEndpoint,
+    },
+    rawArgs: [],
+    cmd: run,
+    data: {},
+  } as never);
+  return true;
+}
+
+function createMain(globals: CliGlobals) {
+  return defineCommand({
+    meta: {
+      name: "keli",
+      version: KELI_VERSION,
+      description: "Keli — personal agent with durable scoped corrections",
+    },
+    subCommands: {
+      init: initCommand(globals),
+      doctor: doctorCommand(globals),
+      inspect: inspectCommand(globals),
+      run: runCommand(globals),
+      login: loginCommand(globals),
+      logout: logoutCommand(globals),
+      update: updateCommand(globals),
+      version: versionCommand(globals),
+      sessions: sessionsCommand(globals),
+      agent: agentCommand(globals),
+    },
+  });
+}
+
+function printRootHelp() {
+  console.log(`Keli ${KELI_VERSION} — personal agent`);
+  console.log("");
+  console.log("Interactive chat/TUI is not available in 0.1-A.");
+  console.log("");
+  console.log("Commands:");
+  console.log("  keli init              Initialize state");
+  console.log("  keli doctor            Health checks");
+  console.log("  keli inspect --json    Show rules and projects");
+  console.log("  keli -p \"...\" --fixture  Headless one-shot");
+  console.log("  keli run -p \"...\"      Same as -p");
+  console.log("  keli version           Version info");
+  console.log("");
+  console.log("Run `keli <command> --help` for details.");
+}
+
+const rawArgs = process.argv.slice(2);
+
+if (await runHeadless(rawArgs)) {
+  // headless turn handled
+} else if (rawArgs.length === 0) {
+  printRootHelp();
+} else {
+  runMain(createMain(buildGlobals()));
+}

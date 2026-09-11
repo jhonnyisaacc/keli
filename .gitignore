@@ -1,0 +1,16 @@
+node_modules/
+dist/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Local Keli state (default locations)
+.keli/
+config.json.tmp
+
+# Test artifacts
+/tmp/keli-test-*
