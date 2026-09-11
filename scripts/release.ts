@@ -19,20 +19,34 @@ const reader = fixtureProc.stdout.getReader();
 const { value } = await reader.read();
 reader.releaseLock();
 const fixtureUrl = new TextDecoder().decode(value).trim();
-const stateDir = await mkdtemp(join(tmpdir(), "keli-release-"));
 
-await $`${keli} init`.cwd(root).env({ ...process.env, KELI_STATE_DIR: stateDir });
-await $`${keli} doctor`.cwd(root).env({ ...process.env, KELI_STATE_DIR: stateDir });
-await $`${keli} -p ${"Rocket changes use Codex"} --fixture`.cwd(root).env({
-  ...process.env,
-  KELI_STATE_DIR: stateDir,
-  KELI_FIXTURE_URL: fixtureUrl,
+const integrationProc = Bun.spawn(["bun", "run", "scripts/integration-fixture-server.ts"], {
+  cwd: root,
+  stdout: "pipe",
 });
-await $`${keli} -p ${"Perform the next Rocket coding action."} --fixture`.cwd(root).env({
+const integrationReader = integrationProc.stdout.getReader();
+const { value: integrationValue } = await integrationReader.read();
+integrationReader.releaseLock();
+const integrationUrl = new TextDecoder().decode(integrationValue).trim();
+
+const stateDir = await mkdtemp(join(tmpdir(), "keli-release-"));
+const env = {
   ...process.env,
   KELI_STATE_DIR: stateDir,
   KELI_FIXTURE_URL: fixtureUrl,
+  KELI_DELEGATE_FIXTURE_URL: integrationUrl,
+  KELI_BROWSER_FIXTURE_URL: integrationUrl,
+};
+
+await $`${keli} init`.cwd(root).env(env);
+await $`${keli} doctor`.cwd(root).env(env);
+await $`${keli} -p ${"Rocket changes use Codex"} --fixture`.cwd(root).env(env);
+await $`${keli} -p ${"Perform the next Rocket coding action."} --fixture`.cwd(root).env(env);
+
+await $`${keli} invoke web.fetch --url ${`${integrationUrl}/page`} --json`.cwd(root).env({
+  ...env,
 });
 
 fixtureProc.kill();
-console.log("release: local artifacts prepared and smoke passed (no publish in 0.1-A)");
+integrationProc.kill();
+console.log("release: local artifacts prepared and 0.1-C smoke passed (no publish)");

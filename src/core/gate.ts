@@ -1,6 +1,17 @@
 import type { Database } from "bun:sqlite";
 import type { BehaviorService } from "./behavior.ts";
-import type { DelegateCandidate, Rule } from "./types.ts";
+import type { CodingDelegate, DelegateCandidate, Rule } from "./types.ts";
+
+export type DelegateExecutorResult = {
+  delegate: string;
+  usedFallback?: boolean;
+  error?: string;
+  output?: unknown;
+};
+
+export type DelegateExecutor = (
+  prepared: ProposalRequest,
+) => Promise<DelegateExecutorResult>;
 
 const CANDIDATE_KEYS = ["delegate", "id", "key", "revision", "scope"] as const;
 
@@ -67,9 +78,13 @@ export class GateService {
       const valid =
         !error && this.validateCandidate(id, candidate, rule, effectiveDelegate);
       const status = error ? "engine_error" : valid ? "executed" : "blocked";
-      const reason =
-        error ??
-        (valid ? "authoritative rule matched" : "candidate rejected by Bun gate");
+      const reason = error
+        ? error.startsWith("auth:") || error.startsWith("quota:")
+          ? `provider ${error}`
+          : error
+        : valid
+          ? "authoritative rule matched"
+          : "candidate rejected by Bun gate";
 
       if (valid && candidate) {
         this.db.run(
@@ -117,6 +132,67 @@ export class GateService {
       candidate.revision === rule.revision &&
       candidate.delegate === expectedDelegate
     );
+  }
+
+  async actWithDelegate(
+    request: string,
+    scope: string,
+    key: string,
+    execute: DelegateExecutor,
+    hooks?: { effectiveDelegate?: string },
+  ) {
+    const prepared = this.prepare(request, scope, key);
+    let execution: DelegateExecutorResult;
+    try {
+      execution = await execute(prepared);
+    } catch (e) {
+      const action = this.finish(prepared.id, null, String(e), hooks?.effectiveDelegate);
+      return {
+        id: prepared.id,
+        error: String(e),
+        action,
+        prepared,
+        delegateExecution: undefined,
+      };
+    }
+
+    if (execution.error) {
+      const action = this.finish(
+        prepared.id,
+        null,
+        execution.error,
+        execution.delegate,
+      );
+      return {
+        id: prepared.id,
+        error: execution.error,
+        action,
+        prepared,
+        delegateExecution: execution,
+      };
+    }
+
+    const rule = this.behavior.requireRule(scope, key);
+    const candidate: DelegateCandidate = {
+      id: prepared.id,
+      scope: rule.scope,
+      key: rule.key,
+      revision: rule.revision,
+      delegate: execution.delegate,
+    };
+    const action = this.finish(
+      prepared.id,
+      candidate,
+      undefined,
+      hooks?.effectiveDelegate ?? execution.delegate,
+    );
+    return {
+      id: prepared.id,
+      candidate,
+      action,
+      prepared,
+      delegateExecution: execution,
+    };
   }
 
   async act(

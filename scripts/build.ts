@@ -1,4 +1,4 @@
-import { mkdir } from "node:fs/promises";
+import { copyFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
 const root = join(import.meta.dir, "..");
@@ -23,4 +23,8 @@ const proc = Bun.spawn(
 const code = await proc.exited;
 if (code !== 0) process.exit(code);
 
+await copyFile(
+  join(root, "src", "execution", "landlock-worker.py"),
+  join(root, "dist", "landlock-worker.py"),
+);
 console.log(`built ${out} (${target})`);

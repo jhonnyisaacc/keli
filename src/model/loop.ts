@@ -3,6 +3,8 @@ import type { GateService } from "../core/gate.ts";
 import { parsePrompt, isUntrustedInstruction } from "../core/correction.ts";
 import { explainSelection } from "../core/explain.ts";
 import type { ModelProvider, ProviderMode } from "./provider.ts";
+import type { DelegateService } from "./delegate-service.ts";
+import { KeliError } from "../core/errors.ts";
 import { projectScope } from "../state/repos.ts";
 import type { CodingDelegate } from "../core/types.ts";
 
@@ -18,9 +20,11 @@ export class ModelLoop {
   constructor(
     private readonly behavior: BehaviorService,
     private readonly gate: GateService,
-    private readonly provider: ModelProvider,
     private readonly projectId: string,
     private readonly projectName: string,
+    private readonly provider?: ModelProvider,
+    private readonly delegateService?: DelegateService,
+    private readonly workspace = "/tmp",
   ) {}
 
   async runTurn(prompt: string, options?: { mode?: ProviderMode; undo?: boolean }): Promise<TurnResult> {
@@ -84,29 +88,33 @@ export class ModelLoop {
     runOverride?: CodingDelegate,
     mode?: ProviderMode,
   ): Promise<TurnResult> {
-    const effectiveValue = runOverride ?? this.behavior.requireRule(scope, key).value;
-    const result = await this.gate.act(
-      prompt,
-      scope,
-      key,
-      async (req) => {
-        const response = await this.provider.propose(
-          runOverride ? { ...req, value: effectiveValue } : req,
-          mode,
-        );
-        return response;
-      },
-      { effectiveDelegate: runOverride },
-    );
+    const rule = this.behavior.requireRule(scope, key);
+    const effectiveValue = (runOverride ?? rule.value) as CodingDelegate;
+
+    const result = this.delegateService
+      ? await this.gate.actWithDelegate(
+          prompt,
+          scope,
+          key,
+          (prepared) =>
+            this.delegateService!.execute(prepared, this.workspace, runOverride),
+          { effectiveDelegate: runOverride },
+        )
+      : await this.runViaProvider(prompt, scope, key, runOverride, mode, effectiveValue);
 
     const explanation = explainSelection(this.behavior, scope, key, runOverride);
     const status = (result.action as { status: string }).status;
+    const usedDelegate = (result as { delegateExecution?: { usedFallback: boolean; delegate: string } })
+      .delegateExecution;
+    const delegateLabel = usedDelegate
+      ? `${usedDelegate.delegate}${usedDelegate.usedFallback ? " (fallback)" : ""}`
+      : effectiveValue;
 
     return {
       kind: status === "executed" ? "action" : "blocked",
       message:
         status === "executed"
-          ? `Action executed with delegate ${effectiveValue}.`
+          ? `Action executed with delegate ${delegateLabel}.`
           : `Action blocked: ${(result.action as { reason: string }).reason}`,
       action: result.action,
       explanation,
@@ -117,5 +125,32 @@ export class ModelLoop {
         revision: explanation.revision,
       },
     };
+  }
+
+  private async runViaProvider(
+    prompt: string,
+    scope: string,
+    key: string,
+    runOverride?: CodingDelegate,
+    mode?: ProviderMode,
+    effectiveValue?: CodingDelegate,
+  ) {
+    if (!this.provider) {
+      throw new KeliError("Provider required for action turns", "provider_required");
+    }
+    const delegate = effectiveValue ?? this.behavior.requireRule(scope, key).value as CodingDelegate;
+    return this.gate.act(
+      prompt,
+      scope,
+      key,
+      async (req) => {
+        const response = await this.provider!.propose(
+          runOverride ? { ...req, value: delegate } : req,
+          mode,
+        );
+        return response;
+      },
+      { effectiveDelegate: runOverride },
+    );
   }
 }

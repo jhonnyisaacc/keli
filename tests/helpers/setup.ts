@@ -49,7 +49,7 @@ export async function createTestEnv(): Promise<TestEnv> {
   const provider = new FixtureModelProvider(fixture.endpoint);
   const behavior = new BehaviorService(db, ownerId);
   const gate = new GateService(db, behavior);
-  const loop = new ModelLoop(behavior, gate, provider, rocketId, "Rocket");
+  const loop = new ModelLoop(behavior, gate, rocketId, "Rocket", provider);
 
   return {
     stateDir,
