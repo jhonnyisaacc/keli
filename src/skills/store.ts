@@ -101,6 +101,15 @@ export function rollbackSkill(db: Database, id: string, scope: string, toVersion
   );
 }
 
+export function listActiveSkills(db: Database, scope: string): SkillPinRecord[] {
+  const rows = db
+    .query(
+      `SELECT * FROM skill_pins WHERE scope = ? AND activation_status = 'active' ORDER BY id, version`,
+    )
+    .all(scope) as Array<Record<string, string | number | null>>;
+  return rows.map(rowToSkill);
+}
+
 export function recordComparableUse(db: Database, id: string, scope: string, version: number): number {
   db.run(
     `UPDATE skill_pins SET comparable_uses = comparable_uses + 1

@@ -13,5 +13,9 @@ for (const file of coreFiles) {
     console.error(`Boundary check failed: ${file} imports adapters`);
     process.exit(1);
   }
+  if (/from ['"].*integrations\/profiles/.test(text)) {
+    console.error(`Boundary check failed: ${file} imports integration profiles`);
+    process.exit(1);
+  }
 }
 console.log("check: types and boundaries ok");

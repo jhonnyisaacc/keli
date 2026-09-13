@@ -26,20 +26,44 @@ export function createRun(
   db: Database,
   scope: string,
   budgetBytesMax = DEFAULT_BUDGET_BYTES,
-  options?: { parentRunId?: string; requestsMax?: number },
+  options?: {
+    parentRunId?: string;
+    requestsMax?: number;
+    tokensMax?: number | null;
+    toolCallsMax?: number | null;
+    monetaryBudgetCents?: number | null;
+  },
 ): string {
   const id = crypto.randomUUID();
   const requestsMax = options?.requestsMax ?? 20;
   db.run(
     `INSERT INTO runs(
        id, scope, status, cancel_epoch, budget_bytes_max, budget_bytes_used,
-       requests_max, requests_used, tokens_used, tool_calls_used, monetary_used_cents,
-       parent_run_id, created_at
-     ) VALUES (?, ?, 'active', 0, ?, 0, ?, 0, 0, 0, 0, ?, ?)`,
-    [id, scope, budgetBytesMax, requestsMax, options?.parentRunId ?? null, new Date().toISOString()],
+       requests_max, requests_used, tokens_max, tokens_used, tool_calls_max, tool_calls_used,
+       monetary_budget_cents, monetary_used_cents, parent_run_id, created_at
+     ) VALUES (?, ?, 'active', 0, ?, 0, ?, 0, ?, 0, ?, 0, ?, 0, ?, ?)`,
+    [
+      id,
+      scope,
+      budgetBytesMax,
+      requestsMax,
+      options?.tokensMax ?? null,
+      options?.toolCallsMax ?? null,
+      options?.monetaryBudgetCents ?? null,
+      options?.parentRunId ?? null,
+      new Date().toISOString(),
+    ],
   );
   return id;
 }
+
+export type RunBudgetConfig = {
+  requestsMax?: number;
+  tokensMax?: number;
+  toolCallsMax?: number;
+  monetaryBudgetCents?: number;
+  bytesMax?: number;
+};
 
 export function getRun(db: Database, runId: string): RunRecord | null {
   return db.query("SELECT * FROM runs WHERE id = ?").get(runId) as RunRecord | null;

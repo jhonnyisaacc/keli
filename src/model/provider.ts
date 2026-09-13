@@ -47,6 +47,7 @@ export class FixtureModelProvider implements ModelProvider {
             },
             mode,
             force: mode === "force" ? "OpenCode" : undefined,
+            context: request.advisoryContext,
           }),
         },
       ],

@@ -1,7 +1,7 @@
 import { defineCommand } from "citty";
 import { requireInitialized } from "../../state/init.ts";
 import { projectScope, getProjectById } from "../../state/repos.ts";
-import { createJob, listJobs, setJobStatus } from "../../jobs/store.ts";
+import { createJob, listJobs, pinJobSkill, setJobStatus } from "../../jobs/store.ts";
 import { listOccurrences } from "../../jobs/occurrences.ts";
 import { tickScheduler } from "../../jobs/scheduler.ts";
 import { createJobTickContext } from "../../jobs/tick-context.ts";
@@ -18,6 +18,7 @@ export function jobsCommand(globals: CliGlobals) {
       tick: jobsTickCommand(globals),
       occurrences: jobsOccurrencesCommand(globals),
       pause: jobsPauseCommand(globals),
+      "pin-skill": jobsPinSkillCommand(globals),
     },
   });
 }
@@ -110,6 +111,31 @@ function jobsOccurrencesCommand(globals: CliGlobals) {
         const occurrences = listOccurrences(db, args.job);
         db.close();
         emit({ occurrences }, globals.outputFormat);
+      } catch (e) {
+        emitError(String(e), globals.outputFormat);
+      }
+    },
+  });
+}
+
+function jobsPinSkillCommand(globals: CliGlobals) {
+  return defineCommand({
+    meta: { description: "Pin a skill version to a job (A28)" },
+    args: {
+      job: { type: "string", required: true },
+      skill: { type: "string", required: true },
+      version: { type: "string", required: true },
+    },
+    async run({ args }) {
+      try {
+        const { db } = await requireInitialized(globals.stateDir);
+        pinJobSkill(db, args.job, args.skill, Number(args.version));
+        db.close();
+        emit(
+          { jobId: args.job, skillId: args.skill, version: args.version },
+          globals.outputFormat,
+          `Pinned ${args.skill}@${args.version} to job ${args.job}`,
+        );
       } catch (e) {
         emitError(String(e), globals.outputFormat);
       }

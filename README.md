@@ -40,8 +40,14 @@ Contains `state.sqlite`, `config.json`, and cache subdirectories.
 | Command | Purpose |
 |---------|---------|
 | `keli init` | Create state, run migrations, seed owner/project |
-| `keli setup` | Explained wizard: models, one transport, route binding, optional test |
-| `keli doctor` | Health checks (schema, paths, readiness) |
+| `keli setup` | Registry-driven wizard: provider, one transport, optional delegate; `--quick` / `--minimal` |
+| `keli doctor [--fix]` | Health checks plus integration probes (safe repairs only) |
+| `keli integrations` | `list [--kind]` and `discover` (static catalog; never installs) |
+| `keli auth` | `add` / `list` / `status` / `remove` / `logout` (keychain refs) |
+| `keli config` | `get` / `set` — single config mutation path |
+| `keli chat` | CLI recovery REPL over the model loop |
+| `keli skills` | `list` / `show` / `pin` / `activate` / `rollback` |
+| `keli memory` | `compact` / `conversations` |
 | `keli inspect [--json]` | Rules, projects, schema version |
 | `keli -p "..."` | Headless one-shot turn |
 | `keli run -p "..."` | Same as `-p` |
@@ -52,13 +58,13 @@ Contains `state.sqlite`, `config.json`, and cache subdirectories.
 | `keli telegram` | Telegram transport: `send`, `ingest`, `process` (fixture-backed) |
 | `keli routes` | Transport route bindings: `list`, `bind` |
 | `keli notes` | Local advisory notes: `add`, `list`, `search` |
-| `keli providers` | List configured model providers (`list`) |
+| `keli providers` | Alias of `integrations list --kind model-provider` |
 | `keli version` | Version and build metadata |
 | `keli update` | Check (`--check`), install (`--install`), or rollback |
 | `keli backup` / `keli restore` | State backup/restore (no credentials; restore pauses jobs) |
 | `keli pause` / `keli resume` / `keli stop` | Global execution control |
 
-Stubs reserved for later: `login`, `logout`, `sessions`, `agent stdio`.
+`login` / `logout` alias `keli auth`. `sessions list` is live. `agent stdio` remains post-v0.1.0.
 
 See [docs/INSTALL.md](docs/INSTALL.md) and [docs/OPERATIONS.md](docs/OPERATIONS.md).
 

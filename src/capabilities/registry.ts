@@ -89,6 +89,46 @@ const BUILTIN: CapabilityDescriptor[] = [
     },
   },
   {
+    id: "sources.search",
+    version: "0.1.0",
+    summary: "Full-text search over indexed read-only source collections (notes, transcripts)",
+    actionClass: "read",
+    resources: ["query"],
+    schema: {
+      type: "object",
+      properties: {
+        query: { type: "string" },
+        collection: { type: "string" },
+        limit: { type: "number" },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    id: "sources.read",
+    version: "0.1.0",
+    summary: "Read a bounded passage of one indexed source document by id",
+    actionClass: "read",
+    resources: ["sourceId"],
+    schema: {
+      type: "object",
+      properties: {
+        sourceId: { type: "string" },
+        offset: { type: "number" },
+        chars: { type: "number" },
+      },
+      required: ["sourceId"],
+    },
+  },
+  {
+    id: "sources.collections",
+    version: "0.1.0",
+    summary: "List indexed source collections with counts, authors, and latest timestamps",
+    actionClass: "read",
+    resources: [],
+    schema: { type: "object", properties: {}, required: [] },
+  },
+  {
     id: "browser.navigate",
     version: "0.1.0",
     summary: "Navigate a JS browser session (pluggable backend); use web.fetch for static pages",

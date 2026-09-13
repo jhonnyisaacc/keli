@@ -98,7 +98,7 @@ describe("Discord transport stub", () => {
       .get() as { n: number };
     expect(pending.n).toBe(1);
 
-    const processed = processTransportInbox(db);
+    const processed = await processTransportInbox(db);
     expect(processed.processed).toBe(1);
 
     const count = db

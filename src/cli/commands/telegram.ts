@@ -84,7 +84,7 @@ function telegramProcessCommand(globals: CliGlobals) {
     async run() {
       try {
         const { db } = await requireInitialized(globals.stateDir);
-        const result = processTransportInbox(db);
+        const result = await processTransportInbox(db);
         db.close();
         emit(result, globals.outputFormat, `Processed ${result.processed} inbox message(s)`);
       } catch (e) {

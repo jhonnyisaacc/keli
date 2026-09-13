@@ -8,11 +8,16 @@ import type { CliGlobals } from "../context.ts";
 import { probeSandbox } from "../../execution/sandbox.ts";
 import { probeBrowserBackends } from "../../execution/browser-backends.ts";
 import { defaultCredentialSource } from "../../credentials/source.ts";
+import { listIntegrations, probeIntegration } from "../../integrations/registry.ts";
+import "../../integrations/load.ts";
 
 export function doctorCommand(globals: CliGlobals) {
   return defineCommand({
     meta: { description: "Check Keli health and readiness" },
-    async run() {
+    args: {
+      fix: { type: "boolean", default: false, description: "Safe repairs only; never touches secrets" },
+    },
+    async run({ args }) {
       const checks: { name: string; ok: boolean; detail?: string }[] = [];
       const stateDir = resolveStateDir(globals.stateDir);
       const paths = statePaths(stateDir);
@@ -87,6 +92,29 @@ export function doctorCommand(globals: CliGlobals) {
           ? `completed (${config.setup.transport ?? "unknown transport"})`
           : "not completed — run: keli setup",
       });
+
+      for (const profile of listIntegrations()) {
+        if (profile.kind === "browser-backend") continue;
+        const entry = config?.integrations?.[profile.id];
+        const status = await probeIntegration(profile.id, {
+          settings: entry?.settings ?? {},
+          credentialRef: entry?.credentialRef,
+          needsReauth: entry?.status?.needsReauth,
+        });
+        if (args.fix && entry?.status?.needsReauth && status.reachable) {
+          entry.status.needsReauth = false;
+          entry.status.lastProbe = new Date().toISOString();
+          const { writeConfig } = await import("../../state/config.ts");
+          await writeConfig({ ...config!, integrations: { ...config!.integrations, [profile.id]: entry } }, stateDir);
+        }
+        const failConfigured =
+          Boolean(entry?.enabled) && (status.credentialState === "locked" || status.credentialState === "needs-reauth");
+        checks.push({
+          name: `integration:${profile.id}`,
+          ok: !failConfigured,
+          detail: `${status.configured ? "configured" : "unset"} ${status.credentialState}${status.reason ? ` (${status.reason})` : ""}`,
+        });
+      }
 
       const ok = checks.every((c) => c.ok);
       const report = { ok, checks };

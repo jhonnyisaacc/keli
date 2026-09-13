@@ -2,6 +2,7 @@ import type { CapabilityResult } from "../capabilities/types.ts";
 import { KeliError } from "../core/errors.ts";
 import type { CredentialRef } from "../credentials/source.ts";
 import { defaultCredentialSource } from "../credentials/source.ts";
+import { fixtureUrlFor } from "../integrations/env.ts";
 
 export type BrowserSessionConnectInput = {
   url: string;
@@ -12,7 +13,7 @@ export async function browserSessionConnect(
   input: BrowserSessionConnectInput,
   fixtureUrl?: string,
 ): Promise<CapabilityResult> {
-  const url = fixtureUrl ?? process.env.KELI_BROWSER_SESSION_FIXTURE_URL;
+  const url = fixtureUrl ?? fixtureUrlFor("browser-session");
   if (!url) {
     return {
       capabilityId: "browser.session",

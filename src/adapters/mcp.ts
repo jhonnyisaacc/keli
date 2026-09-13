@@ -1,21 +1,24 @@
 import type { CapabilityResult } from "../capabilities/types.ts";
 import { KeliError } from "../core/errors.ts";
+import { fixtureUrlFor } from "../integrations/env.ts";
 
 export async function mcpListTools(fixtureUrl?: string): Promise<CapabilityResult> {
-  if (!fixtureUrl) {
+  const url = fixtureUrl ?? fixtureUrlFor("mcp");
+  if (!url) {
     return unavailable("mcp.tools/list");
   }
-  return mcpPost("mcp.tools/list", fixtureUrl, { op: "list" });
+  return mcpPost("mcp.tools/list", url, { op: "list" });
 }
 
 export async function mcpCallTool(
   input: { name: string; arguments?: Record<string, unknown> },
   fixtureUrl?: string,
 ): Promise<CapabilityResult> {
-  if (!fixtureUrl) {
+  const url = fixtureUrl ?? fixtureUrlFor("mcp");
+  if (!url) {
     return unavailable("mcp.tools/call");
   }
-  return mcpPost("mcp.tools/call", fixtureUrl, {
+  return mcpPost("mcp.tools/call", url, {
     op: "call",
     name: input.name,
     arguments: input.arguments ?? {},
@@ -57,7 +60,7 @@ function unavailable(capabilityId: string): CapabilityResult {
     ok: false,
     error: {
       code: "capability_unavailable",
-      message: "MCP requires KELI_MCP_FIXTURE_URL or configured MCP server",
+      message: "MCP requires a resolved mcp-server integration or KELI_FIXTURE_MCP",
     },
   };
 }

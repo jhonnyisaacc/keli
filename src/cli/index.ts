@@ -17,16 +17,26 @@ import { pauseCommand, resumeCommand, stopCommand } from "./commands/pause.ts";
 import { updateCommand } from "./commands/update.ts";
 import { notesCommand } from "./commands/notes.ts";
 import { providersCommand } from "./commands/providers.ts";
+import { integrationsCommand } from "./commands/integrations.ts";
+import { authCommand } from "./commands/auth.ts";
+import { configCommand } from "./commands/config.ts";
+import { skillsCommand } from "./commands/skills.ts";
+import { memoryCommand } from "./commands/memory.ts";
+import { chatCommand } from "./commands/chat.ts";
+import { sessionsCommand } from "./commands/sessions.ts";
+import { sourcesCommand } from "./commands/sources.ts";
+import { watchesCommand } from "./commands/watches.ts";
 import {
   loginCommand,
   logoutCommand,
   versionCommand,
-  sessionsCommand,
   agentCommand,
 } from "./commands/stubs.ts";
 import { emitError } from "./output.ts";
 import { KELI_VERSION } from "../version.ts";
 import { parseHeadlessArgv, needsProvider } from "./parse-run-args.ts";
+import { fixtureUrlFor } from "../integrations/env.ts";
+import "../integrations/load.ts";
 
 function buildGlobals(overrides: Partial<CliGlobals> = {}): CliGlobals {
   return {
@@ -34,7 +44,7 @@ function buildGlobals(overrides: Partial<CliGlobals> = {}): CliGlobals {
     stateDir: overrides.stateDir ?? process.env.KELI_STATE_DIR,
     outputFormat: overrides.outputFormat ?? "plain",
     fixture: overrides.fixture ?? false,
-    fixtureEndpoint: overrides.fixtureEndpoint ?? process.env.KELI_FIXTURE_URL,
+    fixtureEndpoint: overrides.fixtureEndpoint ?? fixtureUrlFor("model"),
   };
 }
 
@@ -94,6 +104,7 @@ function createMain(globals: CliGlobals) {
       doctor: doctorCommand(globals),
       inspect: inspectCommand(globals),
       run: runCommand(globals),
+      chat: chatCommand(globals),
       capabilities: capabilitiesCommand(globals),
       invoke: invokeCommand(globals),
       jobs: jobsCommand(globals),
@@ -108,11 +119,18 @@ function createMain(globals: CliGlobals) {
       stop: stopCommand(globals),
       login: loginCommand(globals),
       logout: logoutCommand(globals),
+      auth: authCommand(globals),
+      config: configCommand(globals),
       update: updateCommand(globals),
       notes: notesCommand(globals),
+      memory: memoryCommand(globals),
+      skills: skillsCommand(globals),
       providers: providersCommand(globals),
+      integrations: integrationsCommand(globals),
       version: versionCommand(globals),
       sessions: sessionsCommand(globals),
+      sources: sourcesCommand(globals),
+      watches: watchesCommand(globals),
       agent: agentCommand(globals),
     },
   });
@@ -121,14 +139,18 @@ function createMain(globals: CliGlobals) {
 function printRootHelp() {
   console.log(`Keli ${KELI_VERSION} — personal agent`);
   console.log("");
-  console.log("Interactive chat/TUI is not available in 0.1-A.");
-  console.log("");
   console.log("Commands:");
   console.log("  keli init              Initialize state");
+  console.log("  keli setup             Registry-driven onboarding");
   console.log("  keli doctor            Health checks");
-  console.log("  keli inspect --json    Show rules and projects");
+  console.log("  keli chat              Research chat with cited evidence and corrections");
+  console.log("  keli sources           add | index | list | search (read-only collections)");
+  console.log("  keli watches           import | list | approve | tick (heartbeat)");
+  console.log("  keli discord poll      Receive → converse → reply on bound routes");
+  console.log("  keli update --mode     off | notify | auto (daily, idle boundary)");
+  console.log("  keli integrations      list | discover");
+  console.log("  keli auth              add | list | status | remove");
   console.log("  keli -p \"...\" --fixture  Headless one-shot");
-  console.log("  keli run --undo        Undo last rule revision");
   console.log("  keli version           Version info");
   console.log("");
   console.log("Run `keli <command> --help` for details.");

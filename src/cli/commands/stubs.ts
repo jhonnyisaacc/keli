@@ -2,27 +2,49 @@ import { defineCommand } from "citty";
 import { emit } from "../output.ts";
 import type { CliGlobals } from "../context.ts";
 import { KELI_VERSION } from "../../version.ts";
+import { addCredential, removeCredential } from "../../integrations/auth.ts";
 
-function stub(name: string, detail: string, globals: CliGlobals) {
+export function loginCommand(globals: CliGlobals) {
   return defineCommand({
-    meta: { description: `${name} (not configured in 0.1-A)` },
-    async run() {
-      emit(
-        { stub: true, command: name, detail },
-        globals.outputFormat,
-        `${name}: ${detail}`,
-      );
-      process.exit(0);
+    meta: { description: "Alias for keli auth add" },
+    args: {
+      provider: { type: "string", description: "Integration id" },
+      value: { type: "string", description: "Credential value" },
+    },
+    async run({ args }) {
+      if (!args.provider) {
+        emit(
+          { alias: "auth add", hint: "keli auth add <integration>" },
+          globals.outputFormat,
+          "login is an alias of keli auth add <integration>",
+        );
+        return;
+      }
+      const ref = await addCredential(args.provider, { stateDir: globals.stateDir, value: args.value });
+      emit({ ref }, globals.outputFormat, `Stored credential ref ${ref.service}/${ref.id}`);
     },
   });
 }
 
-export function loginCommand(globals: CliGlobals) {
-  return stub("login", "Provider OAuth not configured yet. Coming in onboarding increment.", globals);
-}
-
 export function logoutCommand(globals: CliGlobals) {
-  return stub("logout", "No cached credentials to clear in 0.1-A.", globals);
+  return defineCommand({
+    meta: { description: "Alias for keli auth logout" },
+    args: {
+      provider: { type: "string", description: "Integration id" },
+    },
+    async run({ args }) {
+      if (!args.provider) {
+        emit(
+          { alias: "auth logout", hint: "keli auth logout <integration>" },
+          globals.outputFormat,
+          "logout is an alias of keli auth logout <integration>",
+        );
+        return;
+      }
+      await removeCredential(args.provider, { stateDir: globals.stateDir });
+      emit({ removed: args.provider }, globals.outputFormat, `Removed credential for ${args.provider}`);
+    },
+  });
 }
 
 export function updateCommand(globals: CliGlobals) {
@@ -61,20 +83,20 @@ export function versionCommand(globals: CliGlobals) {
   });
 }
 
-export function sessionsCommand(globals: CliGlobals) {
-  return defineCommand({
-    meta: { description: "Session management (stub)" },
-    subCommands: {
-      list: stub("sessions list", "Session CRUD reserved for a later increment.", globals),
-    },
-  });
-}
-
 export function agentCommand(globals: CliGlobals) {
   return defineCommand({
     meta: { description: "ACP agent host (stub)" },
     subCommands: {
-      stdio: stub("agent stdio", "ACP delegate host deferred to 0.1-C.", globals),
+      stdio: defineCommand({
+        meta: { description: "ACP delegate host (not a v0.1.0 requirement)" },
+        async run() {
+          emit(
+            { stub: true, command: "agent stdio", detail: "Hosting Keli as an ACP agent is post-v0.1.0." },
+            globals.outputFormat,
+            "agent stdio: hosting Keli as an ACP agent is post-v0.1.0.",
+          );
+        },
+      }),
     },
   });
 }

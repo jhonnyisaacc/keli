@@ -1,0 +1,28 @@
+name: integration-live
+
+on:
+  workflow_dispatch:
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install
+      - name: Probe configured live integrations
+        env:
+          KELI_PROVIDER_URL: ${{ secrets.KELI_PROVIDER_URL }}
+          KELI_PROVIDER_API_KEY: ${{ secrets.KELI_PROVIDER_API_KEY }}
+          KELI_DISCORD_TOKEN: ${{ secrets.KELI_DISCORD_TOKEN }}
+          KELI_HONCHO_API_KEY: ${{ secrets.KELI_HONCHO_API_KEY }}
+        run: |
+          set -euo pipefail
+          bun run scripts/live-probe.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-probe-evidence
+          path: docs/evidence/LIVE_PROBE.md

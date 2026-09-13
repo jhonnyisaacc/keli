@@ -3,12 +3,14 @@ import { GateService } from "../core/gate.ts";
 import type { CodingDelegate } from "../core/types.ts";
 import { ModelLoop } from "../model/loop.ts";
 import { DelegateService } from "../model/delegate-service.ts";
-import { FixtureModelProvider } from "../model/provider.ts";
+import { FixtureModelProvider, type ModelProvider } from "../model/provider.ts";
 import { resolveProvider, listProviders } from "../model/provider-registry.ts";
+import { fixtureUrlFor } from "../integrations/env.ts";
 import { requireInitialized } from "../state/init.ts";
 import { getProjectById, projectScope } from "../state/repos.ts";
 import { resolveStateDir } from "../state/paths.ts";
 import { isCodingDelegate } from "../core/types.ts";
+import { createConversationApp } from "../conversation/app.ts";
 
 export type CliGlobals = {
   cwd: string;
@@ -29,25 +31,24 @@ export async function openApp(
   if (!project) throw new Error("Default project missing. Run: keli init");
 
   const requireProvider = options?.requireProvider ?? true;
-  let provider: FixtureModelProvider | undefined;
+  let provider: ModelProvider | undefined;
   if (globals.fixtureEndpoint) {
     provider = new FixtureModelProvider(globals.fixtureEndpoint);
   } else if (globals.fixture) {
     throw new Error("Fixture mode requires --fixture-endpoint or internal test harness");
-  } else if (process.env.KELI_FIXTURE_URL) {
-    provider = resolveProvider("fixture") as FixtureModelProvider;
-  } else if (requireProvider && listProviders().some((p) => p.available)) {
-    provider = resolveProvider() as FixtureModelProvider;
-  } else if (requireProvider) {
-    throw new Error("No provider configured. Use --fixture or set KELI_FIXTURE_URL.");
+  } else if (fixtureUrlFor("model")) {
+    provider = resolveProvider("fixture");
+  } else if (requireProvider && !listProviders(config).some((p) => p.available)) {
+    throw new Error("No provider configured. Run: keli setup provider (or set KELI_FIXTURE_URL for fixtures).");
   }
+  // When a configured provider exists, the loop creates it on demand with credentials.
 
   const scope = projectScope(project.id);
   const roots = JSON.parse(project.resource_roots_json) as string[];
   const workspace = roots[0] ?? globals.cwd;
 
   let delegateService: DelegateService | undefined;
-  const delegateFixture = process.env.KELI_DELEGATE_FIXTURE_URL;
+  const delegateFixture = fixtureUrlFor("delegate");
   if (delegateFixture) {
     const rule = behavior.getRule(scope, "coding.delegate");
     const primary = (config.delegates?.primary ??
@@ -74,8 +75,19 @@ export async function openApp(
     config,
   );
 
+  const resolvedStateDir = resolveStateDir(stateDir);
+  const conversation = createConversationApp({
+    db,
+    behavior,
+    config,
+    stateDir: resolvedStateDir,
+    ownerId: owner.id,
+    project: { id: project.id, name: project.name, resourceRoots: roots },
+    codingLoop: loop,
+  });
+
   return {
-    stateDir: resolveStateDir(stateDir),
+    stateDir: resolvedStateDir,
     config,
     db,
     owner,
@@ -83,6 +95,7 @@ export async function openApp(
     gate,
     project,
     loop,
+    conversation,
     scope,
     close: () => db.close(),
   };

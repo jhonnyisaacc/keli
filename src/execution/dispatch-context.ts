@@ -2,6 +2,8 @@ import type { Database } from "bun:sqlite";
 import type { BrowserBackendConfig } from "./browser-backends.ts";
 import type { ResourcePolicy } from "./policy.ts";
 import type { NetworkPolicy } from "./network-policy.ts";
+import type { SourceReader } from "../sources/reader.ts";
+import { fixtureUrlFor } from "../integrations/env.ts";
 
 export type FixtureEndpoints = {
   search?: string;
@@ -26,6 +28,8 @@ export type DispatchContext = {
   jobId?: string;
   stateDir?: string;
   ownerId?: string;
+  /** Narrow read-only source index view; adapters never receive the canonical database. */
+  sources?: SourceReader;
 };
 
 export const DEFAULT_ALLOWED_HOSTS = ["127.0.0.1", "localhost"];
@@ -36,9 +40,9 @@ export function defaultNetworkPolicy(allowedHosts?: string[]): NetworkPolicy {
 
 export function fixtureEndpointsFromEnv(): FixtureEndpoints {
   return {
-    search: process.env.KELI_SEARCH_FIXTURE_URL,
-    browser: process.env.KELI_BROWSER_FIXTURE_URL,
-    mcp: process.env.KELI_MCP_FIXTURE_URL,
-    delegate: process.env.KELI_DELEGATE_FIXTURE_URL,
+    search: fixtureUrlFor("search"),
+    browser: fixtureUrlFor("browser"),
+    mcp: fixtureUrlFor("mcp"),
+    delegate: fixtureUrlFor("delegate"),
   };
 }

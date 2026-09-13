@@ -5,6 +5,8 @@ import { completeHelperRun, spawnHelperRun } from "../execution/helpers.ts";
 import type { DispatchContext } from "../execution/dispatch-context.ts";
 import { KeliError } from "../core/errors.ts";
 import { finishRun } from "../core/run-control.ts";
+import { consumeRequestBudget, consumeTokenBudget } from "../core/budgets.ts";
+import { getRun } from "../core/run-control.ts";
 
 export async function helpersSpawn(
   input: { capabilityId: string; input: Record<string, unknown> },
@@ -75,6 +77,21 @@ export async function helpersSpawn(
     );
     completeHelperRun(ctx.run.db, helper.id, childResult.ok ? "completed" : "failed");
     terminalizeIfActive(ctx.run.db, helper.childRunId, childResult.ok ? "completed" : "failed");
+    try {
+      consumeRequestBudget(ctx.run.db, ctx.run.runId);
+      const child = getRun(ctx.run.db, helper.childRunId);
+      if (child?.tokens_used) consumeTokenBudget(ctx.run.db, ctx.run.runId, child.tokens_used);
+    } catch (e) {
+      const keli = e instanceof KeliError ? e : null;
+      return {
+        capabilityId: "helpers.spawn",
+        ok: false,
+        error: {
+          code: keli?.code ?? "quota_exceeded",
+          message: keli?.message ?? String(e),
+        },
+      };
+    }
     return {
       capabilityId: "helpers.spawn",
       ok: childResult.ok,

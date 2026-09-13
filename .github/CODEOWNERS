@@ -1,0 +1,14 @@
+# Sensitive paths — independent review required (REPO_GOVERNANCE §182).
+.github/** @jhonnyisaacc
+src/execution/** @jhonnyisaacc
+src/credentials/** @jhonnyisaacc
+src/state/** @jhonnyisaacc
+src/core/gate.ts @jhonnyisaacc
+src/core/behavior.ts @jhonnyisaacc
+src/update/** @jhonnyisaacc
+scripts/*release* @jhonnyisaacc
+scripts/*build* @jhonnyisaacc
+install/** @jhonnyisaacc
+SECURITY.md @jhonnyisaacc
+package.json @jhonnyisaacc
+bun.lock @jhonnyisaacc

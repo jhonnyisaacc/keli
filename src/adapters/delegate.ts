@@ -2,6 +2,7 @@ import type { CapabilityResult } from "../capabilities/types.ts";
 import type { CodingDelegate } from "../core/types.ts";
 import { KeliError } from "../core/errors.ts";
 import { isCodingDelegate } from "../core/types.ts";
+import { fixtureUrlFor } from "../integrations/env.ts";
 
 export type DelegateHandoff = {
   actionId: string;
@@ -31,19 +32,20 @@ export async function delegateRun(
       error: { code: "invalid_request", message: `Invalid delegate: ${input.delegate}` },
     };
   }
-  if (!fixtureUrl) {
+  const url = fixtureUrl ?? fixtureUrlFor("delegate");
+  if (!url) {
     return {
       capabilityId: "delegate.run",
       ok: false,
       error: {
         code: "capability_unavailable",
-        message: `${input.delegate} requires KELI_DELEGATE_FIXTURE_URL or configured delegate bridge`,
+        message: `${input.delegate} requires a resolved delegate integration or KELI_FIXTURE_DELEGATE`,
       },
     };
   }
 
   try {
-    const response = await fetch(`${fixtureUrl.replace(/\/$/, "")}/delegate`, {
+    const response = await fetch(`${url.replace(/\/$/, "")}/delegate`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(input),

@@ -8,6 +8,7 @@ import {
   getOccurrenceActionId,
 } from "./occurrences.ts";
 import type { JobRecord } from "./types.ts";
+import { getJobSkillPins } from "./store.ts";
 
 export type JobDispatchDeps = {
   gate: CapabilityGate;
@@ -68,7 +69,8 @@ export async function dispatchJobOccurrence(
         occurrenceId,
         jobName: job.name,
         missedSlots,
-        simulateChanged: deps.simulateChanged ?? false,
+          simulateChanged: deps.simulateChanged ?? false,
+          skillPins: getJobSkillPins(db, job.id),
       },
       resources: [],
     },

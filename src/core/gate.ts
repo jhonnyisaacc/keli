@@ -22,12 +22,25 @@ export type ProposalRequest = {
   key: string;
   value: string;
   revision: number;
+  advisoryContext?: {
+    notes?: Array<{ title: string; body: string }>;
+    skills?: Array<{ id: string; content: string }>;
+  };
+};
+
+export type ProviderUsage = {
+  estimatedTokens?: number;
+  reportedIn?: number;
+  reportedCached?: number;
+  reportedOut?: number;
+  costCents?: number | null;
 };
 
 export type ProviderResponse = {
   id: string;
   candidate?: DelegateCandidate;
   error?: string;
+  usage?: ProviderUsage;
 };
 
 export class GateService {

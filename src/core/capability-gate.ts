@@ -12,6 +12,7 @@ import { createRun, getRun, assertNotCancelled, finishRun } from "./run-control.
 import { parentHasRunningHelpers } from "../execution/helpers.ts";
 import { readControl, isEffectfulBlocked } from "../ops/control.ts";
 import { jobAllowsActionClass } from "../jobs/grants.ts";
+import { writeCheckpoint } from "../memory/checkpoints.ts";
 
 export type CapabilityActionRecord = {
   id: string;
@@ -30,6 +31,7 @@ export type CapabilityRunOptions = {
   budgetBytesMax?: number;
   proposalBytesMax?: number;
   jobId?: string;
+  sources?: DispatchContext["sources"];
 };
 
 export class CapabilityGate {
@@ -152,6 +154,7 @@ export class CapabilityGate {
       jobId: options?.jobId,
       stateDir: this.stateDir,
       ownerId: this.ownerId,
+      sources: options?.sources,
     };
 
     let raw: CapabilityResult;
@@ -186,6 +189,20 @@ export class CapabilityGate {
     }
 
     const result = await this.finish(actionId, raw);
+    try {
+      writeCheckpoint(this.db, {
+        scope,
+        runId,
+        goal: proposal.capabilityId,
+        state: {
+          done: result.ok ? [proposal.capabilityId] : [],
+          pending: result.ok ? [] : [proposal.capabilityId],
+          evidence: (result.artifacts ?? []).map((a) => a.hash).filter((h): h is string => Boolean(h)),
+        },
+      });
+    } catch {
+      // checkpoints require schema v10 run_id; ignore if migration not applied
+    }
     if (result.ok) {
       if (!parentHasRunningHelpers(this.db, runId)) {
         finishRun(this.db, runId, "completed");

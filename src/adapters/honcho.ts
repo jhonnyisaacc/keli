@@ -1,4 +1,5 @@
 import { KeliError } from "../core/errors.ts";
+import { fixtureEnabled, fixtureUrlFor } from "../integrations/env.ts";
 
 export type HonchoStoreInput = {
   scope: string;
@@ -24,8 +25,8 @@ export type HonchoAdapterConfig = {
 
 export function honchoConfigFromEnv(): HonchoAdapterConfig {
   return {
-    fixtureUrl: process.env.KELI_HONCHO_FIXTURE_URL,
-    enabled: process.env.KELI_HONCHO_ENABLED === "1",
+    fixtureUrl: fixtureUrlFor("honcho"),
+    enabled: fixtureEnabled("honcho"),
   };
 }
 

@@ -21,6 +21,11 @@ export function stagedVersionPointer(): string {
   return join(resolveInstallRoot(), "staged-version");
 }
 
+/** The last known-good release retained for rollback. */
+export function previousVersionPointer(): string {
+  return join(resolveInstallRoot(), "previous-version");
+}
+
 export function artifactName(platform: string, arch: string): string {
   const map: Record<string, string> = {
     "linux-x64": "keli-linux-x64",

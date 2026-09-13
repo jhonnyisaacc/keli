@@ -8,7 +8,7 @@ import { recordDiscordUpdate } from "../../src/transports/discord.ts";
 import { processTransportInbox } from "../../src/transports/inbox-processor.ts";
 
 describe("transport inbox and routes", () => {
-  test("queues unprocessed updates until processTransportInbox", () => {
+  test("queues unprocessed updates until processTransportInbox", async () => {
     const db = new Database(":memory:");
     migrate(db);
     const scope = projectScope("proj-1");
@@ -29,7 +29,7 @@ describe("transport inbox and routes", () => {
       .get() as { n: number };
     expect(pending.n).toBe(1);
 
-    const result = processTransportInbox(db);
+    const result = await processTransportInbox(db);
     expect(result.processed).toBe(1);
 
     const done = db
@@ -39,7 +39,7 @@ describe("transport inbox and routes", () => {
     expect(done.scope).toBe(scope);
   });
 
-  test("telegram topic route resolves scoped inbox processing (A18)", () => {
+  test("telegram topic route resolves scoped inbox processing (A18)", async () => {
     const db = new Database(":memory:");
     migrate(db);
     const scope = projectScope("proj-telegram");
@@ -57,7 +57,7 @@ describe("transport inbox and routes", () => {
       payload: { text: "topic message" },
     });
 
-    const result = processTransportInbox(db);
+    const result = await processTransportInbox(db);
     expect(result.processed).toBe(1);
 
     const row = db

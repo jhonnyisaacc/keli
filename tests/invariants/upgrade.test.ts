@@ -81,7 +81,7 @@ describe("A04/A33 upgrade", () => {
             platform: "linux",
             arch: "x64",
             sha256,
-            size: 15,
+            size: (await readFile(bin)).byteLength,
             url: `file://${bin}`,
           },
         ],

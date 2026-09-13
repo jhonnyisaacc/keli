@@ -3,16 +3,63 @@ import { requireInitialized } from "../../state/init.ts";
 import { projectScope, getProjectById } from "../../state/repos.ts";
 import { sendDiscordMessage, recordDiscordUpdate } from "../../transports/discord.ts";
 import { processTransportInbox } from "../../transports/inbox-processor.ts";
+import { resolveDiscordBackend } from "../../transports/discord-resolve.ts";
+import { runDiscordCycle } from "../../conversation/inbox-handler.ts";
 import { emit, emitError } from "../output.ts";
-import type { CliGlobals } from "../context.ts";
+import { openApp, type CliGlobals } from "../context.ts";
 
 export function discordCommand(globals: CliGlobals) {
   return defineCommand({
-    meta: { description: "Discord transport (fixture-backed in 0.1-D)" },
+    meta: { description: "Discord transport (REST polling receiver; fixture when KELI_DISCORD_FIXTURE_URL is set)" },
     subCommands: {
       send: discordSendCommand(globals),
       ingest: discordIngestCommand(globals),
       process: discordProcessCommand(globals),
+      poll: discordPollCommand(globals),
+    },
+  });
+}
+
+function discordPollCommand(globals: CliGlobals) {
+  return defineCommand({
+    meta: { description: "One receive → converse → reply cycle over every bound Discord route" },
+    args: {
+      limit: { type: "string", description: "Max messages per route (default 50)" },
+      loop: { type: "string", description: "Keep polling every N seconds" },
+    },
+    async run({ args }) {
+      try {
+        const app = await openApp(globals);
+        const backend = await resolveDiscordBackend(app.config);
+        const limit = args.limit ? Number(args.limit) : undefined;
+        const once = async () => {
+          const result = await runDiscordCycle(app.db, { ownerId: app.owner.id, backend, loop: app.conversation.loop, limit });
+          emit(
+            result,
+            globals.outputFormat,
+            `${backend.name}: ${result.poll.routesPolled} route(s), ${result.poll.recorded} new, ${result.poll.duplicates} dup, ${result.inbox.replied} replied, ${result.inbox.failed} failed${
+              result.poll.errors.length ? `\n  ${result.poll.errors.join("\n  ")}` : ""
+            }`,
+          );
+        };
+        if (!args.loop) {
+          await once();
+          app.close();
+          return;
+        }
+        const seconds = Math.max(2, Number(args.loop) || 10);
+        let running = true;
+        process.on("SIGINT", () => {
+          running = false;
+        });
+        while (running) {
+          await once();
+          await Bun.sleep(seconds * 1000);
+        }
+        app.close();
+      } catch (e) {
+        emitError(String(e), globals.outputFormat);
+      }
     },
   });
 }
@@ -83,7 +130,7 @@ function discordProcessCommand(globals: CliGlobals) {
     async run() {
       try {
         const { db } = await requireInitialized(globals.stateDir);
-        const result = processTransportInbox(db);
+        const result = await processTransportInbox(db);
         db.close();
         emit(result, globals.outputFormat, `Processed ${result.processed} inbox message(s)`);
       } catch (e) {

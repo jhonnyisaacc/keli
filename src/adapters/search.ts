@@ -1,23 +1,25 @@
 import type { CapabilityResult } from "../capabilities/types.ts";
 import { KeliError } from "../core/errors.ts";
+import { fixtureUrlFor } from "../integrations/env.ts";
 
 export async function searchQuery(
   input: { query: string },
   fixtureUrl?: string,
 ): Promise<CapabilityResult> {
-  if (!fixtureUrl) {
+  const url = fixtureUrl ?? fixtureUrlFor("search");
+  if (!url) {
     return {
       capabilityId: "search.query",
       ok: false,
       error: {
         code: "capability_unavailable",
-        message: "Search requires KELI_SEARCH_FIXTURE_URL or configured search backend",
+        message: "Search requires a resolved search integration or KELI_FIXTURE_SEARCH",
       },
     };
   }
 
   try {
-    const response = await fetch(`${fixtureUrl.replace(/\/$/, "")}/search`, {
+    const response = await fetch(`${url.replace(/\/$/, "")}/search`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ query: input.query }),

@@ -17,7 +17,7 @@ export async function openDatabase(stateDir?: string): Promise<KeliDatabase> {
   recoverInterruptedActions(db);
   reconcileJobs(db);
   await reconcileOutbox(db);
-  processTransportInbox(db);
+  await processTransportInbox(db);
   return db;
 }
 

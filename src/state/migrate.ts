@@ -1,6 +1,6 @@
 import type { Database } from "bun:sqlite";
 
-export const CURRENT_SCHEMA_VERSION = 9;
+export const CURRENT_SCHEMA_VERSION = 11;
 
 const MIGRATIONS: Record<number, string> = {
   1: `
@@ -265,6 +265,114 @@ const MIGRATIONS: Record<number, string> = {
     );
 
     CREATE INDEX IF NOT EXISTS helper_runs_parent_idx ON helper_runs(parent_run_id);
+  `,
+  10: `
+    ALTER TABLE notes ADD COLUMN retained_until TEXT;
+    ALTER TABLE conversations ADD COLUMN retained_until TEXT;
+    ALTER TABLE conversations ADD COLUMN route_id TEXT;
+    ALTER TABLE task_checkpoints ADD COLUMN run_id TEXT;
+
+    CREATE TABLE IF NOT EXISTS job_skill_pins (
+      job_id TEXT NOT NULL,
+      skill_id TEXT NOT NULL,
+      version INTEGER NOT NULL,
+      PRIMARY KEY (job_id, skill_id),
+      FOREIGN KEY (job_id) REFERENCES jobs(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS request_usage (
+      id TEXT PRIMARY KEY,
+      action_id TEXT,
+      provider_id TEXT NOT NULL,
+      est_tokens INTEGER,
+      reported_in INTEGER,
+      reported_cached INTEGER,
+      reported_out INTEGER,
+      cost_cents INTEGER,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS request_usage_action_idx ON request_usage(action_id);
+  `,
+  11: `
+    ALTER TABLE request_usage ADD COLUMN run_id TEXT;
+    ALTER TABLE request_usage ADD COLUMN attempt INTEGER;
+    ALTER TABLE request_usage ADD COLUMN model TEXT;
+    ALTER TABLE request_usage ADD COLUMN outcome TEXT;
+    CREATE INDEX IF NOT EXISTS request_usage_run_idx ON request_usage(run_id);
+
+    ALTER TABLE notes ADD COLUMN archived_at TEXT;
+    ALTER TABLE conversations ADD COLUMN archived_at TEXT;
+
+    CREATE TABLE IF NOT EXISTS conversation_turns (
+      id TEXT PRIMARY KEY,
+      conversation_id TEXT NOT NULL,
+      scope TEXT NOT NULL,
+      role TEXT NOT NULL,
+      kind TEXT NOT NULL,
+      content TEXT NOT NULL,
+      refs_json TEXT,
+      run_id TEXT,
+      source_ref TEXT,
+      created_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS conversation_turns_conv_idx ON conversation_turns(conversation_id, created_at);
+
+    CREATE TABLE IF NOT EXISTS watches (
+      id TEXT PRIMARY KEY,
+      owner_id TEXT NOT NULL,
+      scope TEXT NOT NULL,
+      name TEXT NOT NULL,
+      kind TEXT NOT NULL,
+      version INTEGER NOT NULL DEFAULT 1,
+      status TEXT NOT NULL,
+      trigger_json TEXT NOT NULL,
+      budget_json TEXT NOT NULL,
+      evidence_json TEXT NOT NULL,
+      notify_json TEXT NOT NULL,
+      source_ref TEXT,
+      last_fingerprint TEXT,
+      last_attempt_at TEXT,
+      last_success_at TEXT,
+      last_error TEXT,
+      attempts INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS watches_scope_idx ON watches(scope, status);
+
+    CREATE TABLE IF NOT EXISTS watch_events (
+      id TEXT PRIMARY KEY,
+      watch_id TEXT NOT NULL,
+      kind TEXT NOT NULL,
+      detail_json TEXT,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (watch_id) REFERENCES watches(id)
+    );
+    CREATE INDEX IF NOT EXISTS watch_events_watch_idx ON watch_events(watch_id, created_at);
+
+    CREATE TABLE IF NOT EXISTS source_documents (
+      id TEXT PRIMARY KEY,
+      collection TEXT NOT NULL,
+      path TEXT NOT NULL,
+      title TEXT,
+      author TEXT,
+      url TEXT,
+      published_at TEXT,
+      fetched_at TEXT,
+      indexed_at TEXT NOT NULL,
+      hash TEXT NOT NULL,
+      meta_json TEXT,
+      body TEXT NOT NULL
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS source_documents_path ON source_documents(collection, path);
+
+    CREATE VIRTUAL TABLE IF NOT EXISTS source_documents_fts USING fts5(
+      doc_id UNINDEXED,
+      collection UNINDEXED,
+      title,
+      body
+    );
   `,
 };
 

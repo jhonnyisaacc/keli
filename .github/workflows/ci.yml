@@ -17,6 +17,7 @@ jobs:
       - run: bun run check
       - run: bun test
       - run: bun run build
+      - run: bun run build -- --all-targets
       - run: bun run scripts/write-manifest.ts
 
   # macOS runner required for G02 darwin Landlock/sandbox probes when available.

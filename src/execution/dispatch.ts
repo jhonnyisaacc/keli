@@ -12,12 +12,14 @@ import { delegateRun } from "../adapters/delegate.ts";
 import { jobsObserve } from "../adapters/jobs.ts";
 import { browserSessionConnect } from "../adapters/browser-session.ts";
 import { helpersSpawn } from "../adapters/helpers-spawn.ts";
+import { sourcesCollections, sourcesRead, sourcesSearch } from "../adapters/sources.ts";
 import { KeliError } from "../core/errors.ts";
 import { consumeToolCallBudget } from "../core/budgets.ts";
 import { assertNotCancelled, consumeBudget } from "../core/run-control.ts";
 import type { DispatchContext } from "./dispatch-context.ts";
 import type { ResourcePolicy } from "./policy.ts";
 import type { CodingDelegate } from "../core/types.ts";
+import { fixtureUrlFor } from "../integrations/env.ts";
 
 function descriptorNeedsToolBudget(capabilityId: string): boolean {
   return capabilityId === "mcp.tools/call" || capabilityId === "helpers.spawn";
@@ -149,7 +151,7 @@ export async function dispatchCapability(
     case "browser.session":
       result = await browserSessionConnect(
         proposal.input as { url: string; credentialRef?: { id: string; service: string } },
-        fixtures.browser ?? process.env.KELI_BROWSER_SESSION_FIXTURE_URL,
+        fixtures.browser ?? fixtureUrlFor("browser-session"),
       );
       break;
     case "helpers.spawn":
@@ -158,6 +160,15 @@ export async function dispatchCapability(
         ctx,
         registry,
       );
+      break;
+    case "sources.search":
+      result = sourcesSearch(proposal.input as { query: string; collection?: string; limit?: number }, ctx.sources);
+      break;
+    case "sources.read":
+      result = sourcesRead(proposal.input as { sourceId: string; offset?: number; chars?: number }, ctx.sources);
+      break;
+    case "sources.collections":
+      result = sourcesCollections(ctx.sources);
       break;
     case "mcp.tools/list":
       result = await mcpListTools(fixtures.mcp);

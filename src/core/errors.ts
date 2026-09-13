@@ -9,6 +9,7 @@ export type KeliErrorCode =
   | "blocked"
   | "cancelled"
   | "quota_exceeded"
+  | "needs_reauth"
   | "unknown";
 
 export class KeliError extends Error {

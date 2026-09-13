@@ -11,12 +11,30 @@
 
 | Surface | Fixture (CI default) | Live (optional) |
 |---------|----------------------|-----------------|
-| Model provider | `KELI_FIXTURE_URL` | `KELI_PROVIDER_URL` |
-| Grok override (A05) | `KELI_GROK_FIXTURE_URL` | Not advertised until pinned |
-| Honcho memory | `KELI_HONCHO_FIXTURE_URL` + `KELI_HONCHO_ENABLED=1` | Official client when enabled |
-| Browser session | `KELI_BROWSER_SESSION_FIXTURE_URL` | Playwright with credential ref |
-| Delegate | `KELI_DELEGATE_FIXTURE_URL` | Codex/OpenCode when pinned |
-| Discord/Telegram | Integration fixture | Live tokens optional |
+| Model provider | `KELI_FIXTURE_MODEL` / `KELI_FIXTURE_URL` | `keli auth add` + named custom endpoint |
+| Grok override (A05) | `KELI_FIXTURE_GROK` / `KELI_GROK_FIXTURE_URL` | Configured OpenAI-compatible Grok profile |
+| Honcho memory | `KELI_FIXTURE_HONCHO` + `KELI_HONCHO_ENABLED=1` | `memory.provider=honcho` + credential ref |
+| Browser session | `KELI_FIXTURE_BROWSER_SESSION` | Playwright with credential ref |
+| Delegate | `KELI_FIXTURE_DELEGATE` | External-cli / ACP when pinned |
+| Discord/Telegram | `KELI_FIXTURE_DISCORD` / `KELI_FIXTURE_TELEGRAM` | Token via `keli auth add` |
+
+Fixture knobs are read in `src/integrations/env.ts` only. Legacy `KELI_*_FIXTURE_URL` names remain aliases.
+
+## Readiness for live integration testing (0.1-J)
+
+What "configured" means per surface, and what has actually been exercised:
+
+| Surface | Verified in CI (fixture/replay) | Live behavior | Not yet done |
+|---------|--------------------------------|---------------|--------------|
+| Model provider (OpenAI-compatible chat) | Config + credential resolution, budgets per attempt, retry/no-progress, scripted-model research loop | `HttpModelProvider.complete` with API key from keychain/env; `/models` round trip in `bun run scripts/live-probe.ts` | Anthropic/Gemini native protocols (named-later, refused accurately) |
+| Research corrections | Scoped rule commit/undo, quoted-text rejection, leak test across projects | Same code path | — |
+| Source collections | Index, FTS search, read, fingerprint; Augustine/Shaul and Cava fixture corpora | Point `keli sources add` at the real Shaul index / transcript folders | Transcript ingestion from YouTube itself is outside Keli (bounded adapter feeds a folder) |
+| Discord | Fixture receiver + sender: thread binding, dedupe, cursor, stored replies on restart | `RestDiscordBackend` polling (REST v10, bot token) via `keli discord poll --loop 10` | First live run against a **separate Keli bot identity**; Nancy's receiver is not taken over |
+| Telegram | Outbox/inbox fixtures, `/getMe` round trip | Sender only | Inbox receiver + conversation handler |
+| Watches / heartbeat | Fingerprint gating, one wake per change, notify-once, pause after failures, HEARTBEAT import as proposals | `keli watches tick` from cron/systemd timer | URL watches beyond loopback need `network.allowedHosts` |
+| Updates | Install/rollback bookkeeping, snapshot + migration rehearsal, off/notify/auto policy, idle deferral | `keli update --scheduled` from a daily timer | Published release manifest URL; native-runner evidence |
+
+Live probe: `bun run scripts/live-probe.ts` performs real round trips; required integrations that are skipped are reported as not passing.
 
 ## Human-only leftovers (do not tag v0.1.0 until recorded)
 

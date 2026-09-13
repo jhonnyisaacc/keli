@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { KeliError } from "../core/errors.ts";
 import type { NetworkPolicy } from "./network-policy.ts";
 import { assertAllowedHost } from "./network-policy.ts";
+import { fixtureUrlFor } from "../integrations/env.ts";
 
 const PLAYWRIGHT_SCRIPT = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -37,9 +38,9 @@ const ALL_KINDS: BrowserBackendKind[] = ["fixture", "playwright", "cdp", "mcp"];
 
 export function browserConfigFromEnv(): BrowserBackendConfig {
   return {
-    fixtureUrl: process.env.KELI_BROWSER_FIXTURE_URL,
-    cdpUrl: process.env.KELI_BROWSER_CDP_URL,
-    mcpUrl: process.env.KELI_BROWSER_MCP_URL,
+    fixtureUrl: fixtureUrlFor("browser"),
+    cdpUrl: fixtureUrlFor("browser-cdp"),
+    mcpUrl: fixtureUrlFor("browser-mcp"),
   };
 }
 

@@ -7,6 +7,7 @@ import {
   type OutboxMessage,
 } from "./outbox.ts";
 import { recordInboxMessage } from "./inbox.ts";
+import { fixtureUrlFor } from "../integrations/env.ts";
 
 export type TelegramSendInput = {
   chatId: string;
@@ -30,7 +31,7 @@ export async function sendTelegramMessage(
   input: TelegramSendInput,
   fixtureUrl?: string,
 ): Promise<TelegramSendResult> {
-  const url = fixtureUrl ?? process.env.KELI_TELEGRAM_FIXTURE_URL;
+  const url = fixtureUrl ?? fixtureUrlFor("telegram");
   if (!url) {
     throw new KeliError(
       "Telegram transport requires KELI_TELEGRAM_FIXTURE_URL or configured grammY backend",

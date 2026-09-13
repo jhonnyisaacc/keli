@@ -77,8 +77,8 @@ export function isAmbiguousCorrection(text: string): boolean {
 /** Quoted or injected instructions must not become durable rules. */
 export function isUntrustedInstruction(text: string): boolean {
   const t = text.trim();
-  if (t.startsWith('"') && t.endsWith('"')) return true;
-  if (t.startsWith("'") && t.endsWith("'")) return true;
+  // Text that opens with a quotation is relayed, not spoken by the owner.
+  if (/^["'“‘«]/.test(t)) return true;
   if (/^>\s/.test(t)) return true;
   if (/ignore previous|system:|you are now/i.test(t)) return true;
   return false;

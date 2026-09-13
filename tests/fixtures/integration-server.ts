@@ -4,8 +4,24 @@ export type IntegrationFixture = {
   stop: () => void;
 };
 
-export function startIntegrationFixture(): IntegrationFixture {
+export type FixtureDiscordMessage = {
+  id: string;
+  channelId: string;
+  parentChannelId?: string;
+  authorId: string;
+  authorIsBot: boolean;
+  content: string;
+  timestamp: string;
+};
+
+export function startIntegrationFixture(): IntegrationFixture & {
+  discord: { inbound: FixtureDiscordMessage[]; sent: Array<{ channelId: string; threadId?: string; content: string }> };
+} {
   const sessions = new Map<string, { cancelled: boolean }>();
+  const discord = {
+    inbound: [] as FixtureDiscordMessage[],
+    sent: [] as Array<{ channelId: string; threadId?: string; content: string }>,
+  };
 
   const server = Bun.serve({
     hostname: "127.0.0.1",
@@ -83,12 +99,38 @@ export function startIntegrationFixture(): IntegrationFixture {
         if (process.env.KELI_FIXTURE_FAIL_DISCORD === "1") {
           return new Response("fixture discord failure", { status: 503 });
         }
-        const body = (await req.json()) as { channelId: string; content: string };
+        const body = (await req.json()) as { channelId: string; threadId?: string; content: string };
+        discord.sent.push({ channelId: body.channelId, threadId: body.threadId, content: body.content });
         return Response.json({
           messageId: `discord-${crypto.randomUUID()}`,
           channelId: body.channelId,
           status: "delivered",
         });
+      }
+
+      if (path === "/discord/inbound" && req.method === "POST") {
+        const body = (await req.json()) as Partial<FixtureDiscordMessage> & { content: string; channelId: string };
+        const message: FixtureDiscordMessage = {
+          id: body.id ?? String(Date.now() * 1000 + discord.inbound.length),
+          channelId: body.channelId,
+          parentChannelId: body.parentChannelId,
+          authorId: body.authorId ?? "human-1",
+          authorIsBot: body.authorIsBot ?? false,
+          content: body.content,
+          timestamp: body.timestamp ?? new Date().toISOString(),
+        };
+        discord.inbound.push(message);
+        return Response.json(message);
+      }
+
+      if (path === "/discord/messages" && req.method === "GET") {
+        const channelId = url.searchParams.get("channelId");
+        const after = url.searchParams.get("after");
+        const messages = discord.inbound
+          .filter((m) => m.channelId === channelId)
+          .filter((m) => !after || BigInt(m.id) > BigInt(after))
+          .sort((a, b) => (BigInt(a.id) < BigInt(b.id) ? -1 : 1));
+        return Response.json({ messages });
       }
 
       if (path === "/telegram/send" && req.method === "POST") {
@@ -179,6 +221,7 @@ export function startIntegrationFixture(): IntegrationFixture {
   return {
     server,
     endpoint,
+    discord,
     stop: () => server.stop(),
   };
 }

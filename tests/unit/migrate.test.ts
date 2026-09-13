@@ -125,6 +125,23 @@ describe("migrations", () => {
     db.close();
   });
 
+  test("v10 adds job_skill_pins, request_usage, retention columns", () => {
+    const db = new Database(":memory:");
+    migrate(db, 10);
+    expect(getSchemaVersion(db)).toBe(10);
+    const tables = db
+      .query(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('job_skill_pins','request_usage')",
+      )
+      .all() as { name: string }[];
+    expect(tables.length).toBe(2);
+    const notes = db.query("PRAGMA table_info(notes)").all() as { name: string }[];
+    expect(notes.some((c) => c.name === "retained_until")).toBe(true);
+    const conv = db.query("PRAGMA table_info(conversations)").all() as { name: string }[];
+    expect(conv.some((c) => c.name === "route_id")).toBe(true);
+    db.close();
+  });
+
   test("v2 adds artifacts table", () => {
     const db = new Database(":memory:");
     migrate(db, 2);
