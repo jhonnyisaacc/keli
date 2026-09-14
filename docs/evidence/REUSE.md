@@ -45,3 +45,7 @@ Contract tests in `tests/invariants/` trace to PRD A01–A11.
 | SQLite `VACUUM INTO` | Built-in | — | Update snapshot + migration rehearsal (`src/update/install.ts`) | A04, A33 |
 
 Upstream records above are issue reports and proposals, not reproduced defects in current releases. No third-party code was vendored in 0.1-J; pins are protocol-level.
+
+## Evidence-driven research autonomy
+
+ADOPT existing Keli watches, run budgets, scoped capability dispatch, source index, turns and outbox; ADAPT addressed evidence and phase-memory/verification principles; BUILD the missing resumable watch-occurrence connection. Reference pins, MIT licenses, I1–I7/I9–I10 and acceptance trace IDs are recorded in the [integration evidence note](research-autonomy/README.md#reuse-and-review). No upstream implementation was copied. Paired demonstrations use baseline `4bd3b9e` and scripted providers through actual Keli runtime paths.

@@ -1,0 +1,91 @@
+{
+  "provider": "scripted; real loop, gate, index, SQLite and heartbeat",
+  "results": {
+    "dependency_recovery": {
+      "timeline": [
+        {
+          "modelCalls": 2,
+          "notifications": 1,
+          "outcome": "missing_evidence"
+        },
+        {
+          "modelCalls": 0,
+          "notifications": 0,
+          "outcome": "unchanged"
+        },
+        {
+          "modelCalls": 0,
+          "notifications": 0,
+          "outcome": "unchanged"
+        }
+      ],
+      "modelCalls": 2,
+      "notifications": 1,
+      "occurrences": [],
+      "observations": [
+        {
+          "id": "3a8bd2c9-70e9-499f-9022-39cacb72089a",
+          "run_id": "27f8c591-6d27-4ec1-9d1d-beb67d635f72",
+          "kind": "tool_result"
+        }
+      ],
+      "steeringTurnsAfterApproval": 0
+    },
+    "quiet_thesis": {
+      "timeline": [
+        {
+          "modelCalls": 2,
+          "notifications": 1,
+          "outcome": "answer"
+        },
+        {
+          "modelCalls": 0,
+          "notifications": 0,
+          "outcome": "unchanged"
+        },
+        {
+          "modelCalls": 2,
+          "notifications": 1,
+          "outcome": "answer"
+        }
+      ],
+      "modelCalls": 4,
+      "notifications": 2,
+      "occurrences": [],
+      "observations": [
+        {
+          "id": "f3757866-8014-49a2-9358-b291f78b93f6",
+          "run_id": "4eec04a8-42a0-473e-8d29-515885e1b86f",
+          "kind": "tool_result"
+        },
+        {
+          "id": "dba89424-53e2-42d6-aa1f-7ce69cc214a0",
+          "run_id": "29b85855-c335-45eb-b0b7-99db76a6861a",
+          "kind": "tool_result"
+        }
+      ],
+      "steeringTurnsAfterApproval": 0
+    },
+    "unsupported_completion": {
+      "timeline": [
+        {
+          "modelCalls": 2,
+          "notifications": 1,
+          "outcome": "answer"
+        }
+      ],
+      "modelCalls": 2,
+      "notifications": 1,
+      "occurrences": [],
+      "observations": [
+        {
+          "id": "b4c219b1-5aec-47ae-97ae-b2e5245c9c79",
+          "run_id": "f87ddbe1-7f42-4d9a-bfc9-1e52fc564504",
+          "kind": "tool_result"
+        }
+      ],
+      "steeringTurnsAfterApproval": 0
+    }
+  },
+  "sourceCommit": "4bd3b9e28f9c64ff3166003bbae9f0bfc4d87d10"
+}

@@ -1,0 +1,316 @@
+bun run check
+check: types and boundaries ok
+$ bun run scripts/check.ts
+
+bun test
+bun test v1.4.0 (34cbb9a40)
+held-out fixture pass rate: 100.0% (105/105)
+
+tests/integration/watches-cava.test.ts:
+(pass) HEARTBEAT.md compiles to watch proposals > sections become proposals; malformed sections are reported, not guessed [7.30ms]
+(pass) HEARTBEAT.md compiles to watch proposals > import creates proposed watches; re-import is a no-op; edits bump the version back to proposed [358.98ms]
+(pass) Cava watch heartbeat > first observation with an empty collection: nothing to research, no notification [551.17ms]
+(pass) Cava watch heartbeat > new transcript wakes the model once, requires cited Cava evidence, notifies once [673.63ms]
+(pass) Cava watch heartbeat > unchanged collection: zero model calls, zero notifications [10.38ms]
+(pass) Cava watch heartbeat > not due yet: skipped without touching the source [1.38ms]
+(pass) Cava watch heartbeat > a follow-up video changes the fingerprint; the answer must distinguish confirmation from invalidation [350.03ms]
+(pass) Cava watch heartbeat > restart with the same fingerprint replays the stored research and does not notify again [167.34ms]
+(pass) Cava watch heartbeat > silent policy researches but never notifies; events still record what happened [273.62ms]
+(pass) Cava watch heartbeat > repeated fingerprint failures pause the watch and say so once [67.93ms]
+
+tests/integration/capabilities-01c.test.ts:
+(pass) 0.1-C capability integrations > http.fetch and web.fetch against allowlisted fixture host [283.41ms]
+(pass) 0.1-C capability integrations > search, browser, mcp, and delegate fixtures return structured output [1694.40ms]
+
+tests/integration/discord-conversation.test.ts:
+(pass) Discord conversation cycle > thread message runs a turn, replies on the same thread, and never replies twice [251.35ms]
+(pass) Discord conversation cycle > handler failure is recorded on the inbox message instead of stalling silently [175.76ms]
+
+tests/integration/research-loop.test.ts:
+(pass) Augustine vs Shaul replay > reconstructing Eric's position without retrieval is withheld as missing evidence [53.58ms]
+(pass) Augustine vs Shaul replay > owner correction requires Shaul and Augustine collections, scoped to the project [13.18ms]
+(pass) Augustine vs Shaul replay > with the correction active, the model must search both collections and cite them [234.02ms]
+(pass) Augustine vs Shaul replay > citing only one required collection is rejected until both are covered [143.96ms]
+(pass) Augustine vs Shaul replay > citations pointing at sources never retrieved this turn are rejected [47.82ms]
+(pass) Augustine vs Shaul replay > the correction does not apply in another project [101.06ms]
+(pass) Augustine vs Shaul replay > replaying the same inbound message id returns the stored reply without calling the model [163.63ms]
+(pass) Augustine vs Shaul replay > undo restores the previous research policy and survives a fresh loop instance [11.31ms]
+(pass) Augustine vs Shaul replay > quoted instructions never change policy [6.77ms]
+(pass) Augustine vs Shaul replay > non-research capabilities are refused inside research turns [53.75ms]
+
+tests/integration/discord-transport.test.ts:
+(pass) Discord transport stub > send enqueues outbox and marks delivered via fixture [114.73ms]
+(pass) Discord transport stub > send marks outbox failed on transport error [130.23ms]
+(pass) Discord transport stub > inbox deduplicates Discord update_id and processes on demand [131.20ms]
+
+tests/integration/telegram-transport.test.ts:
+(pass) Telegram transport stub > send enqueues outbox and marks delivered via fixture [145.68ms]
+(pass) Telegram transport stub > inbox deduplicates Telegram update_id (A18) [153.44ms]
+
+tests/integration/research-autonomy.test.ts:
+(pass) evidence-driven research responsibilities > Augustine/Shaul: discriminating retrieval, durable evidence wait, same-budget resume and scoped correction [521.94ms]
+(pass) evidence-driven research responsibilities > Cava: quiet unchanged/irrelevant evidence; changed thesis creates one outbox intent; rejected delivery retries without research [528.44ms]
+(pass) evidence-driven research responsibilities > ambiguous delivery acknowledgement stays unknown and is never blind-retried [210.57ms]
+(pass) evidence-driven research responsibilities > out-of-contract sources and search identifiers cannot falsely complete an occurrence [356.06ms]
+(pass) evidence-driven research responsibilities > source revision changes invalidate retained passages; next evidence arrival recovers [515.02ms]
+(pass) evidence-driven research responsibilities > interruption after observation resumes evidence; concurrent ticks cannot claim a live worker [466.81ms]
+(pass) evidence-driven research responsibilities > waiting input is scoped, current policy supersedes old work, cancellation blocks the next tool [365.82ms]
+(pass) evidence-driven research responsibilities > tool and request budgets survive waiting and cannot refill on resume [229.24ms]
+(pass) a canonical correction between model reply and dispatch supersedes the occurrence without stale action [217.63ms]
+(pass) explicit cancellation persists and the same input cannot resurrect its budget [218.28ms]
+(pass) Discord input requires configured owner and exact watch route, with durable replay dedupe [216.46ms]
+(pass) migration 12 preserves existing approved watches and run counters [103.12ms]
+(pass) resuming after the trigger collection changes records the consumed revision without a duplicate occurrence [237.81ms]
+
+tests/integration/setup-wizard.test.ts:
+(pass) setup wizard > non-interactive discord setup binds route and records config [106.78ms]
+(pass) setup wizard > non-interactive telegram setup can send fixture test message [115.99ms]
+
+tests/invariants/undo.test.ts:
+(pass) A10 undo > compensating revision restores prior behavior only [98.78ms]
+
+tests/invariants/capability-gate.test.ts:
+(pass) capability gate truth > denied capability action stays blocked, not executed [112.29ms]
+(pass) capability gate truth > dispatch failure still terminalizes prepared action [119.18ms]
+(pass) capability gate truth > provider-style error cannot become executed status [100.33ms]
+
+tests/invariants/secrets.test.ts:
+(pass) A44 secret isolation > locked credential source fails closed without leaking value [0.57ms]
+(pass) A44 secret isolation > landlocked shell child does not inherit synthetic secret env var [99.76ms]
+
+tests/invariants/correction.test.ts:
+(pass) A01-A03 corrections > A01 teach Rocket changes use Codex [73.45ms]
+(pass) A01-A03 corrections > A03 survives restart [71.79ms]
+(pass) A01-A03 corrections > A05 run override does not change durable rule [112.58ms]
+
+tests/invariants/scope.test.ts:
+(pass) A06 A43 scope > A06 two projects different delegates [93.04ms]
+(pass) A06 A43 scope > A43 project B cannot read project A rule via scope filter [93.41ms]
+
+tests/invariants/acceptance-0.1e.test.ts:
+(pass) 0.1-E acceptance gates > A07 ambiguous correction asks before durable change [74.91ms]
+(pass) 0.1-E acceptance gates > A12/A13 observational ok; mutate blocked until grant [154.16ms]
+(pass) 0.1-E acceptance gates > A17 discord thread binding without parent fallback [78.47ms]
+(pass) 0.1-E acceptance gates > A20 lost receipt marks outbox unknown [85.11ms]
+(pass) 0.1-E acceptance gates > A25 backup excludes credentials [85.15ms]
+(pass) 0.1-E acceptance gates > A27/A28 skill pin and reuse survive restart [89.96ms]
+(pass) 0.1-E acceptance gates > A29 honcho absent — local rules still work [71.17ms]
+(pass) 0.1-E acceptance gates > A30/A39/A40 paused/false jobs make zero model calls [138.33ms]
+(pass) 0.1-E acceptance gates > A32/A41 schema index vs full schema [0.56ms]
+(pass) 0.1-E acceptance gates > A35 missing capability suggests discover [0.88ms]
+(pass) 0.1-E acceptance gates > A42 cancel blocks delegate child [104.17ms]
+(pass) 0.1-E acceptance gates > A46 pre-dispatch byte guard blocks oversized proposals [72.63ms]
+(pass) 0.1-E acceptance gates > A45 preservation cursor advances without silent hole [79.19ms]
+
+tests/invariants/budget-cancel.test.ts:
+(pass) budget and cancellation > run budget blocks oversized capability output [81.77ms]
+(pass) budget and cancellation > cancelled run terminalizes capability action as blocked [106.37ms]
+(pass) budget and cancellation > cancelRun bumps epoch for active run [142.69ms]
+
+tests/invariants/restart.test.ts:
+(pass) restart recovery > prepared action becomes interrupted on restart [177.85ms]
+(pass) restart recovery > no false success for interrupted action [109.25ms]
+
+tests/invariants/gate.test.ts:
+(pass) A08 A11 gate > A08 quoted malicious instruction blocked [77.41ms]
+(pass) A08 A11 gate > adversarial spoof cannot create effect [114.94ms]
+(pass) A08 A11 gate > A11 stale writer rejected by fencing token [119.28ms]
+
+tests/invariants/acceptance-0.1f.test.ts:
+(pass) 0.1-F memory, Honcho, providers, browser > local notes FTS search is advisory [106.44ms]
+(pass) 0.1-F memory, Honcho, providers, browser > Honcho absent when disabled (A29) [0.46ms]
+(pass) 0.1-F memory, Honcho, providers, browser > Honcho fixture outage and delete [15.66ms]
+(pass) 0.1-F memory, Honcho, providers, browser > named later providers stay unavailable [3.24ms]
+(pass) 0.1-F memory, Honcho, providers, browser > browser.session uses credential ref without leaking secret [102.50ms]
+(pass) 0.1-F memory, Honcho, providers, browser > A05 Grok fixture override via HTTP provider [6.30ms]
+(pass) 0.1-F memory, Honcho, providers, browser > fixture provider still default in tests [0.26ms]
+(pass) 0.1-F memory, Honcho, providers, browser > resolveProvider uses first available when fixture is unset [0.33ms]
+
+tests/invariants/budget-attempts.test.ts:
+(pass) budgets enforced per attempt > every retry is accounted and no-progress terminalizes the action [123.52ms]
+(pass) budgets enforced per attempt > token cap blocks before the first request and cost stays visibly unknown [93.07ms]
+(pass) budgets enforced per attempt > successful turn reconciles reservation and completes the run [101.85ms]
+
+tests/invariants/upgrade.test.ts:
+(pass) A04/A33 upgrade > wrong hash rejected [0.23ms]
+(pass) A04/A33 upgrade > incompatible schema fails closed [5.89ms]
+(pass) A04/A33 upgrade > seeded rules survive upgrade snapshot path [97.18ms]
+(pass) A04/A33 upgrade > manifest checksum roundtrip [19.42ms]
+
+tests/invariants/job-restart.test.ts:
+(pass) job restart recovery (A21) > running occurrence is failed on database reopen [84.86ms]
+
+tests/invariants/global-pause.test.ts:
+(pass) A14/A36 global pause > paused scheduler does not tick [76.67ms]
+(pass) A14/A36 global pause > paused gate blocks effectful capabilities [83.36ms]
+
+tests/invariants/transport-inbox.test.ts:
+(pass) transport inbox and routes > queues unprocessed updates until processTransportInbox [12.96ms]
+(pass) transport inbox and routes > telegram topic route resolves scoped inbox processing (A18) [13.73ms]
+
+tests/invariants/job-dispatch.test.ts:
+(pass) job dispatch through gate > A15 quiet unchanged observation records run without outbox [17.11ms]
+(pass) job dispatch through gate > A19 execution truth retained when delivery fails after changed observation [24.40ms]
+(pass) job dispatch through gate > A21 does not repeat dispatch for already acknowledged occurrence [13.50ms]
+(pass) job dispatch through gate > reconciles pending discord outbox deliveries [20.13ms]
+
+tests/invariants/acceptance-0.1h.test.ts:
+(pass) 0.1-H helper fan-out (A42) > cancel parent cancels children [117.85ms]
+(pass) 0.1-H helper fan-out (A42) > helper fan-out cap enforced [409.71ms]
+(pass) 0.1-H helper fan-out (A42) > child mutate blocked by parent job grant [281.94ms]
+(pass) 0.1-H helper fan-out (A42) > spawned child run terminalizes after success [204.50ms]
+
+tests/invariants/backup-restore.test.ts:
+(pass) A14/A31 backup and restore > restore into fresh state dir pauses jobs [159.96ms]
+
+tests/invariants/delegate-fallback.test.ts:
+(pass) A37 delegate fallback > uses fallback delegate after primary failure with fencing [187.77ms]
+(pass) A37 delegate fallback > honors sole configured delegate without silent alternative [135.69ms]
+
+tests/invariants/acceptance-0.1g.test.ts:
+(pass) 0.1-G routing, budgets, skills, recurring writes > routing table selects role mapping [0.10ms]
+(pass) 0.1-G routing, budgets, skills, recurring writes > request budget exhaust blocks run [103.59ms]
+(pass) 0.1-G routing, budgets, skills, recurring writes > 100 dummy skills keep compact index under full content (A41) [594.95ms]
+(pass) 0.1-G routing, budgets, skills, recurring writes > mutate job blocked until grant [132.42ms]
+(pass) 0.1-G routing, budgets, skills, recurring writes > durable skill activate and rollback [107.80ms]
+(pass) 0.1-G routing, budgets, skills, recurring writes > default requests max matches PRD baseline [93.20ms]
+
+tests/unit/config-paths.test.ts:
+(pass) config paths > normalize migrates primaryModel into providers.primary [0.24ms]
+(pass) config paths > get/set dotted paths [0.62ms]
+(pass) config paths > secret path detection [0.25ms]
+(pass) config paths > write/read keeps integrations [2.31ms]
+
+tests/unit/policy.test.ts:
+(pass) resource policy > denies paths outside project roots [2.26ms]
+
+tests/unit/browser-backends.test.ts:
+(pass) browser backends > selects configured primary when available [0.18ms]
+(pass) browser backends > falls back when primary unavailable [0.07ms]
+(pass) browser backends > fixture probe reflects env URL [0.21ms]
+
+tests/unit/integrations.test.ts:
+(pass) integration registry > bundled profiles register by kind [0.28ms]
+(pass) integration registry > discover never installs [1.16ms]
+(pass) integration registry > probe reports how to configure [0.44ms]
+(pass) integration registry > provider registry facade stays compatible [0.15ms]
+(pass) integration registry > resolver prefers fixture-env when no config [0.22ms]
+(pass) integration registry > tryResolve unknown is null [0.10ms]
+(pass) integration registry > resolveProvider fixture still constructs [0.08ms]
+
+tests/unit/config.test.ts:
+(pass) config > atomic write and read [3.87ms]
+
+tests/unit/schedule.test.ts:
+(pass) job schedule > parses interval schedules [0.17ms]
+(pass) job schedule > parses daily UTC schedules [0.23ms]
+(pass) job schedule > rejects invalid schedules [0.13ms]
+(pass) job schedule > next interval occurrence is anchor plus interval [0.10ms]
+(pass) job schedule > coalesced due occurrence skips intermediate missed slots [0.55ms]
+(pass) job schedule > next daily occurrence rolls to next day when anchor is after slot [0.24ms]
+
+tests/unit/provider-factory.test.ts:
+(pass) config-aware provider creation > uses saved config, credential ref, and configured model [8.10ms]
+(pass) config-aware provider creation > missing credential fails closed with a typed error [2.20ms]
+(pass) config-aware provider creation > disabled integration and unsupported protocol are reported accurately [2.18ms]
+(pass) config-aware provider creation > listProviders reflects config availability without fixture env [0.56ms]
+(pass) typed retries > classification never retries auth or invalid requests [0.07ms]
+(pass) typed retries > no-progress stop is reachable within the retry cap and every attempt is reported [0.34ms]
+(pass) typed retries > changing errors exhaust retries instead of looping [0.25ms]
+(pass) live probe > required integrations come from config; skipped required never pass [9.49ms]
+(pass) live probe > auth failures are typed, not transport [6.12ms]
+
+tests/unit/artifacts.test.ts:
+(pass) artifacts > stores content-addressed artifact with receipt [118.29ms]
+
+tests/unit/explain.test.ts:
+(pass) explain > cites rule revision and source [14.36ms]
+
+tests/unit/validate-capability-input.test.ts:
+(pass) validateCapabilityInput > rejects files.list without path [0.22ms]
+(pass) validateCapabilityInput > rejects files.write without content [0.14ms]
+(pass) validateCapabilityInput > dispatch returns blocked result for missing required fields [0.68ms]
+
+tests/unit/migrate.test.ts:
+(pass) migrations > applies v1 baseline [15.95ms]
+(pass) migrations > upgrade harness v3 fixture [2.38ms]
+(pass) migrations > v4 adds jobs and outbox tables [4.55ms]
+(pass) migrations > v3 adds runs table [1.31ms]
+(pass) migrations > v6 adds occurrence run and action linkage [3.00ms]
+(pass) migrations > v5 adds transport inbox and occurrence completion columns [2.59ms]
+(pass) migrations > v7 adds job grants and preservation cursor [3.13ms]
+(pass) migrations > v8 adds notes and skill_pins [4.56ms]
+(pass) migrations > v9 extends runs and adds helper_runs [10.85ms]
+(pass) migrations > v10 adds job_skill_pins, request_usage, retention columns [9.41ms]
+(pass) migrations > v2 adds artifacts table [1.03ms]
+
+tests/unit/credentials.test.ts:
+(pass) credentials > locked source fails closed [0.19ms]
+
+tests/unit/delegate-fence.test.ts:
+(pass) delegate fencing > superseded delegate lease fails validateFence (used after delegate execution) [12.24ms]
+
+tests/unit/db.test.ts:
+(pass) openDatabase > creates parent directory before opening SQLite on fresh state dir [130.74ms]
+
+tests/unit/auth-flows.test.ts:
+(pass) auth flows > oauth-device is a declared unimplemented seam [0.73ms]
+(pass) auth flows > locked store fails closed on write [0.40ms]
+
+tests/unit/dispatch.test.ts:
+(pass) capability dispatch > files.read succeeds inside roots and denies outside [4.45ms]
+(pass) capability dispatch > registry index stays compact with many registrations [0.91ms]
+
+tests/unit/scheduler.test.ts:
+(pass) job scheduler > materializes due occurrence and completes with zero-model reason [20.58ms]
+(pass) job scheduler > coalesces when an active occurrence already exists [13.89ms]
+(pass) job scheduler > coalesces long outage into one occurrence per tick [23.60ms]
+(pass) job scheduler > dedupes identical job_id + scheduled_at [13.83ms]
+
+tests/unit/parse-run-args.test.ts:
+(pass) parseHeadlessArgv > parses --undo with empty -p prompt [0.52ms]
+(pass) parseHeadlessArgv > parses -p with --undo flag [0.10ms]
+(pass) parseHeadlessArgv > headless undo-only via keli run is not headless argv [0.30ms]
+(pass) parseHeadlessArgv > needsProvider false for undo-only [0.10ms]
+(pass) parseHeadlessArgv > needsProvider false when undo is set even with prompt [0.05ms]
+
+tests/unit/memory-runtime.test.ts:
+(pass) memory and skill runtime > conversations upsert by transport route [93.14ms]
+(pass) memory and skill runtime > checkpoints persist working state [99.69ms]
+(pass) memory and skill runtime > two comparable uses activate a draft skill [133.85ms]
+(pass) memory and skill runtime > compact archives then advances cursor [244.39ms]
+(pass) memory and skill runtime > compaction verifies the archive, includes conversation turns, and is idempotent [165.70ms]
+
+tests/unit/update-policy.test.ts:
+(pass) install and rollback bookkeeping > install retains the previous release, snapshots state, and rollback restores both [189.46ms]
+(pass) install and rollback bookkeeping > rollback without a retained release fails closed [96.40ms]
+(pass) install and rollback bookkeeping > checksum, size, and schema mismatches leave the current release untouched and are recorded [84.28ms]
+(pass) scheduled update policy > off does nothing, even with an update available [103.60ms]
+(pass) scheduled update policy > notify announces a new version once and respects the daily interval [103.22ms]
+(pass) scheduled update policy > auto defers while work is in flight or execution is paused, then installs at idle [178.78ms]
+(pass) scheduled update policy > auto records and reports install failure without touching the running release [93.86ms]
+
+tests/platform/sandbox-linux.test.ts:
+(pass) linux landlock sandbox > probe reports landlock availability [98.73ms]
+(pass) linux landlock sandbox > confined shell cannot write outside workspace [78.48ms]
+(pass) linux landlock sandbox > confined shell can write inside workspace [83.72ms]
+
+tests/platform/playwright-browser.test.ts:
+(pass) playwright browser backend > navigate via playwright when available [3583.92ms]
+
+tests/platform/sandbox-macos.test.ts:
+(pass) macOS sandbox fail-closed > documents darwin fail-closed expectation on non-mac hosts [71.76ms]
+(skip) macOS sandbox fail-closed > shell.exec fails closed when sandbox unavailable
+
+tests/acceptance/held-out/run.test.ts:
+(pass) held-out correction fixture suite > has at least 100 cases [0.05ms]
+(pass) held-out correction fixture suite > fixture pass rate report [1.83ms]
+
+1 tests skipped:
+(skip) macOS sandbox fail-closed > shell.exec fails closed when sandbox unavailable
+
+ 195 pass
+ 1 skip
+ 0 fail
+ 636 expect() calls
+Ran 196 tests across 52 files. [24.23s]

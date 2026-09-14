@@ -6,6 +6,14 @@ All notable changes to Keli follow [SemVer](https://semver.org/).
 
 **Release policy:** the full initial PRD product ships as **v0.1.0**. Increments 0.1-A–I are complete in code, including the integration/onboarding layer. **Do not tag v0.1.0** until human gates are recorded. See [PRD.md](PRD.md) §11.
 
+### Evidence-driven research autonomy (opt-in)
+
+- Approved `autonomy: yes` source-collection watches retain occurrences, evidence dependencies, phases and cumulative budgets across waits/restarts.
+- Research recovers addressed observations, suppresses duplicate inspections, checks current authority at dispatch, and verifies required subjects/collections against current quoted passages.
+- One transactional outbox intent per report; changed supported findings notify, irrelevant additions remain quiet, and delivery retry does not repeat research.
+- Schema v12; `watches occurrences` and `watches resume`; owner-bound Discord `/watch-input`; active research participates in update-idle checks.
+- Scripted paired demonstrations and limitations: [evidence](docs/evidence/research-autonomy/README.md). [CLI walkthrough](docs/research-autonomy.md). Live-provider quality remains a separate milestone.
+
 ### 0.1-J (integration readiness; plan: `plans/integration-readiness.md`)
 
 Foundation

@@ -42,3 +42,13 @@ Live probe: `bun run scripts/live-probe.ts` performs real round trips; required 
 - Held-out correction eval ≥95% with **live** provider (fixture suite runs in CI)
 - Five-user assisted onboarding checklist (`docs/RELEASE_CHECKLIST.md`)
 - Four-target **native** runner evidence on real hardware
+
+## Evidence-driven research autonomy (opt-in)
+
+| Surface | Verified locally | Remaining live milestone / limit |
+|---|---|---|
+| Approved indexed-source responsibility | 13 integration tests: dependency recovery, quiet thesis changes, false/stale completion, restart/concurrency, cancellation, budgets, owner/route input, migration preservation | One bounded live-provider watch; URL autonomy and general coding are outside this slice |
+| Material-change notification | Paired scripted comparison and real outbox persistence; rejected delivery retry and ambiguous acknowledgement handling | Semantic relevance quality and live transport acknowledgement reconciliation |
+| Evidence verification | Current passage hashes, exact quotes, required coverage and scoped source access | Semantic entailment and factual truth are not established by structural checks |
+
+See [reproduction, evidence and scope](evidence/research-autonomy/README.md).
