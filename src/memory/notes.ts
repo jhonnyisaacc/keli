@@ -52,6 +52,19 @@ export function searchNotes(
   }));
 }
 
+export function getNote(db: Database, id: string): NoteRecord | null {
+  const row = db.query("SELECT * FROM notes WHERE id = ?").get(id) as Record<string, string | null> | null;
+  if (!row) return null;
+  return {
+    id: row.id!,
+    scope: row.scope!,
+    title: row.title!,
+    body: row.body!,
+    sourceRef: row.source_ref ?? undefined,
+    createdAt: row.created_at!,
+  };
+}
+
 export function listNotes(db: Database, scope: string, limit = 50): NoteRecord[] {
   const rows = db
     .query("SELECT * FROM notes WHERE scope = ? ORDER BY created_at DESC LIMIT ?")

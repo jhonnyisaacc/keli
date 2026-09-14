@@ -23,9 +23,12 @@ export const localNotesProfile: IntegrationProfile = {
       configured: true,
       credentialState: "n/a",
       reachable: true,
-      reason: "built-in advisory notes",
+      reason: "built-in advisory notes; SQLite is the v0.1 memory authority",
       howToConfigure: "keli notes add --title ... --body ...",
     });
+  },
+  async roundTrip() {
+    return { ok: true, detail: "local SQLite notes are available without a network probe" };
   },
 };
 
