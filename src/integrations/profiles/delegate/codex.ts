@@ -6,7 +6,7 @@ export const codexProfile: IntegrationProfile = {
   id: "codex",
   kind: "delegate",
   displayName: "Codex CLI",
-  aliases: ["openai-codex"],
+  aliases: [],
   auth: { type: "external-cli" },
   settings: [{ key: "command", label: "CLI binary", default: "codex" }],
   fixtureKey: "delegate",

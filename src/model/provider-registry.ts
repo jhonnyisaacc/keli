@@ -1,3 +1,4 @@
+import { catalogEntry, catalogEnvironment, catalogEndpoint } from "../integrations/catalog-provider.ts";
 import type { ModelProvider } from "./provider.ts";
 import { FixtureModelProvider } from "./provider.ts";
 import { HttpModelProvider, unsupportedApiModeReason } from "./http-provider.ts";
@@ -32,6 +33,13 @@ const KIND_BY_ID: Record<string, ProviderKind> = {
 export function listProviders(config?: KeliConfig | null): ProviderDescriptor[] {
   const out: ProviderDescriptor[] = listIntegrations("model-provider").map((profile) => {
     if (profile.id === "chatgpt") return { id: profile.id, kind: "openai-compatible" as const, available: Boolean(config?.integrations?.chatgpt?.credentialRef), source: "config" as const, model: config?.providers?.primary?.id === "chatgpt" ? config.providers.primary.model ?? "gpt-5.5" : "gpt-5.5", reason: config?.integrations?.chatgpt?.credentialRef ? "Account linked; use live probe to verify access" : "Run keli auth add chatgpt" };
+    if (catalogEntry(profile.id) && !(profile.fixtureKey && fixtureUrlFor(profile.fixtureKey as "grok"))) {
+      const resolved = tryResolveIntegration("model-provider", { explicitId: profile.id, config });
+      const configured = Boolean(resolved && catalogEndpoint(profile.id, resolved.settings) && selectModel(resolved));
+      const authenticated = Boolean(resolved?.credentialRef || catalogEnvironment(profile.id) || ["none", "external-cli"].includes(profile.auth.type));
+      return { id: profile.id, kind: "openai-compatible" as const, available: configured && authenticated, source: "config" as const,
+        model: resolved ? selectModel(resolved) : undefined, reason: configured && authenticated ? "Configured; live inference not yet verified" : `Run keli setup provider (${profile.id})` };
+    }
     const unsupported = unsupportedApiModeReason(profile.apiMode);
     if (unsupported || profile.availability === "named-later") {
       return {
@@ -94,7 +102,7 @@ export function resolveProvider(preferredId?: string, config?: KeliConfig | null
     const endpoint = integrationEndpoint(resolved);
     if (!endpoint) continue;
     if (resolved.profile.id === "fixture") return new FixtureModelProvider(endpoint);
-    if (resolved.profile.id === "chatgpt") throw new Error("ChatGPT requires the async createModelProvider factory");
+    if (resolved.profile.id === "chatgpt" || catalogEntry(resolved.profile.id)) throw new Error("This provider requires the async createModelProvider factory");
     const unsupported = unsupportedApiModeReason(resolved.profile.apiMode);
     if (unsupported) throw new Error(`${resolved.profile.displayName}: ${unsupported}`);
     return new HttpModelProvider(endpoint, selectModel(resolved) ?? "default", {

@@ -1,3 +1,4 @@
+import { catalogEntry, catalogEndpoint } from "./catalog-provider.ts";
 import { KeliError } from "../core/errors.ts";
 import type { KeliConfig } from "../state/config.ts";
 import { fixtureUrlFor, preferredProviderId, type FixtureSlot } from "./env.ts";
@@ -66,7 +67,10 @@ function fromConfig(
     : undefined;
   const settings = { ...(entry?.settings ?? {}) };
   if (fixtureUrl && !settings.baseUrl) settings.baseUrl = fixtureUrl;
-  if (profile.baseUrl && !settings.baseUrl) settings.baseUrl = profile.baseUrl;
+  if (!settings.baseUrl) {
+    const url = catalogEntry(profile.id) ? catalogEndpoint(profile.id, settings) : profile.baseUrl;
+    if (url) settings.baseUrl = url;
+  }
   return {
     profile,
     settings,
@@ -107,7 +111,7 @@ export function resolveIntegration(
   if (explicitId) {
     const primary = config?.providers?.primary;
     const primaryModel =
-      primary && resolveProfileId(explicitId) === resolveProfileId(primary.id) ? primary.model : undefined;
+      primary && resolveProfileId(explicitId) === resolveProfileId(primary.id) ? primary.model : config?.providers?.fallback?.find((p) => resolveProfileId(p.id) === resolveProfileId(explicitId))?.model;
     const resolved = fromConfig(explicitId, config, "explicit", options.model ?? primaryModel);
     if (resolved) {
       if (resolved.profile.kind !== kind) {
@@ -133,7 +137,7 @@ export function resolveIntegration(
     const primary = config?.providers?.primary?.id ?? config?.primaryModel;
     const id = routingId ?? primary;
     if (id && id !== "fixture") {
-      const resolved = fromConfig(id, config, "config", options.model ?? config?.providers?.primary?.model);
+      const resolved = fromConfig(id, config, "config", options.model ?? (resolveProfileId(id) === resolveProfileId(primary ?? "") ? config?.providers?.primary?.model : config?.providers?.fallback?.find((p) => resolveProfileId(p.id) === resolveProfileId(id))?.model));
       if (resolved) {
         assertUsable(resolved, config);
         return resolved;

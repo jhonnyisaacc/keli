@@ -13,6 +13,12 @@ by **ADOPT → ADAPT → BUILD**, then evaluates usefulness on the same controll
 Validation at `d9e51d2`: `bun test` is the regression baseline (temporary
 `KELI_STATE_DIR`). Those checks do not certify live providers, transports, or Rocket.
 
+Provider expansion is implemented in the shared setup/auth/factory path. See the
+[connection guide](../docs/providers.md) and
+[provider evidence](../docs/evidence/HERMES_PROVIDERS.md). Continue with real user
+onboarding and observed failures; no additional provider architecture or portfolio
+implementation is required by this slice.
+
 ## Product direction
 
 **Keli is the general-purpose agent. Rocket and other tools provide domain capabilities.**

@@ -32,7 +32,7 @@ function unavailable(id: string, displayName: string, aliases: string[], apiMode
   };
 }
 
-export const claudeCodeProfile = unavailable("claude-code", "Claude Code", ["anthropic", "claude"], "anthropic-messages");
+export const claudeCodeProfile = unavailable("claude-code", "Claude Code", [], "anthropic-messages");
 export const antigravityProfile = unavailable("antigravity", "Antigravity", [], "chat-completions");
 
 registerIntegration(claudeCodeProfile);

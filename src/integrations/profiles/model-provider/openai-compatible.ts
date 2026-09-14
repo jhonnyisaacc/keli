@@ -7,7 +7,7 @@ export const openaiCompatibleProfile: IntegrationProfile = {
   id: "openai-compatible",
   kind: "model-provider",
   displayName: "OpenAI-compatible",
-  aliases: ["openai", "openai-api"],
+  aliases: ["openai"],
   auth: { type: "api-key" },
   settings: [
     { key: "baseUrl", label: "Base URL", required: true },

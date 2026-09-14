@@ -42,6 +42,20 @@ export async function addCredential(integrationId: string, options: AuthAddOptio
     if (config?.ownerId) await upsertIntegration(profile.id, { enabled: true, settings: config.integrations?.chatgpt?.settings ?? {}, credentialRef: ref, status: { needsReauth: false } }, options.stateDir);
     return ref;
   }
+  if (["anthropic", "copilot", "nous", "minimax-oauth", "xai-oauth", "qwen-oauth"].includes(profile.id) && (type === "oauth-device" || (profile.id === "qwen-oauth" && type === "external-cli"))) {
+    const { loginProvider, qwenAccessToken } = await import("./provider-oauth.ts");
+    if (options.value) throw new KeliError("Account login does not accept a pasted API key", "invalid_request");
+    let ref: CredentialRef;
+    if (profile.id === "qwen-oauth") {
+      await qwenAccessToken(); ref = { service: "keli/qwen-oauth", id: "qwen-cli" };
+    } else {
+      if (!options.oauthCallbacks) throw new KeliError(`Run keli auth add ${profile.id} interactively`, "invalid_request");
+      ref = await loginProvider(profile.id, options.oauthCallbacks, options.source);
+    }
+    const config = await readConfig(options.stateDir);
+    if (config?.ownerId) await upsertIntegration(profile.id, { enabled: true, settings: config.integrations?.[profile.id]?.settings ?? {}, credentialRef: ref, status: { needsReauth: false } }, options.stateDir);
+    return ref;
+  }
   if (type === "oauth-device") {
     if (profile.id === "codex") {
       return { id: "external-cli", service: credentialService(profile.id) };
@@ -93,7 +107,7 @@ export async function removeCredential(
   const config = await readConfig(options.stateDir);
   const ref = config?.integrations?.[profile.id]?.credentialRef;
   const source = options.source ?? defaultCredentialSource();
-  if (ref && source.delete && !(profile.id === "chatgpt" && ref.id === "codex-cli")) {
+  if (ref && source.delete && !["codex-cli", "qwen-cli"].includes(ref.id)) {
     try {
       await source.delete(ref);
     } catch {
@@ -126,12 +140,22 @@ export async function credentialStatus(
   const config = await readConfig(options.stateDir);
   if (config?.integrations?.[profile.id]?.status?.needsReauth) return "needs-reauth";
   const ref = config?.integrations?.[profile.id]?.credentialRef;
-  if (!ref) return "missing";
+  if (!ref) {
+    const { catalogEnvironment } = await import("./catalog-provider.ts");
+    return catalogEnvironment(profile.id) ? "resolvable" : "missing";
+  }
   if (profile.id === "chatgpt") {
     try { const { chatGptAccessToken } = await import("./chatgpt-auth.ts"); await chatGptAccessToken(ref, options.source); return "resolvable"; }
     catch { return "needs-reauth"; }
   }
 
+  if (ref.id === "oauth" || ref.id === "qwen-cli") {
+    try {
+      const { providerOAuthSession, qwenAccessToken } = await import("./provider-oauth.ts");
+      if (ref.id === "qwen-cli") await qwenAccessToken(); else await providerOAuthSession(profile.id, ref, options.source);
+      return "resolvable";
+    } catch { return "needs-reauth"; }
+  }
   const source = options.source ?? defaultCredentialSource();
   if (!source.available) return "locked";
   try {

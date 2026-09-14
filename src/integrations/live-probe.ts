@@ -2,7 +2,7 @@ import { credentialService, type CredentialSource } from "../credentials/source.
 import { KeliError } from "../core/errors.ts";
 import type { KeliConfig } from "../state/config.ts";
 import { fixtureUrlFor, type FixtureSlot } from "./env.ts";
-import { listIntegrations } from "./registry.ts";
+import { listIntegrations, resolveProfileId } from "./registry.ts";
 import type { IntegrationProfile, RoundTripResult } from "./types.ts";
 import "./load.ts";
 
@@ -36,9 +36,9 @@ export type LiveProbeReport = {
  * checkout is honest about what it cannot verify.
  */
 export function requiredIntegrationIds(config: KeliConfig | null | undefined, extra: string[] = []): string[] {
-  const ids = new Set<string>(extra);
+  const ids = new Set<string>(extra.map((id) => resolveProfileId(id) ?? id));
   const primary = config?.providers?.primary?.id ?? config?.primaryModel;
-  if (primary && primary !== "fixture") ids.add(primary);
+  if (primary && primary !== "fixture") ids.add(resolveProfileId(primary) ?? primary);
   if (config?.setup?.transport && config.setup.transport !== "none") ids.add(config.setup.transport);
   if (config?.memory?.provider) ids.add(config.memory.provider);
   return [...ids];
@@ -55,11 +55,13 @@ export async function runLiveProbe(options: {
   const lines: LiveProbeLine[] = [];
 
   for (const profile of listIntegrations()) {
-    if (options.only && !options.only.includes(profile.id)) continue;
+    if (options.only && !options.only.some((id) => (resolveProfileId(id) ?? id) === profile.id)) continue;
     const isRequired = required.includes(profile.id);
     const entry = options.config?.integrations?.[profile.id];
     const fixtureUrl = profile.fixtureKey ? fixtureUrlFor(profile.fixtureKey as FixtureSlot) : undefined;
     const settings = { ...(entry?.settings ?? {}) };
+    const selectedModel = [options.config?.providers?.primary, ...(options.config?.providers?.fallback ?? [])].find((p) => p && resolveProfileId(p.id) === profile.id)?.model;
+    if (selectedModel) settings.model = selectedModel;
     const configured = Boolean(entry?.enabled || settings.baseUrl || fixtureUrl || entry?.credentialRef);
 
     if (!configured) {
@@ -105,16 +107,25 @@ export async function runLiveProbe(options: {
 
     let result: RoundTripResult;
     try {
-      result = await profile.roundTrip({
+      const { catalogEntry } = await import("./catalog-provider.ts");
+      if (profile.kind === "model-provider" && catalogEntry(profile.id) && !fixtureUrl) {
+        const { createModelProvider } = await import("../model/provider-factory.ts");
+        const created = await createModelProvider({ config: options.config, explicitId: profile.id, credentials: options.credentials });
+        const response = await created.provider.complete!([{ role: "user", content: 'Reply with exactly {"connected":true}' }], { responseFormat: "json_object", maxTokens: 128, timeoutMs: options.timeoutMs ?? 30_000 });
+        let ok = false;
+        try { ok = !response.error && JSON.parse(response.content!).connected === true; } catch { /* malformed */ }
+        result = { ok, detail: ok ? `Model ${created.model} completed an inference request` : response.error ?? "Unexpected model response", failure: ok ? undefined : "invalid" };
+      } else result = await profile.roundTrip({
         settings,
         credentialRef: entry?.credentialRef,
         fixtureUrl,
         needsReauth: entry?.status?.needsReauth,
         credential,
+        credentialSource: options.credentials,
         timeoutMs: options.timeoutMs,
       });
     } catch (e) {
-      result = { ok: false, detail: `round trip threw: ${String(e).slice(0, 160)}`, failure: "transport" };
+      result = { ok: false, detail: "Connection check failed; verify the model, endpoint and credential with keli setup provider", failure: e instanceof KeliError && e.code === "secret_unavailable" ? "auth" : "transport" };
     }
     lines.push({
       id: profile.id,

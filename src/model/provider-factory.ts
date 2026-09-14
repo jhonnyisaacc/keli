@@ -55,6 +55,13 @@ export async function createModelProvider(options: CreateProviderOptions = {}): 
     await chatGptAccessToken(resolved.credentialRef, options.credentials);
     return { provider: new ChatGptModelProvider(model, () => chatGptAccessToken(resolved.credentialRef, options.credentials)), providerId: profile.id, model, endpoint: "https://chatgpt.com/backend-api/codex", resolved, costKnown: false };
   }
+  const { catalogEntry, createCatalogProvider, catalogEndpoint } = await import("../integrations/catalog-provider.ts");
+  if (catalogEntry(profile.id) && profile.reuse.pin !== "config" && !resolved.fixtureUrl) {
+    const model = selectModel(resolved, options.model);
+    if (!model) throw new KeliError(`${profile.id} needs a model; run keli setup provider`, "invalid_request");
+    return { provider: await createCatalogProvider(resolved, model, options.credentials), providerId: profile.id, model,
+      endpoint: catalogEndpoint(profile.id, resolved.settings) ?? "", resolved, costKnown: Boolean(options.config?.pricing?.[profile.id]) };
+  }
   const endpoint = integrationEndpoint(resolved);
   if (!endpoint) {
     throw new KeliError(

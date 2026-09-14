@@ -2,6 +2,8 @@
 
 The L05 incompatibility conclusion below is superseded by [live account results](LIVE_ACCOUNT_RESULTS.md) and the corrected [account boundary](CODEX_APP_SERVER.md). ChatGPT inference is now implemented through an adopted model library.
 
+Provider coverage now extends beyond ChatGPT: see [Hermes provider adoption](HERMES_PROVIDERS.md) and the [connection guide](../providers.md). The catalog records 52 inference connections plus two excluded non-inference entries; account-wide live verification is not claimed.
+
 Compact contract: requirement → existing implementation → missing behavior → reuse
 source → integration work → acceptance evidence. Working Keli paths stay in place.
 

@@ -45,6 +45,7 @@ export type ProbeContext = {
 export type RoundTripContext = ProbeContext & {
   /** Resolved secret value; never logged. Absent when the credential store is locked or unset. */
   credential?: string;
+  credentialSource?: import("../credentials/source.ts").CredentialSource;
   timeoutMs?: number;
 };
 

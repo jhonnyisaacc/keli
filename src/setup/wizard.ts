@@ -9,7 +9,7 @@ import { sendDiscordMessage } from "../transports/discord.ts";
 import { resolveDiscordBackend } from "../transports/discord-resolve.ts";
 import { sendTelegramMessage } from "../transports/telegram.ts";
 import { resolveTelegramBackend } from "../transports/telegram-resolve.ts";
-import { listIntegrations, probeIntegration } from "../integrations/registry.ts";
+import { getIntegration, listIntegrations, probeIntegration } from "../integrations/registry.ts";
 import { fixtureUrlFor } from "../integrations/env.ts";
 import { runLiveProbe } from "../integrations/live-probe.ts";
 import "../integrations/load.ts";
@@ -123,6 +123,46 @@ export async function runSetup(options: SetupOptions = {}): Promise<SetupResult>
         if (primaryAnswer.trim()) primaryModel = primaryAnswer.trim();
         const fallbackAnswer = await rl.question(`Fallback provider [${fallbackModel}] (optional): `);
         if (fallbackAnswer.trim()) fallbackModel = fallbackAnswer.trim();
+        primaryModel = getIntegration(primaryModel)?.id ?? primaryModel;
+        fallbackModel = getIntegration(fallbackModel)?.id ?? fallbackModel;
+        for (const id of new Set([primaryModel, fallbackModel])) {
+          const profile = getIntegration(id);
+          if (!profile || profile.kind !== "model-provider" || profile.availability === "named-later") throw new Error(`Provider '${id}' is not implemented`);
+          if (id === "fixture") continue;
+          const entry = existing.integrations?.[id] ?? { enabled: true, settings: {} };
+          const { catalogModels, catalogEnvironment } = await import("../integrations/catalog-provider.ts");
+          const models = catalogModels(id);
+          if (models.length) explain([`Suggested models: ${models.slice(0, 12).join(", ")} (other model IDs accepted)`]);
+          const currentModel = entry.settings.model ?? (existing.providers?.primary?.id === id ? existing.providers.primary.model : undefined) ?? profile.defaultModels?.[0] ?? "";
+          const chosen = (await rl.question(`Model for ${id} [${currentModel}]: `)).trim() || currentModel;
+          if (!chosen) throw new Error(`A model is required for ${id}`);
+          entry.settings = { ...entry.settings, model: chosen };
+          for (const setting of profile.settings.filter((p) => !p.secret && p.key !== "model")) {
+            const current = entry.settings[setting.key] ?? (setting.key === "baseUrl" ? profile.baseUrl : setting.default) ?? "";
+            const value = (await rl.question(`${setting.label} [${current}]: `)).trim() || current;
+            if (!value && setting.required) throw new Error(`${setting.label} is required for ${id}`);
+            if (value) entry.settings[setting.key] = value;
+          }
+          entry.enabled = true;
+          existing.integrations = { ...existing.integrations, [id]: entry };
+          await writeConfig(existing, stateDir);
+          if (id === "chatgpt") continue;
+          if (!entry.credentialRef && profile.auth.type !== "none" && profile.auth.type !== "external-cli" && !catalogEnvironment(id)) {
+            const { addCredential } = await import("../integrations/auth.ts");
+            let type = profile.auth.type;
+            if (id === "anthropic" && (await rl.question("Authentication: API key or account login? [api-key/account]: ")).trim() === "account") type = "oauth-device";
+            let value: string | undefined;
+            if (type === "api-key" || type === "token") {
+              rl.pause();
+              try { const { promptSecret } = await import("./secret-prompt.ts"); value = await promptSecret(`Credential for ${id} (hidden): `); } finally { rl.resume(); }
+            }
+            await addCredential(id, { stateDir, type, value, oauthCallbacks: {
+              onAuth: ({ url, instructions }) => explain([`Sign in: ${url}`, instructions ?? ""]),
+              onPrompt: ({ message }) => rl.question(`${message} `),
+            } });
+            existing.integrations = (await readConfig(stateDir))?.integrations;
+          }
+        }
         if (primaryModel === "chatgpt" || fallbackModel === "chatgpt") {
           if (!existing.integrations?.chatgpt?.credentialRef) {
             const { addCredential } = await import("../integrations/auth.ts");
@@ -266,8 +306,8 @@ export async function runSetup(options: SetupOptions = {}): Promise<SetupResult>
     fallbackModel,
     providers: {
       ...existing.providers,
-      primary: { id: primaryModel },
-      fallback: fallbackModel ? [{ id: fallbackModel }] : existing.providers?.fallback,
+      primary: { id: primaryModel, model: existing.integrations?.[primaryModel]?.settings.model ?? (existing.providers?.primary?.id === primaryModel ? existing.providers.primary.model : undefined) },
+      fallback: fallbackModel ? [{ id: fallbackModel, model: existing.integrations?.[fallbackModel]?.settings.model ?? existing.providers?.fallback?.find((p) => p.id === fallbackModel)?.model }] : existing.providers?.fallback,
     },
     integrations: {
       ...existing.integrations,

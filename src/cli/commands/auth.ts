@@ -30,11 +30,9 @@ function authAddCommand(globals: CliGlobals) {
       try {
         let value = args.value as string | undefined;
         const type = args.type as "api-key" | "token" | "external-cli" | "oauth-device" | undefined;
-        if (!value && type !== "external-cli" && type !== "oauth-device" && getIntegration(String(args.integration))?.auth.type !== "oauth-device" && process.stdin.isTTY) {
-          const readline = await import("node:readline/promises");
-          const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-          value = await rl.question("Credential (input is recorded; prefer a TTY): ");
-          rl.close();
+        if (!value && !["external-cli", "oauth-device", "none"].includes(type ?? getIntegration(String(args.integration))?.auth.type ?? "api-key") && process.stdin.isTTY) {
+          const { promptSecret } = await import("../../setup/secret-prompt.ts");
+          value = await promptSecret("Credential (hidden): ");
         }
         const ref = await addCredential(String(args.integration), {
           stateDir: globals.stateDir,
