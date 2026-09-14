@@ -1,371 +1,331 @@
-# Plan: finish Keli through first-use, not catalog breadth
+# Plan: complete Keli's capability integrations without diluting its autonomy core
 
-Status: current development plan on `feat/v0.1.0`. Continues the general-purpose
-autonomy work; does not start another architecture proposal. The PRD remains the
-product completion contract. Compact ledger:
-[docs/evidence/COMPLETION_LEDGER.md](../docs/evidence/COMPLETION_LEDGER.md).
-[plans/evidence-driven-autonomy.md](evidence-driven-autonomy.md) is historical.
-[plans/integration-readiness.md](integration-readiness.md) is superseded; do not extend it.
+Status: implementation plan for `feat/v0.1.0`, baseline `021ca10`. This plan replaces the
+old "first-use only" stop and the unbounded provider-parity draft. It keeps the existing
+responsibility, evidence, and authority architecture and gives Cursor a finite sequence of
+vertical implementation slices.
 
-Implementation baseline: `ce51b3a` on `feat/v0.1.0`. That commit already contains the
-responsibility controller, ChatGPT live path, and a Hermes-derived inference **catalog**.
-Catalog rows are not live connections. This pass completes one honest first-use path, then
-the remaining PRD-required connections, by **ADOPT → ADAPT → BUILD**.
+The goal is a product that people can set up by selecting the connections they need and that
+can carry an approved responsibility across those connections. A provider means any
+interchangeable capability backend: inference, search, memory, browser, documents/OCR, speech,
+MCP, transport, delegate, or background execution. Hermes and Nanobot are reuse sources only;
+their protocols, option shapes, and stable integration ideas may be adopted and adapted, but
+their agent runtimes, state stores, and policy loops do not enter Keli.
 
-`ce51b3a` catalog size: 54 JSON rows; 50 registered catalog inference profiles plus 6
-Keli-owned (`fixture`, `openai-compatible`, `grok`, `chatgpt`, `claude-code`,
-`antigravity`). `moa` and `copilot-acp` stay excluded. Construction tests are not
-account entitlement. Live inference remains ChatGPT gpt-5.5 unless the owner probes
-another model. See [providers](../docs/providers.md) and
-[catalog evidence](../docs/evidence/HERMES_PROVIDERS.md).
+Keli owns investigation, coordination, evidence contracts, and durable behavior. Adapters return
+proposals and evidence. Only `src/core/gate.ts`, `src/core/capability-gate.ts`, and
+`ResearchResponsibilityService` in `src/core/behavior.ts` can authorize actions or commit
+terminal behavior. Adapters must not write canonical behavior state or mark research verified.
 
-Readiness layers (keep distinct in CLI, ledger, and tests): catalog entry · usable
-config/auth · runtime connection · fixture verification · live verification.
+Rocket and portfolio management are acceptance scenarios for a general-purpose product. Rocket
+is an optional external tool profile; wallet discovery, chain support, valuation, and financial
+calculations stay outside Keli. A passing Rocket scenario demonstrates the controller's behavior
+under realistic evidence gaps. It does not make Rocket a product dependency or turn Keli into a
+portfolio application.
 
-Keep authority in `src/core/gate.ts`, `src/core/capability-gate.ts`, and
-`ResearchResponsibilityService` in `src/core/behavior.ts`. Providers and tools remain
-proposals. Rocket stays an optional CLI profile. No portfolio engine.
+## Review corrections to the previous draft
 
-## Product direction
+- Do not use machine-specific home paths in tracked plans, fixtures, or docs. Refer to pinned
+  source commits and configurable roots such as `KELI_HERMES_ROOT`.
+- A catalog entry is inventory, not a working adapter. Every row needs a protocol mapping and a
+  status (`catalogued`, `configured`, `fixture-verified`, `live-verified`, `blocked`, or
+  `excluded`). Do not claim that all rows are implemented because they construct successfully.
+- Keep one manifest. Rename the existing Hermes-derived snapshot only in a mechanical migration
+  that updates every import, test, and attribution; never maintain two diverging catalogs.
+- Do not add `service` or `composition` to the integration kind merely to make the inventory
+  complete. Services are lifecycle commands, and composition is a gated capability. Add a kind
+  only when a real registry and execution path require it.
+- Do not make seven search vendors, every OAuth system, OCR, speech, memory SaaS, and MoA one
+  indivisible milestone. Implement a shared contract first, then add a backend when its public
+  protocol, authentication, and license are verified. Unsupported rows remain visible as
+  `partial` or `blocked`.
+- MoA is an opt-in experiment after the provider contract is stable. It is not required for
+  provider completion and must never become an implicit fallback.
+- Live credentials, subscriptions, hardware, and external binaries are owner checks. They are
+  not reasons to keep changing the architecture after fixture contracts and product flows pass.
 
-**Keli is the general-purpose agent. Rocket and other tools provide domain capabilities.**
-Portfolio management, Augustine/Shaul research, and software-maintenance triage are examples
-used to expose failures in memory, analysis, initiative, and follow-through.
+## Current baseline
 
-This replaces the previous proposal to build wallet adapters, portfolio calculations, and
-protocol decoding inside Keli.
+Already present on `021ca10` and preserved by this work:
 
-The intended boundary is:
-
-**User responsibility → Keli investigates and coordinates → domain tools return evidence →
-Keli evaluates progress and reports**
-
-Rocket already documents a bot-independent interface: `rocket <workflow> --json →
-ResearchResult`. Its results distinguish operational health from research outcomes. Preserve
-that distinction.
-
-## What is already implemented
-
-The following is current runtime truth. Historical spike documents remain dated snapshots.
-
-| Capability | Status | Where |
+| Area | Current evidence | Product meaning |
 |---|---|---|
-| Approved watches, fingerprints, HEARTBEAT import, pause/approve | implemented, fixture-verified | `src/watches/` |
-| Resumable research occurrences, cumulative budgets, dependency waits | implemented, fixture-verified | `ResearchResponsibilityService` in `src/core/behavior.ts`; `src/watches/occurrences.ts` |
-| Inspect/retrieve/verify research loop, addressed observations | implemented, fixture-verified | `src/conversation/`, `src/watches/autonomy.ts` |
-| Evidence-bound occurrence completion; invocation ≠ verified | implemented, fixture-verified | `src/core/evidence.ts`, `ResearchResponsibilityService.finish` |
-| Material-change outbox; delivery retry does not repeat research | implemented, fixture-verified | `src/watches/autonomy.ts`, `src/transports/outbox.ts` |
-| Augustine/Shaul and Cava source-collection scenarios | implemented, fixture-verified | `tests/integration/`, `docs/evidence/research-autonomy/` |
-| 2026 mechanism matrix, A–J micro-tests, Hermes/Nanobot probes | historical research evidence | `docs/research/`, `docs/evidence/2026-fast-spike/`, `experiments/2026-fast-spike/` |
-| Generic structured external-CLI tools (Rocket profile) | implemented, fixture-verified | `src/tools/`, `tools.rocket`; live Rocket deferred |
-| General responsibility contract beyond source-collection watches | implemented, fixture-verified | `kind: responsibility`, `src/watches/review.ts`; live cadence deferred |
-| Evidence-directed investigation across domains | implemented, fixture-verified | same occurrence controller; cross-domain live use deferred |
-| Cross-domain portfolio / Augustine / maintenance scenarios | fixture-verified (scripted) | `tests/integration/responsibility-scenarios.test.ts`; live use deferred |
-| Operating guide | implemented | [docs/responsibilities.md](../docs/responsibilities.md) |
-| Live provider / live Rocket evaluation | deferred onboarding milestone | section 3 |
-| Ordinary vs research conversation | implemented, fixture-verified | `ConversationLoop` mode ordinary/research; watches stay evidence-bound |
-| Honest provider readiness | implemented, fixture-verified | `keli providers list` catalog/configured/live-checked; grok A05 HTTP vs `xai-oauth` |
-| First-use wizard shortlist | implemented, fixture-verified | ChatGPT, OpenAI-compatible, Anthropic, Grok, plus explicit catalog ids |
-| Search as optional setup connection | implemented, fixture-verified | `keli setup search`; `missing_access` when unset |
-| One-transport pairing challenge | implemented, fixture-verified | `KELI-PAIR`; live token remains owner-gated |
-| Browser screenshot/download artifacts | implemented, fixture-verified | approved responsibilities only; Playwright optional |
-| MCP/Rocket missing access | implemented, fixture-verified | `missing_access` / `integration_gap`; no ambient MCP in casual chat |
-| Generated user-service units | implemented, fixture-verified | `keli service install` writes units; no committed `install/keli.service` |
-| Learned memory policies, RL controllers, general world models | deferred | research matrix M06–M08, M12 |
+| Responsibilities and watches | Approved definitions, occurrences, budgets, schedules, pauses, and restart handling are fixture-verified. | Keli can own a bounded recurring objective. |
+| Evidence and authority | Capability receipts, evidence-bound completion, typed blockers, and durable corrections are fixture-verified. | A model or tool cannot promote its own proposal to truth. |
+| Conversation and delivery | Ordinary/research modes, Discord/Telegram seams, dedupe, and outbox retry behavior are fixture-verified. | Delivery retries do not repeat research. |
+| Model connections | ChatGPT live path plus OpenAI-compatible, Grok, fixture, and a pinned Hermes-derived catalog. | Catalogued models still need per-model runtime and live checks. |
+| Retrieval and tools | Local notes/source collections, generic search, browser artifact capture, MCP transport, and generic external CLI seams exist. | Missing access is reported explicitly; no invented substitute is used. |
+| Service and portability | Generated user-service units and portability checks exist. | Background execution is optional and configuration-driven. |
+| Generalization scenarios | Portfolio/Rocket, Augustine/Shaul, and maintenance scenarios use the same controller with scripted evidence. | Domain behavior belongs in tools and configuration, not Keli branches. |
 
-`verified` still means the declared evidence/coverage contract passed. It is not semantic
-truth.
+The pinned Hermes snapshot currently contains 54 inventory rows. Confirm the count and row
+contents at implementation time; do not write tests that only assert a row count. Reference
+pins are Hermes `93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544` and Nanobot
+`f49965445152361b779b465e8a5111549ac934c4`, both MIT. Keep attribution and PRD trace IDs in
+the manifest/evidence note. The research decision matrix and supporting spike evidence remain
+the source for the hypotheses below: [research matrix](../docs/research/2026-agent-architecture-matrix.md),
+[completion ledger](../docs/evidence/COMPLETION_LEDGER.md), and
+[portability evidence](../docs/evidence/PORTABILITY.md).
 
-## 2. Completion stages (this work)
+## Unchanged autonomy core
 
-First-use slices on this pass (fixture-verified). Dual-transport identity proof, four-target
-native, five-user, and live ≥95% remain owner/hardware gates (ledger L13). Do not add catalog
-providers, papers, OCR/speech, Honcho, or portfolio engines to close this pass.
+The integration work plugs into the existing responsibility contract. A responsibility carries
+an objective, scope and current constraints, completion criteria, approved capabilities and
+action boundaries, triggers/cadence, an investigation budget, unresolved dependencies, reporting
+preferences, hypotheses, previous findings, and next-review conditions. Source-collection watches
+are one specialization of this contract.
 
-1. **First-use honesty and ordinary conversation.** Shortlist, readiness layers, grok vs
-   xai-oauth, greetings after research corrections.
-2. **Search as an optional first-class connection.** Typed missing-access when skipped.
-3. **One transport pairing + delivery.** CLI-only remains valid; notifications stay local
-   until pairing succeeds.
-4. **Browser artifacts.** Screenshot/download on approved responsibilities.
-5. **MCP/Rocket missing-access** in product language; lifecycle unchanged.
-6. **Background service docs and generated unit tests.**
-7. **Stop.** Record remaining PRD §14 leftovers as owner-only.
+For each occurrence, Keli establishes the objective, inspects approved capabilities and current
+evidence, selects the most consequential unresolved question, retrieves or calculates through
+the gate, challenges the emerging conclusion with counterevidence, and then either meets the
+evidence contract or records a targeted wait/blocker. It persists attempted questions, evidence
+references, failures, and changed approach. Equivalent unsuccessful attempts on unchanged inputs
+are suppressed while bounded transient retries remain possible.
 
-Minimal first-use connections: one conversation model; local notes/sources; ordinary CLI
-chat. Optional: search, one transport, `keli service install`. Later: remaining catalog
-ids after a real probe, MCP, Codex, Rocket, dual-transport pairing, Honcho, OCR/speech.
+Provenance, deterministic execution/calculation, analytical interpretation, completion, and
+delivery remain separate statuses. A tool saying "no finding" does not complete an occurrence
+unless Keli can show that the relevant question had adequate coverage and current inputs.
+Reports explain what was examined, implications, limitations, and what would change the result.
+Outbox retries deliver an existing report and never rerun its investigation.
 
-## 2b. Already implemented: responsibilities that use tools intelligently
+## Product contract and readiness vocabulary
 
-### A. General responsibility contract
+Every capability adapter implements the same conceptual boundary:
 
-Extend the existing approved-watch/occurrence machinery with a reusable responsibility
-definition containing:
+1. resolve configuration and credential references without exposing secrets;
+2. probe the configured endpoint, executable, or fixture with a bounded request;
+3. invoke with a timeout, cancellation, output limit, and usage accounting;
+4. normalize the result into an evidence record and a compact model-visible projection;
+5. classify failures (`not-configured`, `missing-access`, `transport`, `invalid-request`,
+   `unsupported`, `timeout`, or `upstream`) without guessing;
+6. preserve raw artifacts and hashes where the capability needs replay or audit.
 
-- Objective, scope, current constraints, and completion criteria.
-- Approved capabilities and action boundaries.
-- Event triggers and scheduled review cadence.
-- Investigation budget, unresolved dependencies, and reporting preference.
-- Current hypotheses, previous findings, and next-review conditions.
+Readiness is reported separately in the CLI, registry, ledger, and tests:
 
-Support event-driven work and scheduled reassessment through the existing scheduling system.
+| State | Meaning |
+|---|---|
+| `catalogued` | Known metadata and an attribution/source pin exist. |
+| `configured` | Settings and credential references resolve; no network claim is made. |
+| `fixture-verified` | The adapter contract passed deterministic fixtures. |
+| `live-verified` | A bounded round trip succeeded for this provider and model/configuration. |
+| `blocked` | Required access, binary, protocol, or dependency is absent. |
+| `excluded` | Deliberately outside Keli's product boundary, with a documented reason. |
 
-The portfolio example uses **a daily brief plus meaningful event alerts**. Default its daily
-review to 09:00 UTC until configured otherwise. This is an explicit scheduled occurrence, so
-it can reassess a thesis even without a changed feed. Repeated ticks within that period must
-not duplicate the review.
+Credential presence is never a live probe. A live check is scoped to the selected model or
+backend, records request/result metadata without secrets, and is cleared when the model or
+endpoint changes.
 
-Other responsibilities choose their own cadence and reporting policy. Daily financial
-reporting must not become Keli’s universal behavior.
+## Implementation slices
 
-### B. Structured external-tool integration
+Each slice is independently reviewable and committed on `feat/v0.1.0`. A slice is complete only
+when its fixture contract, negative paths, docs, and checks pass. Do not start the next slice to
+compensate for an incomplete previous one.
 
-Extend the existing capability registry and gated dispatch path to support bounded,
-structured research tools beyond the current source-tool allowlist.
+### 1. Neutral inventory and protocol mapping
 
-Introduce a generic external-CLI adapter with:
+Create one `src/integrations/provider-manifest.json` (or mechanically rename the existing
+snapshot) with `category`, canonical `id`, aliases, display name, auth strategy, protocol,
+endpoint defaults, model discovery, supported options, runtime adapter, source commit, license,
+status, and PRD trace IDs. Keep source attribution in metadata; do not create source-specific
+runtime packages.
 
-- Configured executable and argument arrays; no model-generated shell command.
-- Declared input/output schemas, version, action class, and resource boundaries.
-- Owned process lifetime, timeout, cancellation, output limits, and usage accounting.
-- Recoverable raw-result artifacts and a compact model-visible projection.
+Before coding adapters, classify every row as one of: native SDK, OpenAI-compatible HTTP, other
+documented HTTP, OAuth/external CLI, cloud SDK chain, local process, fixture-only, or unsupported.
+Record why an apparently similar row cannot share a protocol adapter. Add registry queries such
+as `listByCategory()` and `listByStatus()`; status must come from configuration/probe state and
+the manifest, never from file existence.
 
-Use Rocket as the first integration profile. Configure its executable and private state paths
-externally (`ROCKET_BIN`, `ROCKET_STATE_DIR`, or equivalent config keys). Record the tested
-Rocket revision and supported workflows.
+Acceptance: the manifest is portable, generated/imported deterministically from optional source
+roots, contains no secrets or personal paths, and the CLI can show catalogued/configured/
+fixture-verified/live-verified distinctly. No new runtime provider is claimed in this slice.
 
-Map Rocket’s existing `ResearchResult` into Keli’s evidence contract without conflating:
+### 2. One-session, selection-first setup
 
-- Successful command execution.
-- Healthy or unavailable data acquisition.
-- Sufficient or insufficient research evidence.
-- A domain finding.
-- Fulfilled responsibility.
-- Delivered notification.
+Rewrite `keli setup` around one injectable `WizardIo` session. The flow is:
 
-Keep wallet discovery, chain support, Ondo interpretation, Reserve look-through, valuations,
-macro acquisition, and financial calculations in Rocket or other domain tools. Do not
-duplicate those engines in Keli.
+`category number → provider number → readiness → provider settings → authentication method →
+model (when applicable) → bounded probe → configure another category? → summary`.
 
-A missing domain capability becomes an explicit integration gap. Keli must not silently
-replace unavailable calculations or retrieval with invented model output.
+Categories are Chat/Models, Search, Memory, Browser, Documents/OCR, Speech, Messaging,
+External tools/delegates, and Background service. Each list offers `Skip` and displays a short
+status (`ready`, `needs credentials`, `fixture only`, or `blocked`). Users never need to type an
+internal provider ID in the normal flow. Prompts always begin on a fresh line. Secret entry uses
+the parent session or an injected secret handler; it must not open a competing readline stream.
 
-### C. Evidence-directed investigation
+The Chat/Models category requires an explicit provider choice for a real installation. Fixture
+mode is available only through an explicit `--fixture`/test flag. Non-interactive CI flags keep
+working. Advanced commands (`setup provider`, `setup search`, `setup memory`, `setup mcp`,
+`setup transport`, and `setup delegate`) call the same registry, auth, and probe helpers and do
+not erase unrelated connections.
 
-Build on the current occurrence state and recoverable observations. The general controller
-should:
+Acceptance: a clean install can be completed with numbered choices, a skipped optional category
+is shown as a typed blocker when used, an existing connection survives another setup command, and
+the summary states exactly what is configured and what still needs access.
 
-1. Establish current objective and constraints.
-2. Inspect available capabilities and evidence.
-3. Identify the most consequential unresolved question.
-4. Retrieve or calculate through approved tools.
-5. Challenge the emerging conclusion with relevant counterevidence.
-6. Verify completion criteria and report or persist a targeted wait.
+### 3. Inference runtimes by protocol family
 
-Persist attempted questions, evidence references, observed failures, and the reason for
-changing approach. Suppress equivalent unsuccessful attempts on unchanged inputs while
-retaining bounded transient retries.
+Implement runtime support by protocol, with a mapping table in the manifest. Start with the
+Keli-owned fixture, OpenAI-compatible, Grok HTTP, and ChatGPT paths, then add a catalog row only
+when its protocol and options are covered. Use the existing Pi SDK/native path where it is a real
+fit; do not import Hermes plugins or Python runtimes.
 
-A tool reporting “no finding” does not automatically complete the responsibility. Keli must
-establish whether the tool answered the relevant question, had adequate coverage, and used
-sufficiently current inputs.
+Keep these identities separate: ChatGPT model inference versus Codex app-server coding delegate;
+OpenCode inference versus OpenCode delegate; Copilot inference versus Copilot ACP delegate; xAI
+API versus xAI subscription OAuth. Preserve provider-specific reasoning, headers, base URLs,
+Azure deployment, Vertex project/location, and Bedrock region/profile settings.
 
-Likewise, unchanged holdings do not establish an unchanged investment assessment; unchanged
-source files do not establish that a scheduled review is unnecessary.
+Fallback is explicit and bounded: try configured fallback providers only for typed transport or
+provider failures, never after a partial response or side effect, never silently to fixture, and
+record the provider/model and fallback reason in the receipt. OAuth refresh remains under Keli's
+existing lock; credential files are not copied from upstream projects.
 
-### D. Current context, verification, and reporting
+Acceptance: each implemented family has request-shape, option, timeout/cancel, retry-class,
+malformed-response, missing-access, and secret non-leakage fixtures. Changing a model or endpoint
+clears its live-verified state. Unsupported catalog rows remain `partial`/`blocked`.
 
-Route a compact projection of current commitments and constraints into each decision.
-Retrieve detailed history on demand. Old summaries must not override corrected rules.
+### 4. Retrieval and browser capabilities
 
-Extend evidence records with optional source-defined coverage, freshness, effective-time, and
-verification metadata. Preserve unknown values rather than inventing generic freshness rules
-for every domain.
+Keep one normalized search contract and a shared dispatcher. Brave and generic JSON are the first
+live-capable backends; add Tavily, Exa, Firecrawl, SearXNG, Perplexity, or another backend as
+separate manifest rows only after checking its current public API, auth, license, and maintenance
+status. A fixture proves normalization; a real bounded request proves live readiness.
 
-Keep these separate:
+Extend `web.fetch` and browser navigation/capture evidence with content type, byte count, SHA-256,
+bounded retrievable body/artifact, and source URL. Enforce network allowlists and artifact size
+limits before the gate stores or exposes bytes. Playwright, CDP, and MCP browser backends remain
+optional profiles, not hidden dependencies.
 
-- Provenance and quote checks.
-- Deterministic calculation or execution checks.
-- Analytical interpretation.
-- Completion and delivery status.
+Acceptance: credentials alone do not pass a probe; malformed results and network failures become
+typed errors; browser screenshots/downloads can be replayed from retained bytes; casual chat
+cannot bypass the capability gate.
 
-Models may propose conclusions and next actions. Authoritative core services commit durable
-behavior and terminal truth (`src/core/gate.ts`, `src/core/capability-gate.ts`,
-`ResearchResponsibilityService` in `src/core/behavior.ts`).
+### 5. Memory contract and local-first persistence
 
-Reports must explain implications and next steps, not merely list retrieved content. A valid
-“no change recommended” conclusion includes what was examined, why the previous assessment
-still holds, limitations, and what would change it.
+Define a memory provider interface for `import`, `search`, `read`, and `retain`, returning
+evidence records. Providers may suggest context but cannot commit rules, permissions, or
+occurrence status. Keep SQLite notes, source collections, and conversation memory as the default
+and authoritative v0.1 path.
 
-Continue using the existing outbox so delivery retries never repeat analysis.
+Add a Honcho adapter only if its documented HTTP contract is stable and its round trip can be
+tested; otherwise keep the fixture and publish the interface as `blocked`/`fixture-only`. Do not
+add a second memory authority or a collection of unmaintained SaaS plugins in this completion
+pass.
 
-## 3. Research hypotheses and acceptance scenarios
+Acceptance: restart and migration behavior is covered, stale summaries cannot override current
+corrections, advisory memory is visibly distinct from canonical behavior, and live credentials
+are not treated as successful retrieval.
 
-Use the existing paper research selectively. Each experiment compares the current
-implementation with one bounded change on identical inputs.
+### 6. Documents, OCR, and speech as bounded modalities
 
-| Direction | General capability to test | Acceptance evidence |
-|---|---|---|
-| InMind-inspired context routing | Apply a relevant constraint even when the new request does not repeat its wording. | Correct, current constraint used; no cross-project leakage. |
-| Scroll/ReFind-inspired retrieval | Recover exact earlier evidence omitted from recent summaries. | Relevant passage recovered within a fixed retrieval budget. |
-| PMCoder-inspired phase/memory coupling | Use prior observations to choose a better next investigation after failure. | Useful changed approach and reduced need for user steering—not merely earlier stopping. |
-| Typed uncertainty | Distinguish unavailable tools, missing evidence, stale inputs, conflicting evidence, and unresolved interpretation. | Each condition produces an appropriate investigation, wait, or qualified conclusion. |
-| Bounded capability discovery | Find a necessary approved tool that was initially absent from model context. | Successful discovery without loading every schema or expanding authority. |
-| Verification-grounded completion | Reject plausible completion claims unsupported by required receipts or evidence. | Unsupported results remain unverified; valid evidence closes the occurrence. |
+Add `documents.extract`/`ocr.extract`, `speech.transcribe`, and optional `speech.synthesize`
+capabilities behind the same gate. Prefer a maintained Bun-compatible PDF parser only after
+verifying its API and license; wrap `pdftotext`, Tesseract, local STT, or equivalent binaries as
+owned bounded processes. Use OpenAI-compatible audio endpoints where configured rather than
+creating provider-specific clients for every service.
 
-These are narrow engineering hypotheses informed by the [research matrix](../docs/research/2026-agent-architecture-matrix.md),
-not reproductions of complete paper systems. Defer learned memory policies, RL controllers,
-general world models, and another broad literature survey.
+Evidence includes source artifact/hash, extracted text, page or timestamp ranges, confidence when
+the backend supplies it, and extraction errors. Enforce byte, duration, and process-time limits;
+optional dependencies must not be required by CI. Extraction never writes notes or authorizes an
+action automatically.
 
-### Scenario 1: portfolio analyst using Rocket
+Acceptance: fixtures cover text PDFs, image/OCR input, audio request/response shapes, missing
+binary/access, cancellation, malformed output, and secret non-leakage. Live modality checks are
+owner milestones after the fixture contract passes.
 
-Configure the wallet privately and let Rocket or the selected tools retrieve its positions
-and domain evidence.
+### 7. MCP, delegates, transports, and background lifecycle
 
-Use Solana/Ondo and Base/Reserve examples to exercise different data requirements—not to
-hard-code blockchain concepts into Keli.
+Before `mcp.tools/call`, fetch and validate `tools/list`, reject unknown tools and invalid
+arguments, and preserve credential scoping. Keep owned/bounded stdio process handling and the
+existing HTTP path. A remote tool remains unavailable until its schema and access are present.
 
-Reproduce the combined failure pattern described by the user:
+Keep Discord/Telegram pairing, inbox/outbox, and dedupe on the existing seams; do not rewrite
+transport protocols. Give Codex app-server, OpenCode, and Copilot ACP explicit gated delegate
+profiles. A child completion without artifacts remains unverified. `keli service install`,
+`status`, and `run` remain lifecycle commands; they are not providers and do not introduce a new
+scheduler. Rocket remains `tools.rocket`, optional and externally configured.
 
-- Holdings are remembered, but new macro evidence changes their interpretation.
-- X/Grok, Cava, and macro inputs conflict or have incomplete coverage.
-- A tool returns “nothing new,” despite an unresolved analytical question.
-- Keli must investigate, explain implications, retain constraints, and identify the next
-  meaningful check.
-- Produce paper options only when domain capabilities and evidence support them. No signing,
-  orders, swaps, or approvals.
+Acceptance: schema and access failures are typed, delegate receipts include artifacts or an
+explicit unverified state, pairing remains route-bound and one-use, and service commands reuse
+the existing scheduler.
 
-### Scenario 2: Augustine/Shaul research
+### 8. Contract tests and release evidence
 
-An older correction and missing source determine whether an attribution is justified. Keli
-retrieves the relevant evidence, preserves disagreement, resumes after the dependency
-arrives, and does not leak the correction into another project.
+Add category-neutral provider contract suites (use `tests/unit/providers.test.ts`,
+`memory-providers.test.ts`, `browser-providers.test.ts`, `search-providers.test.ts`,
+`modality-providers.test.ts`, and `transports.test.ts`, or the repository's equivalent naming).
+Tests must exercise behavior: resolution, auth choice, model selection, request shape, options,
+timeouts, cancellation, retry classification, malformed upstream, artifacts, restart, and gate
+authority. Do not add catalog-row counters as a substitute for runtime tests.
 
-This scenario already has a fixture path for source-collection watches. The same
-responsibility controller must also cover it after the generalization.
+Run with a temporary `KELI_STATE_DIR`; keep secrets out of logs and fixtures. Required checks are
+`bun test --timeout 20000`, `bun run check`, the production build, and the portability/link check.
+Extra review is required for `src/state/`, `src/core/gate.ts`, `src/execution/`, `scripts/build.ts`,
+and `install/`.
 
-### Scenario 3: software-maintenance triage
+Update the completion ledger, support matrix, operations guide, provider documentation,
+third-party notices, release report, and this plan. Every row says implemented, fixture-verified,
+live-verified, blocked, or excluded with a reason. Do not rewrite published history.
 
-An approved read-only maintenance responsibility receives a failure report. The first
-diagnostic is misleading or unavailable. Keli discovers the appropriate tool, retrieves
-previous evidence, performs a bounded authorized check, and reports a verified diagnosis or
-concrete blocker.
+## Autonomy acceptance scenarios
 
-No automatic code edits or deployment are required for this scenario.
+The existing paper-derived hypotheses become regression expectations, not another research loop:
 
-**All three scenarios must use the same responsibility controller.** Domain changes should
-require tool/configuration changes, not branches in Keli’s core.
+| Hypothesis | Test expectation |
+|---|---|
+| Context routing (InMind) | A relevant durable constraint is applied without leaking across projects. |
+| Exact retrieval (Scroll/ReFind) | Earlier evidence omitted from a summary is recovered within a fixed budget. |
+| Phase/memory coupling (PMCoder) | After a failed attempt, the next investigation changes usefully rather than stopping early. |
+| Typed uncertainty | Missing access, stale input, conflicting evidence, and unresolved interpretation produce different waits or qualified reports. |
+| Bounded capability discovery | Keli finds an approved missing tool without loading every schema or expanding authority. |
+| Verification-grounded completion | Plausible claims without required receipts remain unverified. |
+
+Use the same responsibility controller for three demonstrations:
+
+1. **Portfolio/Rocket:** Rocket supplies positions and domain evidence. Keli must distinguish
+   unchanged holdings from an unchanged assessment, surface missing or conflicting macro evidence,
+   and never invent valuations or perform signing, orders, swaps, or approvals.
+2. **Augustine/Shaul research:** a correction and a missing source drive retrieval, disagreement
+   preservation, resumability, and project isolation.
+3. **Maintenance triage:** a misleading or unavailable diagnostic drives bounded discovery,
+   previous-evidence retrieval, and either a verified diagnosis or a concrete blocker. No code
+   edit or deployment is automatic.
 
 Measure steering turns, relevant evidence recovered, repeated failed attempts, unsupported
-conclusions, duplicate work/reports, and budget consumption. Use scripted providers for
-deterministic failures and label them clearly.
+conclusions, duplicate work/reports, and budget consumption. Scripted providers make these
+regressions deterministic; real-model and live-tool runs are labeled separately.
 
-Real-model evaluation remains a later onboarding milestone. Preserve the intended
-ChatGPT-account connection and Grok access requirements without assuming subscription access
-automatically provides every needed integration.
+## Explicit exclusions
 
-## 4. Repository portability and private-data boundaries
+Do not import complete Hermes/Nanobot runtimes, credential pools, account rotation, scraper-based
+search, keyless MCP search rings, Python browser agents, unmaintained memory SaaS, or a full TTS
+plugin zoo. Do not build portfolio or wallet engines inside Keli. These are boundary decisions,
+not claims that the upstream projects are unusable.
 
-Remove personal-device paths from all tracked current content, including imported research
-files and generated evidence.
+MoA/mixture composition may be explored later as an explicit, opt-in gated capability that fans
+out to configured models and merges evidence. It is not a provider, fallback, or v0.1 completion
+blocker.
 
-- Repository material uses relative references.
-- External repositories, executables, private state, and wallet inputs use configuration or
-  named environment variables.
-- Private-source hyperlinks become stable evidence IDs with source descriptions and version
-  pins. Do not fabricate public replacements.
-- Sanitized historical artifacts must be labeled as derivatives. Preserve provenance and
-  original hash references where applicable; do not describe changed bytes as original
-  evidence. See [docs/evidence/2026-fast-spike/ORIGINAL_HASHES.json](../docs/evidence/2026-fast-spike/ORIGINAL_HASHES.json)
-  and [docs/evidence/PORTABILITY.md](../docs/evidence/PORTABILITY.md).
-- Update generators so future reports remain portable.
-- Keep real wallet addresses, holdings, credentials, and private reports outside Git. Commit
-  synthetic or explicitly sanitized fixtures.
-- `bun run check` rejects embedded personal-home paths and broken local documentation links.
-  Runtime discovery of a user’s home directory remains valid.
-- Verify operation from a differently named temporary checkout with temporary
-  `KELI_STATE_DIR`.
+## Stop conditions and owner milestones
 
-Do not rewrite published Git history as part of this cleanup. Report historical references
-separately in [docs/evidence/PORTABILITY.md](../docs/evidence/PORTABILITY.md).
+Engineering is complete when the manifest and registry are truthful, setup is selection-first,
+each implemented capability family has fixture and negative-path coverage, the three autonomy
+scenarios pass through the same controller, portable docs contain no personal paths, and all
+required checks pass. At that point stop changing architecture.
 
-## 5. Delivery sequence
+Remaining work is an owner milestone: API keys/OAuth subscriptions for non-ChatGPT models,
+search/MCP/browser accounts or binaries, Honcho/Tesseract/Whisper/TTS access, transport tokens,
+Codex/OpenCode/Copilot logins, dual-transport testing, four-target native packaging, five-user
+testing, notarization, live Rocket, and any live ≥95% evaluation. A live check can move one row to
+`live-verified`; it cannot redefine the authority boundary or reopen the research plan.
 
-Fixture-verified research, tools, and controller work is on `feat/v0.1.0` through
-`d9e51d2`. Provider catalog import is `ce51b3a`. This first-use pass is the current
-completion work.
+## Reuse trace
 
-Onboarding path: `keli init` → `keli setup` (one model from the shortlist) → optional
-search and one transport → `keli chat` (ordinary) → import/approve a responsibility →
-`keli watches tick` or `keli service run` → verified result or typed missing access /
-insufficient evidence. Delivery retries never rerun research.
+Record ADOPT → ADAPT → BUILD for each capability with the upstream commit, license, protocol
+documentation, and PRD trace IDs (I1–I10 and A01–A46 as applicable). The existing Keli gate,
+occurrence controller, evidence receipts, outbox, and local memory are ADOPT decisions. Hermes
+and Nanobot provider protocols are ADAPT inputs. Keli's authority, readiness model, setup UX,
+and cross-domain responsibility behavior are BUILD work.
 
-Slices 1–6 are fixture-verified on this branch. Remaining PRD leftovers (dual-transport
-live pairing, four-target native, five-user, live ≥95%, notarization, live Rocket/search/
-MCP/Codex) are owner/hardware gates (ledger L13). Do not wait on more catalog providers,
-Hermes search failover, session_search, papers, portfolio math, OCR/speech, or another
-research loop.
-
-Run existing checks and targeted regressions for authority, cancellation, process
-ownership, migration, restart, budgets, and outbox. Extra review for `src/state/`,
-`src/core/gate.ts`, `src/execution/`, `scripts/build.ts`, and `install/`.
-
-The final handoff on `feat/v0.1.0` must contain:
-
-- One current development plan (this file) and an updated
-  [implementation prompt](../docs/architecture/keli-autonomy-implementation-prompt.md).
-- The research decision matrix and reproducible supporting evidence.
-- Clear distinctions between implemented, fixture-verified, live-verified, and deferred
-  capabilities.
-- A generic responsibility example plus the three domain demonstrations.
-- A short summary of changes, validation, and remaining blockers.
-
-Success means Keli can carry an approved responsibility across tools, evidence gaps, and
-interruptions in multiple domains. Portfolio management is the demanding example that
-exposes weaknesses—not the definition of the product.
-
-## Generic responsibility example
-
-```markdown
-## portfolio-daily
-- kind: responsibility
-- objective: Maintain a current investment assessment of the configured wallet using approved tools only.
-- cadence: daily:09:00Z plus material tool/source events
-- capabilities: rocket.research (read), sources.search, sources.read
-- notify: daily-brief + material-change
-- completion: supported assessment or explicit blocker (missing tool, stale input, unresolved conflict)
-- forbidden: signing, orders, swaps, approvals, invented valuations
-```
-
-Cadence, capabilities, and notify policy belong to the approved contract. A source-collection
-research watch remains one specialization of this shape, not a second product.
-
-## Reuse and research trace
-
-| Capability | Decision | Source / trace |
-|---|---|---|
-| Approved watch, scoped dispatch, budget, occurrence ownership, outbox | ADOPT existing Keli | `e32b2ad`; I1–I5, I9–I10; A11–A16, A19–A22, A32, A39 |
-| Addressed evidence and current canonical context | ADAPT Scroll/InMind using existing stores | [Decision matrix](../docs/architecture/keli-agent-architecture-proposal.md) M01/M05 |
-| Phase/evidence-guided continuation | ADAPT the existing research controller; generalize beyond source collections | Matrix M03; H11 |
-| Structured external tools | BUILD generic CLI adapter; ADOPT Rocket `ResearchResult` as evidence, not as authority | Section B; keep domain engines outside Keli |
-| Evidence-bound terminal status | ADAPT existing checker/core | Matrix M17; A24 analogous false-completion contract |
-
-Reference pins: Hermes `93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544` and Nanobot
-`f49965445152361b779b465e8a5111549ac934c4`, both MIT. Telegram/Discord channel Python
-is not copied; Bot API / REST protocols are adopted. Codex App Server is Apache-2.0 and
-is used only as a gated coding delegate — see
-[CODEX_APP_SERVER.md](../docs/evidence/CODEX_APP_SERVER.md). Paper/source links remain in
-the [research matrix](../docs/research/2026-agent-architecture-matrix.md).
-
-## Live account milestone follow-up
-
-The account-backed Keli conversation has now been exercised, along with retrieval,
-a durable correction across restart, and bounded scheduled reviews. See
-[the live results](../docs/evidence/LIVE_ACCOUNT_RESULTS.md). The previous blanket
-ChatGPT incompatibility conclusion is superseded. Reuse is a pinned model/OAuth
-library, not an imported second agent runtime.
-
-Live tests exposed budget-terminalization and configured-tool discovery defects;
-these are fixed in Keli without changing the responsibility architecture. Rocket
-remains an optional external diagnostic scenario, not a product default.
+The implementation prompt given to Cursor should reference this file, require one slice per
+commit, preserve the baseline commit, and stop at the engineering stop conditions above. It
+should not ask for another literature survey or another architecture proposal.
