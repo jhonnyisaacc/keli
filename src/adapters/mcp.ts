@@ -32,11 +32,75 @@ export async function mcpCallTool(
   fixtureUrl?: string,
   config?: KeliConfig | null,
 ): Promise<CapabilityResult> {
+  const target = mcpTargetFrom(config, fixtureUrl);
+  const listed = await mcpCall("mcp.tools/list", { op: "list" }, target);
+  if (!listed.ok) {
+    return { ...listed, capabilityId: "mcp.tools/call" };
+  }
+  const tools = toolsFromList(listed.output);
+  const args = input.arguments ?? {};
+  const invalid = validateMcpToolCall(tools, input.name, args);
+  if (invalid) return invalid;
   return mcpCall(
     "mcp.tools/call",
-    { op: "call", name: input.name, arguments: input.arguments ?? {} },
-    mcpTargetFrom(config, fixtureUrl),
+    { op: "call", name: input.name, arguments: args },
+    target,
   );
+}
+
+export type McpToolSchema = {
+  name: string;
+  description?: string;
+  inputSchema?: {
+    type?: string;
+    required?: string[];
+    properties?: Record<string, unknown>;
+  };
+};
+
+export function toolsFromList(output: unknown): McpToolSchema[] {
+  if (!output || typeof output !== "object") return [];
+  const record = output as { tools?: unknown; result?: { tools?: unknown } };
+  const raw = Array.isArray(record.tools) ? record.tools : Array.isArray(record.result?.tools) ? record.result.tools : [];
+  return raw.filter((t): t is McpToolSchema => Boolean(t) && typeof t === "object" && typeof (t as McpToolSchema).name === "string");
+}
+
+/** Reject unknown names and missing required arguments before tools/call. */
+export function validateMcpToolCall(
+  tools: McpToolSchema[],
+  name: string,
+  args: Record<string, unknown>,
+): CapabilityResult | null {
+  const tool = tools.find((t) => t.name === name);
+  if (!tool) {
+    return {
+      capabilityId: "mcp.tools/call",
+      ok: false,
+      error: {
+        code: "invalid_request",
+        message: `Unknown MCP tool '${name}'. Run mcp.tools/list and call a listed name.`,
+      },
+    };
+  }
+  const schema = tool.inputSchema;
+  if (!schema) return null;
+  if (schema.type && schema.type !== "object") {
+    return {
+      capabilityId: "mcp.tools/call",
+      ok: false,
+      error: { code: "invalid_request", message: `MCP tool '${name}' schema is not an object` },
+    };
+  }
+  for (const key of schema.required ?? []) {
+    if (!(key in args) || args[key] === undefined) {
+      return {
+        capabilityId: "mcp.tools/call",
+        ok: false,
+        error: { code: "invalid_request", message: `MCP tool '${name}' is missing required argument '${key}'` },
+      };
+    }
+  }
+  return null;
 }
 
 async function mcpCall(

@@ -75,10 +75,17 @@ export async function delegateRun(
         output: payload,
       };
     }
+    const artifacts = payload.artifacts ?? [];
+    const unverified = artifacts.length === 0;
     return {
       capabilityId: "delegate.run",
       ok: true,
-      output: payload,
+      output: {
+        ...payload,
+        artifacts,
+        verification: unverified ? "unverified" : "artifacts",
+      },
+      artifacts: artifacts.map((a) => ({ path: a.path })),
     };
   } catch (e) {
     if (signal?.aborted) {

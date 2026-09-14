@@ -1,4 +1,5 @@
 import { registerIntegration } from "../../registry.ts";
+import { httpRoundTrip, notConfigured } from "../../round-trip.ts";
 import { statusOf } from "../../status.ts";
 import type { IntegrationProfile } from "../../types.ts";
 
@@ -31,6 +32,27 @@ export const mcpFixtureProfile: IntegrationProfile = {
       reason: url || ctx.settings.command ? "MCP server configured" : "Run keli setup mcp",
       howToConfigure: "keli setup mcp  or set KELI_MCP_FIXTURE_URL",
     });
+  },
+  async roundTrip(ctx) {
+    const url = ctx.fixtureUrl ?? ctx.settings.url;
+    if (url) {
+      return httpRoundTrip({
+        url: `${url.replace(/\/$/, "")}/mcp`,
+        method: "POST",
+        body: { op: "list" },
+        timeoutMs: ctx.timeoutMs,
+        accept: (_s, body) => {
+          try {
+            const payload = JSON.parse(body) as { tools?: unknown };
+            return Array.isArray(payload.tools);
+          } catch {
+            return false;
+          }
+        },
+      });
+    }
+    if (ctx.settings.command) return { ok: true, detail: "MCP stdio command configured" };
+    return notConfigured("MCP is not connected. Run keli setup mcp.");
   },
 };
 

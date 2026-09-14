@@ -9,6 +9,7 @@ import "./profiles/memory/honcho.ts";
 import "./profiles/memory/local-notes.ts";
 import "./profiles/delegate/codex.ts";
 import "./profiles/delegate/opencode.ts";
+import "./profiles/delegate/copilot-acp.ts";
 import "./profiles/search/fixture.ts";
 import "./profiles/mcp-server/fixture.ts";
 import "./profiles/browser-backend/index.ts";

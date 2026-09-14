@@ -2673,7 +2673,7 @@
       "displayName": "MCP",
       "authStrategy": "none",
       "protocol": "other-http",
-      "protocolNote": "JSON-RPC HTTP or owned stdio; schema inspect is a later slice",
+      "protocolNote": "JSON-RPC HTTP or owned stdio; tools/call requires a prior tools/list schema check",
       "runtimeAdapter": "mcp.ts",
       "sourceCommit": "in-tree",
       "license": "MIT",
@@ -2754,10 +2754,31 @@
       "displayName": "OpenCode CLI",
       "authStrategy": "external-cli",
       "protocol": "local-process",
-      "protocolNote": "ACP delegate; opencode-zen is hosted inference",
+      "protocolNote": "ACP coding delegate, distinct from opencode-zen inference. Fixture or ACP handshake required.",
       "runtimeAdapter": "none",
       "sourceCommit": "in-tree",
       "license": "Apache-2.0",
+      "status": "blocked",
+      "prdIds": [
+        "A19",
+        "A20",
+        "A37"
+      ],
+      "origin": "keli"
+    },
+    {
+      "category": "delegate",
+      "id": "copilot-acp-delegate",
+      "aliases": [
+        "copilot-acp-agent"
+      ],
+      "displayName": "GitHub Copilot ACP",
+      "authStrategy": "oauth-external-cli",
+      "protocol": "oauth-external-cli",
+      "protocolNote": "ACP coding delegate; distinct from Copilot Chat Completions. Child completion without artifacts stays unverified.",
+      "runtimeAdapter": "delegateRun",
+      "sourceCommit": "in-tree",
+      "license": "n/a",
       "status": "blocked",
       "prdIds": [
         "A19",

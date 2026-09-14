@@ -85,7 +85,15 @@ export function startIntegrationFixture(): IntegrationFixture & {
           arguments?: { text?: string };
         };
         if (body.op === "list") {
-          return Response.json({ tools: [{ name: "echo", description: "echo text" }] });
+          return Response.json({
+            tools: [
+              {
+                name: "echo",
+                description: "echo text",
+                inputSchema: { type: "object", properties: { text: { type: "string" } }, required: ["text"] },
+              },
+            ],
+          });
         }
         if (body.op === "call") {
           return Response.json({
@@ -336,7 +344,19 @@ async function mcpJsonRpc(body: unknown): Promise<Response> {
     return new Response(null, { status: 204 });
   }
   if (msg.method === "tools/list") {
-    return Response.json({ jsonrpc: "2.0", id: msg.id, result: { tools: [{ name: "echo", description: "echo text" }] } });
+    return Response.json({
+      jsonrpc: "2.0",
+      id: msg.id,
+      result: {
+        tools: [
+          {
+            name: "echo",
+            description: "echo text",
+            inputSchema: { type: "object", properties: { text: { type: "string" } }, required: ["text"] },
+          },
+        ],
+      },
+    });
   }
   if (msg.method === "tools/call") {
     return Response.json({
