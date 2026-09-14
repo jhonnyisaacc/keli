@@ -34,6 +34,7 @@ export type CapabilityRunOptions = {
   proposalBytesMax?: number;
   jobId?: string;
   sources?: DispatchContext["sources"];
+  config?: DispatchContext["config"];
 };
 
 export class CapabilityGate {
@@ -158,6 +159,7 @@ export class CapabilityGate {
       stateDir: this.stateDir,
       ownerId: this.ownerId,
       sources: options?.sources,
+      config: options?.config,
     };
 
     let raw: CapabilityResult;

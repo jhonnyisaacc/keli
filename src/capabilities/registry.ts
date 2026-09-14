@@ -1,3 +1,4 @@
+import { rocketDescriptor } from "../tools/profiles.ts";
 import type { CapabilityDescriptor } from "./types.ts";
 
 const BUILTIN: CapabilityDescriptor[] = [
@@ -231,6 +232,7 @@ const BUILTIN: CapabilityDescriptor[] = [
       required: ["delegate", "goal", "workspace", "actionId"],
     },
   },
+  rocketDescriptor(),
 ];
 
 export class CapabilityRegistry {

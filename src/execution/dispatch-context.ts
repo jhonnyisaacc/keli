@@ -3,6 +3,7 @@ import type { BrowserBackendConfig } from "./browser-backends.ts";
 import type { ResourcePolicy } from "./policy.ts";
 import type { NetworkPolicy } from "./network-policy.ts";
 import type { SourceReader } from "../sources/reader.ts";
+import type { KeliConfig } from "../state/config.ts";
 import { fixtureUrlFor } from "../integrations/env.ts";
 
 export type FixtureEndpoints = {
@@ -30,6 +31,8 @@ export type DispatchContext = {
   ownerId?: string;
   /** Narrow read-only source index view; adapters never receive the canonical database. */
   sources?: SourceReader;
+  /** Structured CLI profiles; executables come from config/env, never from model argv. */
+  config?: KeliConfig | null;
 };
 
 export const DEFAULT_ALLOWED_HOSTS = ["127.0.0.1", "localhost"];

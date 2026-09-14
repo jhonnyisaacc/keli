@@ -13,6 +13,8 @@ import { jobsObserve } from "../adapters/jobs.ts";
 import { browserSessionConnect } from "../adapters/browser-session.ts";
 import { helpersSpawn } from "../adapters/helpers-spawn.ts";
 import { sourcesCollections, sourcesRead, sourcesSearch } from "../adapters/sources.ts";
+import { runStructuredTool } from "../tools/cli-adapter.ts";
+import { profileFor } from "../tools/profiles.ts";
 import { KeliError } from "../core/errors.ts";
 import { consumeToolCallBudget } from "../core/budgets.ts";
 import { assertNotCancelled, consumeBudget } from "../core/run-control.ts";
@@ -202,7 +204,14 @@ export async function dispatchCapability(
         fixtures.delegate,
       );
       break;
-    default:
+    default: {
+      if (proposal.capabilityId.startsWith("tools.")) {
+        const profile = profileFor(proposal.capabilityId, ctx.config);
+        if (profile) {
+          result = await runStructuredTool(profile, proposal.input, ctx);
+          break;
+        }
+      }
       result = {
         capabilityId: proposal.capabilityId,
         ok: false,
@@ -211,10 +220,24 @@ export async function dispatchCapability(
           message: `Capability not wired: ${proposal.capabilityId}`,
         },
       };
+    }
   }
 
   if (ctx.run) {
-    assertNotCancelled(ctx.run.db, ctx.run.runId, ctx.run.cancelEpoch);
+    try {
+      assertNotCancelled(ctx.run.db, ctx.run.runId, ctx.run.cancelEpoch);
+    } catch (e) {
+      const keli = e instanceof KeliError ? e : null;
+      return {
+        capabilityId: proposal.capabilityId,
+        ok: false,
+        output: result.output,
+        error: {
+          code: keli?.code ?? "cancelled",
+          message: keli?.message ?? String(e),
+        },
+      };
+    }
   }
 
   return applyRunBudget(ctx, result);

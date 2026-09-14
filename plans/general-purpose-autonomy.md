@@ -44,7 +44,7 @@ The following is current runtime truth. Historical spike documents remain dated 
 | Material-change outbox; delivery retry does not repeat research | implemented, fixture-verified | `src/watches/autonomy.ts`, `src/transports/outbox.ts` |
 | Augustine/Shaul and Cava source-collection scenarios | implemented, fixture-verified | `tests/integration/`, `docs/evidence/research-autonomy/` |
 | 2026 mechanism matrix, A–J micro-tests, Hermes/Nanobot probes | historical research evidence | `docs/research/`, `docs/evidence/2026-fast-spike/`, `experiments/2026-fast-spike/` |
-| Generic structured external-CLI tools (Rocket profile) | not implemented | this plan, section B |
+| Generic structured external-CLI tools (Rocket profile) | implemented, fixture-verified | `src/tools/`, `tools.rocket`; live Rocket deferred |
 | General responsibility contract beyond source-collection watches | not implemented | this plan, section A |
 | Evidence-directed investigation across domains | partial (research watches only) | this plan, section C |
 | Live provider / live Rocket evaluation | deferred onboarding milestone | section 3 |

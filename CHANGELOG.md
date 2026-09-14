@@ -6,6 +6,12 @@ All notable changes to Keli follow [SemVer](https://semver.org/).
 
 **Release policy:** the full initial PRD product ships as **v0.1.0**. Increments 0.1-A–I are complete in code, including the integration/onboarding layer. **Do not tag v0.1.0** until human gates are recorded. See [PRD.md](PRD.md) §11.
 
+### Structured external tools (Rocket profile)
+
+- `tools.rocket` is a read-only structured CLI capability. The executable and argv template come from `ROCKET_BIN` / `tools.rocket.bin` and config; the model may pass only a declared `workflow`.
+- Command success, acquisition health, evidence sufficiency, and domain findings are mapped separately. Missing binaries are `integration_gap`, not invented results.
+- Owned process timeout, cancellation, and output limits are enforced. Research turns still cannot call this capability until a responsibility approves it.
+
 ### Current plan (general-purpose autonomy)
 
 - Current development plan is [general-purpose autonomy](plans/general-purpose-autonomy.md). Keli coordinates; domain tools such as Rocket return evidence. In-Keli wallet/portfolio engines are superseded.

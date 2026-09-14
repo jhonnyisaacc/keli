@@ -38,6 +38,10 @@ export function invokeCommand(globals: CliGlobals) {
         type: "string",
         description: "Query for search.query",
       },
+      workflow: {
+        type: "string",
+        description: "Declared workflow for tools.rocket and other structured CLI tools",
+      },
       name: {
         type: "string",
         description: "Tool name for mcp.tools/call",
@@ -82,6 +86,7 @@ export function invokeCommand(globals: CliGlobals) {
         if (args.name !== undefined) input.name = args.name;
         if (args.delegate !== undefined) input.delegate = args.delegate;
         if (args.goal !== undefined) input.goal = args.goal;
+        if (args.workflow !== undefined) input.workflow = args.workflow;
         if (args.capability === "delegate.run") {
           input.workspace = args.path ?? globals.cwd;
           input.actionId = crypto.randomUUID();
@@ -95,7 +100,7 @@ export function invokeCommand(globals: CliGlobals) {
         };
 
         const gate = new CapabilityGate(db, defaultRegistry, stateDir, owner.id);
-        const { actionId, runId, result } = await gate.run(proposal, policy, scope, globals.cwd);
+        const { actionId, runId, result } = await gate.run(proposal, policy, scope, globals.cwd, { config });
         const terminal = gate.terminalStatus(actionId);
 
         emit(

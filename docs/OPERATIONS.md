@@ -30,6 +30,23 @@ While paused:
 - Scheduled jobs do not tick
 - Effectful capabilities (`mutate`, `effect`) are blocked at the gate
 
+## Structured domain tools
+
+Rocket and other CLIs stay outside Keli. Configure the executable and private state with
+environment variables or config; never commit wallet inputs.
+
+```sh
+export ROCKET_BIN=/path/to/rocket
+export ROCKET_STATE_DIR=/path/to/private-rocket-state
+keli config set tools.rocket.revision <tested-git-sha>
+keli invoke tools.rocket --workflow health --json
+```
+
+`tools.rocket` is read-only. A successful command is not a sufficient research result and
+does not close a responsibility. Research watches cannot call it until a later
+responsibility contract approves the capability. A missing binary is reported as
+`integration_gap`.
+
 ## Known limits (current increments)
 
 - **0.1-A–E shipped:** packaging, backup/restore, global pause, fixture-backed transports in CI

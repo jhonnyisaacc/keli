@@ -13,6 +13,21 @@ import type {
   ProviderSelection,
 } from "../integrations/types.ts";
 
+export type StructuredToolConfig = {
+  id?: string;
+  bin?: string;
+  binEnv?: string;
+  args?: string[];
+  workflows?: string[];
+  timeoutMs?: number;
+  maxOutputBytes?: number;
+  stateDir?: string;
+  stateEnvVar?: string;
+  revision?: string;
+  version?: string;
+  summary?: string;
+};
+
 export type KeliConfig = {
   version: number;
   ownerId: string;
@@ -75,6 +90,14 @@ export type KeliConfig = {
   };
   /** Outbound hosts research tools may fetch. Unset means loopback only. */
   network?: { allowedHosts?: string[] };
+  /**
+   * Structured external CLI tools. Executables and argv templates are configured here or
+   * via named environment variables; the model never supplies a shell command.
+   */
+  tools?: {
+    rocket?: StructuredToolConfig;
+    external?: StructuredToolConfig[];
+  };
   /** Heartbeat authoring file compiled into watch proposals by `keli watches import`. */
   watches?: { heartbeatFile?: string };
   /** Daily software updates. Default off; auto activates only at an idle boundary. */

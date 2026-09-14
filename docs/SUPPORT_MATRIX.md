@@ -33,6 +33,7 @@ What "configured" means per surface, and what has actually been exercised:
 | Telegram | Outbox/inbox fixtures, `/getMe` round trip | Sender only | Inbox receiver + conversation handler |
 | Watches / heartbeat | Fingerprint gating, one wake per change, notify-once, pause after failures, HEARTBEAT import as proposals | `keli watches tick` from cron/systemd timer | URL watches beyond loopback need `network.allowedHosts` |
 | Updates | Install/rollback bookkeeping, snapshot + migration rehearsal, off/notify/auto policy, idle deferral | `keli update --scheduled` from a daily timer | Published release manifest URL; native-runner evidence |
+| Structured CLI tools (`tools.rocket`) | Fixture CLI: argv lock, timeout/cancel, ResearchResult mapping, integration_gap | `ROCKET_BIN` + `ROCKET_STATE_DIR` when configured | Live Rocket revision pin; responsibility approval to use it in research turns |
 
 Live probe: `bun run scripts/live-probe.ts` performs real round trips; required integrations that are skipped are reported as not passing.
 

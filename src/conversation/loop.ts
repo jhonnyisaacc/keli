@@ -486,6 +486,7 @@ export class ConversationLoop {
         sources,
         networkHosts: this.deps.networkHosts,
         fixtures: this.deps.fixtures,
+        config: this.deps.config,
       },
     );
     if (result.ok) this.registerSources(capability, input, result.output, known, evidence);
