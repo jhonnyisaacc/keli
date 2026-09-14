@@ -15,6 +15,7 @@ export async function browserNavigate(
       capabilityId: "browser.navigate",
       ok: true,
       output,
+      artifacts: [{ path: output.url, hash: output.sha256 }],
     };
   } catch (e) {
     const keli = e instanceof KeliError ? e : null;
@@ -50,6 +51,7 @@ export async function browserCapture(
         backend: output.backend,
         title: output.title,
       },
+      artifacts: [{ path: output.url, hash: output.sha256 }],
     };
   } catch (e) {
     const keli = e instanceof KeliError ? e : null;

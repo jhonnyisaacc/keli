@@ -1,5 +1,6 @@
 import { probeBrowserBackend, type BrowserBackendKind } from "../../../execution/browser-backends.ts";
 import { registerIntegration } from "../../registry.ts";
+import { httpRoundTrip, notConfigured } from "../../round-trip.ts";
 import { statusOf } from "../../status.ts";
 import type { IntegrationProfile } from "../../types.ts";
 
@@ -38,6 +39,22 @@ for (const kind of KINDS) {
           kind.id === "playwright"
             ? "bun add -d playwright && bunx playwright install chromium"
             : `configure browser.${kind.id} or matching KELI_FIXTURE_* URL`,
+      });
+    },
+    async roundTrip(ctx) {
+      const url = ctx.fixtureUrl ?? ctx.settings.url;
+      if (!url && kind.id !== "playwright") return notConfigured("Browser backend has no endpoint");
+      if (kind.id === "playwright") {
+        const result = await probeBrowserBackend("playwright");
+        return result.available
+          ? { ok: true, detail: result.reason ?? "playwright available" }
+          : { ok: false, detail: result.reason ?? "playwright missing", failure: "not-configured" };
+      }
+      return httpRoundTrip({
+        url: `${url!.replace(/\/$/, "")}/navigate`,
+        method: "POST",
+        body: { url: "https://example.com/" },
+        timeoutMs: ctx.timeoutMs,
       });
     },
   };

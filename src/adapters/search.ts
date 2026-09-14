@@ -48,10 +48,16 @@ export async function searchQuery(
     return await postSearch(base, input.query, credential);
   } catch (e) {
     const keli = e instanceof KeliError ? e : null;
+    const message = keli?.message ?? String(e);
+    const timeout = /timeout|TimeoutError|aborted/i.test(message);
     return {
       capabilityId: "search.query",
       ok: false,
-      error: { code: keli?.code ?? "unknown", message: keli?.message ?? String(e) },
+      error: {
+        code: keli?.code ?? (timeout ? "engine_error" : "unknown"),
+        message: timeout ? `Search timed out: ${message}` : message,
+        retryable: keli?.retryable ?? timeout,
+      },
     };
   }
 }
@@ -73,9 +79,18 @@ async function postSearch(base: string, query: string, credential?: string): Pro
     body: JSON.stringify({ query }),
     signal: AbortSignal.timeout(15_000),
   });
+  if (response.status === 401 || response.status === 403) {
+    throw new KeliError(`Search authentication failed (HTTP ${response.status})`, "needs_reauth");
+  }
   if (!response.ok) throw new KeliError(`Search HTTP ${response.status}`, "engine_error", response.status >= 500);
-  const payload = (await response.json()) as { results: { title: string; url: string }[] };
-  return { capabilityId: "search.query", ok: true, output: payload };
+  let payload: { results?: { title?: string; url?: string; snippet?: string }[] };
+  try {
+    payload = (await response.json()) as { results?: { title?: string; url?: string; snippet?: string }[] };
+  } catch {
+    throw new KeliError("Search returned malformed JSON", "invalid_request");
+  }
+  const results = (payload.results ?? []).map((r) => ({ title: r.title ?? "", url: r.url ?? "", snippet: r.snippet ?? "" }));
+  return { capabilityId: "search.query", ok: true, output: { results } };
 }
 
 async function braveSearch(base: string, query: string, credential?: string): Promise<CapabilityResult> {

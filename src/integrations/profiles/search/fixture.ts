@@ -53,6 +53,14 @@ export const searchProfile: IntegrationProfile = {
         url: probe.toString(),
         headers: { Accept: "application/json", "X-Subscription-Token": ctx.credential },
         timeoutMs: ctx.timeoutMs,
+        accept: (_status, body) => {
+          try {
+            const payload = JSON.parse(body) as { web?: { results?: unknown } };
+            return Array.isArray(payload.web?.results);
+          } catch {
+            return false;
+          }
+        },
       });
     }
     return httpRoundTrip({
@@ -64,6 +72,14 @@ export const searchProfile: IntegrationProfile = {
       },
       body: { query: "keli-probe" },
       timeoutMs: ctx.timeoutMs,
+      accept: (_status, body) => {
+        try {
+          const payload = JSON.parse(body) as { results?: unknown };
+          return Array.isArray(payload.results);
+        } catch {
+          return false;
+        }
+      },
     });
   },
 };

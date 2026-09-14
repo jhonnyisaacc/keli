@@ -2,6 +2,7 @@ import type { CapabilityResult } from "../capabilities/types.ts";
 import type { NetworkPolicy } from "../execution/network-policy.ts";
 import { assertAllowedHost } from "../execution/network-policy.ts";
 import { KeliError } from "../core/errors.ts";
+import { boundedTextArtifact } from "../execution/artifacts.ts";
 
 const MAX_RESPONSE_BYTES = 256_000;
 
@@ -21,15 +22,20 @@ export async function httpFetch(
       );
     }
     const text = new TextDecoder().decode(body);
+    const contentType = response.headers.get("content-type") ?? "application/octet-stream";
+    const artifact = boundedTextArtifact(parsed.toString(), text, contentType);
     return {
       capabilityId: "http.fetch",
       ok: response.ok,
       output: {
-        url: parsed.toString(),
+        url: artifact.url,
         status: response.status,
-        bytes: body.byteLength,
-        body: text,
+        bytes: artifact.bytes,
+        body: artifact.text,
+        contentType: artifact.contentType,
+        sha256: artifact.sha256,
       },
+      artifacts: artifact.artifacts,
       error: response.ok
         ? undefined
         : {

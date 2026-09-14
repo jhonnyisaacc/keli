@@ -4,6 +4,7 @@ import { KeliError } from "../core/errors.ts";
 import type { NetworkPolicy } from "./network-policy.ts";
 import { assertAllowedHost } from "./network-policy.ts";
 import { fixtureUrlFor } from "../integrations/env.ts";
+import { boundedTextArtifact, sha256Hex, MAX_ARTIFACT_BYTES } from "./artifacts.ts";
 
 const PLAYWRIGHT_SCRIPT = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -24,6 +25,9 @@ export type BrowserNavigateOutput = {
   title: string;
   content: string;
   backend: BrowserBackendKind;
+  contentType: string;
+  bytes: number;
+  sha256: string;
 };
 
 export type BrowserCaptureKind = "screenshot" | "download";
@@ -151,14 +155,44 @@ export async function navigateWithBrowser(
   assertAllowedHost(policy, url);
   switch (backend) {
     case "fixture":
-      return { ...await navigateViaFixture(url, merged.fixtureUrl!), backend };
+      return withNavigateHash(await navigateViaFixture(url, merged.fixtureUrl!), backend);
     case "playwright":
-      return { ...await navigateViaPlaywright(url), backend };
+      return withNavigateHash(await navigateViaPlaywright(url), backend);
     case "cdp":
-      return { ...await navigateViaCdp(url, merged.cdpUrl!), backend };
+      return withNavigateHash(await navigateViaCdp(url, merged.cdpUrl!), backend);
     case "mcp":
-      return { ...await navigateViaMcp(url, merged.mcpUrl!), backend };
+      return withNavigateHash(await navigateViaMcp(url, merged.mcpUrl!), backend);
   }
+}
+
+function withNavigateHash(
+  output: Omit<BrowserNavigateOutput, "backend" | "contentType" | "bytes" | "sha256"> & Partial<Pick<BrowserNavigateOutput, "contentType" | "bytes" | "sha256">>,
+  backend: BrowserBackendKind,
+): BrowserNavigateOutput {
+  const artifact = boundedTextArtifact(output.url, output.content ?? "", output.contentType ?? "text/html");
+  return {
+    ...output,
+    backend,
+    contentType: artifact.contentType,
+    bytes: artifact.bytes,
+    sha256: artifact.sha256,
+  };
+}
+
+function withCaptureHash(
+  output: Omit<BrowserCaptureOutput, "backend">,
+  backend: BrowserBackendKind,
+): BrowserCaptureOutput {
+  const bytes = Buffer.from(output.bodyBase64 ?? "", "base64");
+  if (bytes.byteLength > MAX_ARTIFACT_BYTES) {
+    throw new KeliError(`Response exceeds ${MAX_ARTIFACT_BYTES} bytes`, "quota_exceeded");
+  }
+  return {
+    ...output,
+    backend,
+    bytes: bytes.byteLength,
+    sha256: sha256Hex(bytes),
+  };
 }
 
 async function selectedBackend(config: BrowserBackendConfig): Promise<{ backend: BrowserBackendKind; merged: BrowserBackendConfig }> {
@@ -184,10 +218,10 @@ export async function captureWithBrowser(
   const { backend, merged } = await selectedBackend(config);
   assertAllowedHost(policy, url);
   if (backend === "fixture") {
-    return { ...await captureViaFixture(url, kind, merged.fixtureUrl!), backend };
+    return withCaptureHash(await captureViaFixture(url, kind, merged.fixtureUrl!), backend);
   }
   if (backend === "playwright") {
-    return { ...await captureViaPlaywright(url, kind), backend };
+    return withCaptureHash(await captureViaPlaywright(url, kind), backend);
   }
   throw new KeliError(
     `Browser ${kind} is available for fixture and Playwright backends; ${backend} is navigation-only.`,

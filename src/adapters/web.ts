@@ -1,6 +1,7 @@
 import type { CapabilityResult } from "../capabilities/types.ts";
 import type { NetworkPolicy } from "../execution/network-policy.ts";
 import { httpFetch } from "./http.ts";
+import { boundedTextArtifact } from "../execution/artifacts.ts";
 
 export async function webFetch(
   input: { url: string },
@@ -9,16 +10,20 @@ export async function webFetch(
   const fetched = await httpFetch({ url: input.url, method: "GET" }, policy);
   if (!fetched.ok || !fetched.output) return { ...fetched, capabilityId: "web.fetch" };
 
-  const body = (fetched.output as { body: string }).body;
+  const body = (fetched.output as { body: string; contentType?: string }).body;
   const text = stripHtml(body).slice(0, 65_536);
+  const artifact = boundedTextArtifact(input.url, text, "text/plain");
   return {
     capabilityId: "web.fetch",
     ok: true,
     output: {
-      url: input.url,
-      bytes: Buffer.byteLength(text),
-      text,
+      url: artifact.url,
+      contentType: artifact.contentType,
+      bytes: artifact.bytes,
+      sha256: artifact.sha256,
+      text: artifact.text,
     },
+    artifacts: artifact.artifacts,
   };
 }
 
