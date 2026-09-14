@@ -1,6 +1,6 @@
 import type { Database } from "bun:sqlite";
 
-export const CURRENT_SCHEMA_VERSION = 11;
+export const CURRENT_SCHEMA_VERSION = 12;
 
 const MIGRATIONS: Record<number, string> = {
   1: `
@@ -374,6 +374,20 @@ const MIGRATIONS: Record<number, string> = {
       body
     );
   `,
+  12: `
+    CREATE TABLE watch_occurrences (
+      id TEXT PRIMARY KEY, watch_id TEXT NOT NULL REFERENCES watches(id),
+      version INTEGER NOT NULL, fingerprint TEXT NOT NULL, observed_fingerprint TEXT NOT NULL, policy_key TEXT NOT NULL,
+      status TEXT NOT NULL, run_id TEXT NOT NULL REFERENCES runs(id),
+      generation INTEGER NOT NULL DEFAULT 0, dependency_key TEXT NOT NULL, contract_json TEXT NOT NULL,
+      input_text TEXT, input_ref TEXT, phase TEXT NOT NULL DEFAULT 'inspect',
+      result_json TEXT, token TEXT, pid INTEGER,
+      created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+      UNIQUE(watch_id, version, fingerprint, policy_key)
+    );
+    CREATE INDEX watch_occurrences_watch ON watch_occurrences(watch_id, created_at);
+  `,
+
 };
 
 /** Synthetic v3 migration for upgrade harness tests only. */

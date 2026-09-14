@@ -1,6 +1,9 @@
+import { DeliveryRejectedError } from "../../transports/outbox.ts";
+import { ResearchResponsibilityService } from "../../core/behavior.ts";
+import { listResearchOccurrences } from "../../watches/occurrences.ts";
 import { defineCommand } from "citty";
 import { join } from "node:path";
-import { sendDiscordMessage } from "../../transports/discord.ts";
+import { deliverDiscordOutbox, sendDiscordMessage } from "../../transports/discord.ts";
 import { resolveDiscordBackend } from "../../transports/discord-resolve.ts";
 import { importHeartbeatFile } from "../../watches/heartbeat-file.ts";
 import { tickWatches, type WatchNotification } from "../../watches/heartbeat.ts";
@@ -57,6 +60,24 @@ export function watchesCommand(globals: CliGlobals) {
       approve: statusCommand(globals, "active", "Approve a proposed watch so the heartbeat runs it"),
       pause: statusCommand(globals, "paused", "Pause a watch"),
       retire: statusCommand(globals, "retired", "Retire a watch"),
+      occurrences: defineCommand({
+        meta: { description: "Show research occurrence status, evidence, run budget reference and unmet input" },
+        args: { id: { type: "positional", required: true } },
+        async run({ args }) {
+          const app = await openApp(globals, { requireProvider: false });
+          try { const rows = listResearchOccurrences(app.db, String(args.id)); emit(rows, globals.outputFormat, rows.map(o => `${o.id} ${o.status} phase=${o.phase} run=${o.run_id} ${o.result_json ? JSON.parse(o.result_json).text : ""}`).join("\n")); }
+          finally { app.close(); }
+        },
+      }),
+      resume: defineCommand({
+        meta: { description: "Supply missing input to a waiting research occurrence; next tick resumes within its remaining budget" },
+        args: { id: { type: "positional", required: true }, input: { type: "string", required: true } },
+        async run({ args }) {
+          const app = await openApp(globals, { requireProvider: false });
+          try { const resumed = new ResearchResponsibilityService(app.db, app.owner.id).supplyInput(String(args.id), app.scope, String(args.input), `cli:${crypto.randomUUID()}`); emit({ resumed }, globals.outputFormat, resumed ? "Input recorded; next eligible tick resumes research." : "No matching approved waiting occurrence in this scope."); }
+          finally { app.close(); }
+        },
+      }),
       events: defineCommand({
         meta: { description: "Show recent events for a watch" },
         args: { id: { type: "positional", required: true } },
@@ -78,7 +99,7 @@ export function watchesCommand(globals: CliGlobals) {
         },
         async run({ args }) {
           try {
-            const app = await openApp(globals);
+            const app = await openApp(globals, { requireProvider: false });
             let backend: Awaited<ReturnType<typeof resolveDiscordBackend>> | null = null;
             const notify = args["no-notify"]
               ? undefined
@@ -87,7 +108,9 @@ export function watchesCommand(globals: CliGlobals) {
                     console.log(n.text);
                     return;
                   }
-                  backend ??= await resolveDiscordBackend(app.config);
+                  try { backend ??= await resolveDiscordBackend(app.config); }
+                  catch (e) { throw new DeliveryRejectedError(String(e)); }
+                  if (n.outbox) { await deliverDiscordOutbox(app.db, n.outbox, backend); return; }
                   await sendDiscordMessage(
                     app.db,
                     { channelId: n.watch.notify.channelId, threadId: n.watch.notify.threadId, message: n.text, scope: n.watch.scope },

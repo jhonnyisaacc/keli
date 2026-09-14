@@ -24,6 +24,9 @@ export type WatchBudget = {
 };
 
 export type WatchEvidence = {
+  /** Opt-in evidence-driven continuation; source-collection watches only. */
+  autonomy?: boolean;
+  requiredSubjects?: string[];
   /** Question the research turn answers when the fingerprint changes. */
   question: string;
   /** Collections that must be cited in the answer; merged with the scope's research policy. */

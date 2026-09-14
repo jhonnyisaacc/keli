@@ -1,3 +1,5 @@
+import { ResearchResponsibilityService } from "../core/behavior.ts";
+import { getWatch } from "../watches/store.ts";
 import type { Database } from "bun:sqlite";
 import type { ConversationRecord } from "../memory/conversations.ts";
 import { getProjectById } from "../state/repos.ts";
@@ -55,9 +57,17 @@ export function turnContextFor(
  * reference is the transport message id, so re-processing the same inbound message after a
  * restart returns the stored reply instead of running the model again.
  */
-export function conversationInboxHandler(db: Database, ownerId: string, loop: ConversationLoop): InboxHandler {
+export function conversationInboxHandler(db: Database, ownerId: string, loop: ConversationLoop, ownerUserId?: string): InboxHandler {
   return async (message, route, conversation) => {
     const text = String(message.payload.text ?? message.payload.content ?? message.payload.message ?? "");
+    const supplied = /^\/watch-input\s+(watch-[a-f0-9]+)\s+([\s\S]+)$/.exec(text);
+    if (supplied) {
+      const watch = getWatch(db, supplied[1]!);
+      const sameRoute = watch && (watch.notify.threadId ? `thread:${watch.notify.threadId}` : watch.notify.channelId) === route.externalId;
+      if (!ownerUserId || message.payload.authorId !== ownerUserId || !sameRoute) return { reply: "Watch input requires the configured owner on the watch's exact route." };
+      const suppliedOk = new ResearchResponsibilityService(db, ownerId).supplyInput(supplied[1]!, route.scope, supplied[2]!, `${message.transport}:${message.dedupeKey}`);
+      return { reply: suppliedOk ? "Input recorded; the next watch tick resumes within its remaining budget." : "No matching waiting occurrence." };
+    }
     const ctx = turnContextFor(db, ownerId, message, route, conversation);
     const outcome = await loop.runTurn(ctx, text, { sourceRef: `${message.transport}:${message.dedupeKey}` });
     return { reply: formatReply(outcome.kind, outcome.text) };
@@ -95,12 +105,12 @@ export type DiscordCycleResult = { poll: DiscordPollResult; inbox: InboxProcessR
 /** One receive → converse → reply cycle for every bound Discord route. Safe to run repeatedly. */
 export async function runDiscordCycle(
   db: Database,
-  input: { ownerId: string; backend: DiscordBackend; loop: ConversationLoop; limit?: number },
+  input: { ownerId: string; backend: DiscordBackend; loop: ConversationLoop; ownerUserId?: string; limit?: number },
 ): Promise<DiscordCycleResult> {
   const poll = await pollDiscordRoutes(db, input.backend, { limit: input.limit });
   const inbox = await processTransportInbox(db, {
     limit: input.limit,
-    handler: conversationInboxHandler(db, input.ownerId, input.loop),
+    handler: conversationInboxHandler(db, input.ownerId, input.loop, input.ownerUserId),
     reply: discordReplier(db, input.backend),
   });
   return { poll, inbox };

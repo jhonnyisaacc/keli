@@ -24,9 +24,13 @@ export type AnswerDraft = {
 };
 
 export type ResearchPolicy = {
+  strict?: boolean;
+  requiredSubjects?: string[];
   requiredCollections: string[];
   citationsRequired: boolean;
 };
+
+export type SourceEvidence = { collection: string; hash?: string; text?: string; offset?: number; passages?: Array<{ offset: number; text: string }> };
 
 export type EvidenceVerdict = {
   ok: boolean;
@@ -59,9 +63,28 @@ export function policyFromRules(rules: Rule[]): ResearchPolicy {
 export function checkEvidence(
   draft: AnswerDraft,
   policy: ResearchPolicy,
-  knownSources: Map<string, { collection: string }>,
+  knownSources: Map<string, SourceEvidence>,
 ): EvidenceVerdict {
   const reasons: string[] = [];
+  if (policy.strict) {
+    if (!draft.attributions.length) reasons.push("research completion requires explicit supported claims");
+    if (!draft.citations.length) reasons.push("research completion requires passage citations");
+    for (const citation of draft.citations) {
+      const source = knownSources.get(citation.sourceId);
+      if (!source?.hash || !source.text?.trim()) reasons.push(`read a current passage for ${citation.sourceId}`);
+      if (!citation.quote?.trim() || !(source?.passages ?? (source?.text ? [{text: source.text, offset: source.offset ?? 0}] : [])).some(p => p.text.includes(citation.quote!))) reasons.push(`quote must match retained passage for ${citation.sourceId}`);
+    }
+    for (const subject of policy.requiredSubjects ?? []) {
+      if (!draft.attributions.some(a => a.subject.toLowerCase() === subject.toLowerCase() && a.stance !== "no-coverage" && a.claim.trim())) {
+        reasons.push(`required subject not covered: ${subject}`);
+      }
+    }
+    for (const attribution of draft.attributions) {
+      if (attribution.stance === "no-coverage" || !attribution.sourceIds.some(id => draft.citations.some(c => c.sourceId === id))) {
+        reasons.push(`unresolved attribution: ${attribution.subject}`);
+      }
+    }
+  }
   const unknownSourceIds = draft.citations.map((c) => c.sourceId).filter((id) => !knownSources.has(id));
   const knownCitations = draft.citations.filter((c) => knownSources.has(c.sourceId));
   const citedCollections = new Set(knownCitations.map((c) => knownSources.get(c.sourceId)!.collection));

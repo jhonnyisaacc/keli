@@ -24,6 +24,8 @@ export type CapabilityActionRecord = {
 };
 
 export type CapabilityRunOptions = {
+  /** Trusted controller rechecks occurrence ownership/current approval at dispatch. */
+  assertDispatch?: () => void | Promise<void>;
   runId?: string;
   networkHosts?: string[];
   fixtures?: DispatchContext["fixtures"];
@@ -68,6 +70,7 @@ export class CapabilityGate {
     options?: CapabilityRunOptions,
   ): Promise<{ actionId: string; runId: string; result: CapabilityResult }> {
     const control = await readControl(this.stateDir);
+    await options?.assertDispatch?.();
     const descriptor = this.registry.get(proposal.capabilityId);
     if (descriptor && descriptor.actionClass !== "read" && isEffectfulBlocked(control)) {
       const actionId = this.prepare(proposal, scope, options?.runId);

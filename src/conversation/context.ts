@@ -51,7 +51,10 @@ export function buildSystemPrompt(input: {
   lines.push("- Distinguish agreement, disagreement, interpretation, and missing coverage. Never reconstruct what someone 'would' say without retrieved evidence.");
   lines.push("- Cite only sourceIds returned by tools in this turn. If evidence is missing after searching, say so with type \"missing_evidence\".");
 
-  const collections = input.sources?.collections() ?? [];
+  if (policy.strict) {
+    lines.push(`Evidence contract: read current passages with sources.read before answering; cite exact quotes. Provide explicit attributions for supported findings, including assumptions/invalidation in the claim when relevant. Required subjects: ${(policy.requiredSubjects ?? []).join(", ")}. Search identifiers alone do not establish support. Missing coverage must remain missing_evidence. Reuse addressed recovered observations; change an unsuccessful retrieval strategy.`);
+  }
+  const collections = (input.sources?.collections() ?? []).filter(c => !policy.strict || policy.requiredCollections.includes(c.id));
   lines.push("");
   lines.push(collections.length ? "Indexed source collections:" : "Indexed source collections: none (sources.* tools will report unavailable).");
   for (const c of collections) {

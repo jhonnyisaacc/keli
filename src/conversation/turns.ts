@@ -37,12 +37,13 @@ export function turnIdFor(conversationId: string, sourceRef: string, suffix: str
 export function appendTurn(
   db: Database,
   turn: Omit<ConversationTurn, "createdAt" | "id"> & { id?: string; createdAt?: string },
+  preserveRaw = false,
 ): { turn: ConversationTurn; duplicate: boolean } {
   const id = turn.id ?? crypto.randomUUID();
   const existing = db.query("SELECT * FROM conversation_turns WHERE id = ?").get(id) as Record<string, string | null> | null;
   if (existing) return { turn: rowToTurn(existing), duplicate: true };
   const createdAt = turn.createdAt ?? new Date().toISOString();
-  const content = turn.content.length > MAX_INLINE_TURN_CHARS ? `${turn.content.slice(0, MAX_INLINE_TURN_CHARS)}…[truncated]` : turn.content;
+  const content = !preserveRaw && turn.content.length > MAX_INLINE_TURN_CHARS ? `${turn.content.slice(0, MAX_INLINE_TURN_CHARS)}…[truncated]` : turn.content;
   db.run(
     `INSERT INTO conversation_turns(id, conversation_id, scope, role, kind, content, refs_json, run_id, source_ref, created_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,

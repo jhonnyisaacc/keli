@@ -2,7 +2,7 @@
 
 ## Authority
 
-- Only `src/core/gate.ts` and `src/core/behavior.ts` commit durable behavior and terminal action truth.
+- `src/core/gate.ts`, `src/core/capability-gate.ts` (existing capability execution receipts), and `src/core/behavior.ts` own durable behavior and terminal action truth. Research occurrence verification is committed by `ResearchResponsibilityService` in `behavior.ts`; adapters and the conversation loop cannot mark occurrences verified. Run lifecycle and transport delivery remain separate bookkeeping.
 - Model output and tool responses are proposals only; never trust them for authorization.
 - Adapters under `src/adapters/` (future) must not write canonical state directly.
 

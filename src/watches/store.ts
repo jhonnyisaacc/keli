@@ -64,6 +64,12 @@ export function validateDefinition(def: WatchDefinition): void {
   if (def.kind !== "source-collection" && def.kind !== "url") {
     throw new KeliError(`Unsupported watch kind: ${String(def.kind)}`, "invalid_request");
   }
+  if (def.evidence.autonomy && def.kind !== "source-collection") {
+    throw new KeliError("Autonomous research currently requires an indexed source-collection", "invalid_request");
+  }
+  for (const [key, value] of Object.entries(def.budget ?? {})) {
+    if (!Number.isFinite(value) || value < 0 || !Number.isInteger(value)) throw new KeliError(`Invalid watch budget ${key}`, "invalid_request");
+  }
   parseSchedule(def.trigger.schedule);
   if (!def.trigger.target?.trim()) throw new KeliError("Watch trigger needs a target", "invalid_request");
   if (def.kind === "url" && !/^https?:\/\//.test(def.trigger.target)) {

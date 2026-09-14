@@ -29,11 +29,11 @@ function discordPollCommand(globals: CliGlobals) {
     },
     async run({ args }) {
       try {
-        const app = await openApp(globals);
+        const app = await openApp(globals, { requireProvider: false });
         const backend = await resolveDiscordBackend(app.config);
         const limit = args.limit ? Number(args.limit) : undefined;
         const once = async () => {
-          const result = await runDiscordCycle(app.db, { ownerId: app.owner.id, backend, loop: app.conversation.loop, limit });
+          const result = await runDiscordCycle(app.db, { ownerId: app.owner.id, backend, loop: app.conversation.loop, ownerUserId: app.config.transports?.discord?.ownerUserId, limit });
           emit(
             result,
             globals.outputFormat,

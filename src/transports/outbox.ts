@@ -1,6 +1,9 @@
 import type { Database } from "bun:sqlite";
 import type { OutboxStatus } from "../jobs/types.ts";
 
+/** A transport positively knows it did not send; unlike an ambiguous retryable network failure. */
+export class DeliveryRejectedError extends Error {}
+
 export type OutboxMessage = {
   id: string;
   scope: string;

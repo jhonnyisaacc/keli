@@ -1,3 +1,5 @@
+import { tickResearchWatch, flushResearchNotifications } from "./autonomy.ts";
+import { enqueueOutbox, type OutboxMessage } from "../transports/outbox.ts";
 import type { Database } from "bun:sqlite";
 import { createHash } from "node:crypto";
 import type { ConversationLoop } from "../conversation/loop.ts";
@@ -21,6 +23,7 @@ import {
 import type { WatchNotifyPolicy, WatchRecord } from "./types.ts";
 
 export type WatchNotification = {
+  outbox?: OutboxMessage;
   watch: WatchRecord;
   kind: "changed" | "missing_evidence" | "failed" | "paused";
   text: string;
@@ -152,6 +155,26 @@ export async function tickWatches(db: Database, deps: HeartbeatDeps, now = new D
       continue;
     }
     result.due += 1;
+    if (watch.evidence.autonomy) {
+      try { result.outcomes.push(await tickResearchWatch(db, deps, watch, now)); }
+      catch (e) {
+        // An interruption with a persisted occurrence remains resumable; pre-claim failures
+        // share the watch's bounded consecutive-failure policy.
+        recordWatchFailure(db, watch.id, now.toISOString(), String(e));
+        const attempt = db.query("SELECT last_attempt_at, attempts FROM watches WHERE id=?").get(watch.id) as { last_attempt_at: string | null; attempts: number };
+        if (attempt.last_attempt_at !== now.toISOString()) recordWatchAttempt(db, watch.id, now.toISOString());
+        const failures = attempt.attempts + (attempt.last_attempt_at !== now.toISOString() ? 1 : 0);
+        let paused = false;
+        if (failures >= (watch.budget.maxConsecutiveFailures ?? 3)) {
+          setWatchStatus(db, watch.id, "paused"); paused = true;
+          if (watch.notify.policy !== "silent") enqueueOutbox(db, { id: `research:pause:${watch.id}:${crypto.randomUUID()}`, scope: watch.scope,
+            destination: watch.notify.channelId ? `discord:${watch.notify.channelId}` : "local:watch",
+            payload: { watchId: watch.id, version: watch.version, kind: "paused", message: `Watch "${watch.name}" paused after ${failures} failures: ${String(e)}`, threadId: watch.notify.threadId ?? null } });
+        }
+        result.outcomes.push({ watchId: watch.id, name: watch.name, result: paused ? "paused" : "failed", error: String(e) });
+      }
+      continue;
+    }
     const at = now.toISOString();
     recordWatchAttempt(db, watch.id, at);
 
@@ -236,5 +259,7 @@ export async function tickWatches(db: Database, deps: HeartbeatDeps, now = new D
     });
   }
 
+  result.modelWakes += result.outcomes.filter(o => o.result === "researched" && listWatches(db).find(w => w.id === o.watchId)?.evidence.autonomy).length;
+  result.notifications += await flushResearchNotifications(db, deps);
   return result;
 }

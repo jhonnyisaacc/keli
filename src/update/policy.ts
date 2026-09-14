@@ -44,6 +44,8 @@ export function idleReport(db: Database): IdleReport {
     db.query("SELECT COUNT(*) AS n FROM job_occurrences WHERE status IN ('pending', 'running')").get() as { n: number }
   ).n;
   if (occurrences) reasons.push(`${occurrences} job occurrence(s) in flight`);
+  const research = (db.query("SELECT COUNT(*) AS n FROM watch_occurrences WHERE status='active'").get() as { n: number }).n;
+  if (research) reasons.push(`${research} research occurrence(s) in flight`);
   const inbox = (db.query("SELECT COUNT(*) AS n FROM transport_inbox WHERE processed_at IS NULL").get() as { n: number }).n;
   if (inbox) reasons.push(`${inbox} unprocessed inbox message(s)`);
   return { idle: reasons.length === 0, reasons };

@@ -31,7 +31,7 @@ export type KeliConfig = {
   };
   /** Transport bindings chosen during setup. */
   transports?: {
-    discord?: { channelId?: string; threadId?: string };
+    discord?: { ownerUserId?: string; channelId?: string; threadId?: string };
     telegram?: { chatId?: string; topicId?: string };
   };
   setup?: {

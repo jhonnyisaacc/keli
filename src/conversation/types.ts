@@ -1,4 +1,4 @@
-import type { Attribution, Citation } from "../core/evidence.ts";
+import type { Attribution, Citation, SourceEvidence } from "../core/evidence.ts";
 
 export type TurnOrigin = {
   transport: "cli" | "discord" | "telegram" | "job" | "watch" | "test";
@@ -36,6 +36,7 @@ export type TurnOutcomeKind =
   | "error";
 
 export type TurnOutcome = {
+  evidence?: Record<string, SourceEvidence>;
   kind: TurnOutcomeKind;
   text: string;
   citations?: Citation[];

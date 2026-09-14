@@ -84,6 +84,8 @@ export function compileHeartbeat(text: string): HeartbeatParse {
     }
     const budget: WatchDefinition["budget"] = {};
     if (f["max-requests"]) budget.requestsMax = Number(f["max-requests"]);
+    if (f["max-tokens"]) budget.tokensMax = Number(f["max-tokens"]);
+    if (f["max-tools"]) budget.toolCallsMax = Number(f["max-tools"]);
     if (f["max-cents"]) budget.monetaryBudgetCents = Number(f["max-cents"]);
     if (f["max-failures"]) budget.maxConsecutiveFailures = Number(f["max-failures"]);
     proposals.push({
@@ -91,7 +93,7 @@ export function compileHeartbeat(text: string): HeartbeatParse {
       kind,
       trigger: { schedule, target },
       budget,
-      evidence: { question, requiredCollections: requires.length ? requires : undefined, citationsRequired: f.citations ? f.citations !== "no" : undefined },
+      evidence: { question, autonomy: f.autonomy === "yes", requiredSubjects: f.subjects?.split(",").map(s => s.trim()).filter(Boolean), requiredCollections: requires.length ? requires : undefined, citationsRequired: f.citations ? f.citations !== "no" : undefined },
       notify: { policy: notify, transport: f.channel || f.thread ? "discord" : undefined, channelId: f.channel, threadId: f.thread },
     });
   }

@@ -14,6 +14,7 @@ export type SourceHit = {
 };
 
 export type SourcePassage = {
+  hash?: string;
   sourceId: string;
   collection: string;
   title: string;
@@ -108,6 +109,7 @@ export function createSourceReader(db: Database): SourceReader {
       const length = Math.min(Math.max(1, chars), MAX_PASSAGE_CHARS);
       return {
         sourceId,
+        hash: row.hash!,
         collection: row.collection!,
         title: row.title ?? row.path!,
         author: row.author ?? undefined,

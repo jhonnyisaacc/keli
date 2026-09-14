@@ -254,3 +254,132 @@ export class BehaviorService {
       .map((row) => toRule(row as Parameters<typeof toRule>[0]));
   }
 }
+
+// Research occurrence truth is committed here, alongside scoped behavior authority.
+import { createRun, getRun, cancelRun } from "./run-control.ts";
+import { checkEvidence, type ResearchPolicy } from "./evidence.ts";
+import type { TurnOutcome } from "../conversation/types.ts";
+import { getWatch, appendWatchEvent } from "../watches/store.ts";
+import type { WatchRecord } from "../watches/types.ts";
+import { getResearchOccurrence, listResearchOccurrences, type ResearchOccurrence } from "../watches/occurrences.ts";
+import { enqueueOutbox } from "../transports/outbox.ts";
+
+/** Single-host ownership: never replace a worker whose process is still alive.
+ * PID reuse fails closed; all database writes also require the unique claim token.
+ * Research tools are read-only. No lease expiry is used to permit overlapping effects.
+ */
+function processAlive(pid: number | null): boolean {
+  if (!pid) return false;
+  try { process.kill(pid, 0); return true; } catch (e) { return (e as { code?: string }).code !== "ESRCH"; }
+}
+export class ResearchResponsibilityService {
+  constructor(private db: Database, private ownerId: string) {}
+
+  claim(watch: WatchRecord, fingerprint: string, policyKey: string, dependencyKey: string, policy: ResearchPolicy): ResearchOccurrence | null {
+    return this.db.transaction(() => {
+      const current = getWatch(this.db, watch.id);
+      if (!current || current.ownerId !== this.ownerId || current.status !== "active" || current.version !== watch.version) return null;
+      const rows = listResearchOccurrences(this.db, watch.id);
+      if (rows.some(o => o.token && processAlive(o.pid))) return null;
+      for (const o of rows.filter(o => (o.version !== watch.version || o.policy_key !== policyKey) && !["verified", "failed", "cancelled"].includes(o.status))) {
+        cancelRun(this.db, o.run_id);
+        this.db.run("UPDATE watch_occurrences SET status='cancelled', token=NULL, pid=NULL WHERE id=?", [o.id]);
+      }
+      let o = rows.find(o => o.version === watch.version && o.policy_key === policyKey && ["active", "waiting_for_evidence", "waiting_for_user"].includes(o.status));
+      if (o && o.status === "waiting_for_user" && !o.input_ref) return null;
+      if (o && o.status === "waiting_for_evidence" && o.dependency_key === dependencyKey && !o.input_ref) return null;
+      if (!o) {
+        o = rows.find(o => o.version === watch.version && o.policy_key === policyKey && (o.fingerprint === fingerprint || o.observed_fingerprint === fingerprint));
+        if (o) return null;
+        const runId = createRun(this.db, watch.scope, undefined, {
+          requestsMax: watch.budget.requestsMax ?? 20, tokensMax: watch.budget.tokensMax ?? 50000,
+          toolCallsMax: watch.budget.toolCallsMax ?? 20, monetaryBudgetCents: watch.budget.monetaryBudgetCents,
+        });
+        const id = crypto.randomUUID(), at = new Date().toISOString();
+        this.db.run(`INSERT INTO watch_occurrences(id,watch_id,version,fingerprint,observed_fingerprint,policy_key,status,run_id,dependency_key,contract_json,created_at,updated_at)
+          VALUES(?,?,?,?,?,?,'active',?,?,?,?,?)`, [id, watch.id, watch.version, fingerprint, fingerprint, policyKey, runId, dependencyKey, JSON.stringify({ watch, policy }), at, at]);
+        o = getResearchOccurrence(this.db, id)!;
+      }
+      if (getRun(this.db, o.run_id)?.status === "cancelled") {
+        this.db.run("UPDATE watch_occurrences SET status='cancelled', token=NULL, pid=NULL WHERE id=?", [o.id]);
+        return null;
+      }
+      const generation = o.generation + (o.status.startsWith("waiting_") ? 1 : 0);
+      const token = crypto.randomUUID();
+      this.db.run("UPDATE watch_occurrences SET status='active', token=?, pid=?, generation=?, dependency_key=?, observed_fingerprint=?, updated_at=? WHERE id=?", [token, process.pid, generation, dependencyKey, fingerprint, new Date().toISOString(), o.id]);
+      this.db.run("UPDATE runs SET status='active' WHERE id=? AND status != 'cancelled'", [o.run_id]);
+      return getResearchOccurrence(this.db, o.id)!;
+    }).immediate();
+  }
+
+  assertActive(o: ResearchOccurrence): void {
+    const row = getResearchOccurrence(this.db, o.id), watch = getWatch(this.db, o.watch_id);
+    if (!row || row.token !== o.token || row.status !== "active" || !watch || watch.status !== "active" || watch.version !== o.version || watch.ownerId !== this.ownerId || getRun(this.db, o.run_id)?.status === "cancelled") {
+      throw new BehaviorError("Research ownership or approval changed", "cancelled");
+    }
+  }
+
+  phase(o: ResearchOccurrence, phase: string): void {
+    this.assertActive(o);
+    this.db.run("UPDATE watch_occurrences SET phase=?, updated_at=? WHERE id=? AND token=?", [phase, new Date().toISOString(), o.id, o.token]);
+  }
+
+  /** Owner input is data, not authorization. Exact watch+scope and input-id dedupe are required. */
+  supplyInput(watchId: string, scope: string, text: string, ref: string): boolean {
+    return this.db.transaction(() => {
+      const watch = getWatch(this.db, watchId);
+      if (!watch || watch.ownerId !== this.ownerId || watch.scope !== scope || watch.status !== "active") return false;
+      if (this.db.query("SELECT id FROM watch_events WHERE watch_id=? AND json_extract(detail_json, '$.inputRef')=? LIMIT 1").get(watchId, ref)) return false;
+      const o = listResearchOccurrences(this.db, watchId).find(o => o.version === watch.version && o.status.startsWith("waiting_"));
+      if (!o || o.input_ref === ref || !text.trim()) return false;
+      appendWatchEvent(this.db, watchId, "updated", { inputRef: ref, occurrenceId: o.id });
+      this.db.run("UPDATE watch_occurrences SET input_text=?, input_ref=? WHERE id=?", [text.slice(0, 4000), ref, o.id]);
+      return true;
+    }).immediate();
+  }
+
+  finish(o: ResearchOccurrence, outcome: TurnOutcome, policy: ResearchPolicy): { status: string; outboxId?: string } {
+    return this.db.transaction(() => {
+      this.assertActive(o);
+      const watch = getWatch(this.db, o.watch_id)!;
+      let status: ResearchOccurrence["status"] = outcome.kind === "answer" ? "verified" : outcome.kind === "clarify" ? "waiting_for_user" : outcome.kind === "missing_evidence" ? "waiting_for_evidence" : "failed";
+      if (status === "verified") {
+        const known = new Map(Object.entries(outcome.evidence ?? {}));
+        for (const [id, evidence] of known) {
+          const row = this.db.query("SELECT hash FROM source_documents WHERE id=?").get(id) as { hash: string } | null;
+          if (!row || row.hash !== evidence.hash) known.delete(id);
+        }
+        const verdict = checkEvidence({ text: outcome.text, citations: outcome.citations ?? [], attributions: outcome.attributions ?? [] }, { ...policy, strict: true }, known);
+        if (!verdict.ok) {
+          status = "waiting_for_evidence";
+          outcome = { ...outcome, kind: "missing_evidence", text: verdict.reasons.join("; ") };
+        }
+      }
+      const previous = listResearchOccurrences(this.db, watch.id).find(p => p.id !== o.id && p.version === o.version && p.policy_key === o.policy_key && p.status === "verified");
+      const prior = previous?.result_json ? JSON.parse(previous.result_json) as TurnOutcome : undefined;
+      // Compare explicitly supported findings, excluding narrative wording and source-count churn.
+      const thesis = (r: TurnOutcome) => JSON.stringify((r.attributions ?? []).map(a => [a.subject.trim().toLowerCase(), a.claim.trim().toLowerCase(), a.stance ?? "interprets"]).sort());
+      const support = (r: TurnOutcome) => JSON.stringify((r.citations ?? []).map(c => [c.sourceId, r.evidence?.[c.sourceId]?.hash, c.quote]).sort());
+      const material = !prior || (thesis(prior) !== thesis(outcome) && support(prior) !== support(outcome));
+      const old = listResearchOccurrences(this.db, watch.id).find(p => p.id === o.id);
+      const previousWait = old?.result_json ? (JSON.parse(old.result_json) as TurnOutcome).kind : undefined;
+      const notify = watch.notify.policy !== "silent" && (status === "verified" ? watch.notify.policy === "always" || material : status.startsWith("waiting_") ? previousWait !== outcome.kind : true);
+      let outboxId: string | undefined;
+      if (notify) {
+        outboxId = `research:${o.id}:${o.generation}:${status}`;
+        enqueueOutbox(this.db, { id: outboxId, scope: watch.scope, destination: watch.notify.channelId ? `discord:${watch.notify.channelId}` : "local:watch", payload: {
+          watchId: watch.id, version: watch.version, occurrenceId: o.id, kind: status === "verified" ? "changed" : status.startsWith("waiting_") ? "missing_evidence" : "failed",
+          message: `Watch "${watch.name}" [${o.id}]: ${outcome.text.slice(0, 1200)}${outcome.citations?.length ? `\nSources: ${outcome.citations.map(c => c.sourceId).join(", ").slice(0, 500)}` : ""}`, threadId: watch.notify.threadId ?? null,
+        } });
+      }
+      this.db.run("UPDATE watch_occurrences SET status=?, phase=?, result_json=?, token=NULL, pid=NULL, input_ref=NULL, input_text=NULL, updated_at=? WHERE id=?", [status, status === "verified" ? "verify" : "inspect", JSON.stringify(outcome), new Date().toISOString(), o.id]);
+      this.db.run("UPDATE runs SET status=? WHERE id=? AND status != 'cancelled'", [status.startsWith("waiting_") ? "waiting" : status === "verified" ? "completed" : "failed", o.run_id]);
+      return { status, outboxId };
+    }).immediate();
+  }
+
+  release(o: ResearchOccurrence): void {
+    // Interrupted read-only work can recover from persisted turns with the same budget.
+    this.db.run("UPDATE watch_occurrences SET token=NULL,pid=NULL WHERE id=? AND token=?", [o.id, o.token]);
+  }
+}
