@@ -5,8 +5,29 @@ export type ResearchOccurrence = {
   id: string; watch_id: string; version: number; fingerprint: string; observed_fingerprint: string; policy_key: string;
   status: "active" | "waiting_for_evidence" | "waiting_for_user" | "verified" | "failed" | "cancelled";
   contract_json: string; run_id: string; generation: number; dependency_key: string; input_text: string | null;
-  input_ref: string | null; phase: string; result_json: string | null; token: string | null; pid: number | null;
+  input_ref: string | null; phase: string; result_json: string | null; investigation_json: string | null;
+  token: string | null; pid: number | null;
 };
+
+export type InvestigationAttempt = {
+  question?: string;
+  capability: string;
+  signature: string;
+  ok: boolean;
+  failure?: string;
+  changedApproach?: string;
+};
+
+export type InvestigationState = {
+  attempts: InvestigationAttempt[];
+  hypothesis?: string;
+  unresolved?: string[];
+};
+
+export function investigationOf(o: ResearchOccurrence): InvestigationState {
+  if (!o.investigation_json) return { attempts: [] };
+  try { return JSON.parse(o.investigation_json) as InvestigationState; } catch { return { attempts: [] }; }
+}
 export function listResearchOccurrences(db: Database, watchId: string): ResearchOccurrence[] {
   return db.query("SELECT * FROM watch_occurrences WHERE watch_id = ? ORDER BY rowid DESC").all(watchId) as ResearchOccurrence[];
 }

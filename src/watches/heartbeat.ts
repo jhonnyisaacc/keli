@@ -7,7 +7,7 @@ import type { TurnContext, TurnOutcome } from "../conversation/types.ts";
 import type { BehaviorService } from "../core/behavior.ts";
 import type { CapabilityGate } from "../core/capability-gate.ts";
 import type { ResourcePolicy } from "../execution/policy.ts";
-import { coalescedDueOccurrence, parseSchedule } from "../jobs/schedule.ts";
+import { isWatchDue } from "./review.ts";
 import { upsertConversation } from "../memory/conversations.ts";
 import { isExecutionBlocked, readControl } from "../ops/control.ts";
 import type { SourceReader } from "../sources/reader.ts";
@@ -84,10 +84,7 @@ async function fingerprintFor(watch: WatchRecord, deps: HeartbeatDeps): Promise<
 }
 
 function isDue(watch: WatchRecord, now: Date): boolean {
-  const schedule = parseSchedule(watch.trigger.schedule);
-  const anchor = watch.lastAttemptAt ? new Date(watch.lastAttemptAt) : new Date(watch.createdAt);
-  if (!watch.lastAttemptAt) return true;
-  return coalescedDueOccurrence(schedule, anchor, now) !== null;
+  return isWatchDue(watch, now);
 }
 
 function notifyPolicy(watch: WatchRecord, behavior: BehaviorService): WatchNotifyPolicy {

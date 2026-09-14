@@ -15,6 +15,7 @@ import { helpersSpawn } from "../adapters/helpers-spawn.ts";
 import { sourcesCollections, sourcesRead, sourcesSearch } from "../adapters/sources.ts";
 import { runStructuredTool } from "../tools/cli-adapter.ts";
 import { profileFor } from "../tools/profiles.ts";
+import { RESEARCH_CAPABILITIES } from "../conversation/context.ts";
 import { KeliError } from "../core/errors.ts";
 import { consumeToolCallBudget } from "../core/budgets.ts";
 import { assertNotCancelled, consumeBudget } from "../core/run-control.ts";
@@ -192,6 +193,28 @@ export async function dispatchCapability(
         },
       );
       break;
+    case "capabilities.lookup": {
+      const query = String(proposal.input.query ?? proposal.input.id ?? "").toLowerCase();
+      const allow = ctx.allowedCapabilities ?? [...RESEARCH_CAPABILITIES];
+      const matches = allow
+        .map((id) => registry.get(id))
+        .filter((c): c is NonNullable<typeof c> => c != null)
+        .filter((c) => !query || c.id.includes(query) || c.summary.toLowerCase().includes(query));
+      result = {
+        capabilityId: "capabilities.lookup",
+        ok: true,
+        output: {
+          capabilities: matches.map((c) => ({
+            id: c.id,
+            version: c.version,
+            summary: c.summary,
+            actionClass: c.actionClass,
+            schema: c.schema,
+          })),
+        },
+      };
+      break;
+    }
     case "delegate.run":
       result = await delegateRun(
         {

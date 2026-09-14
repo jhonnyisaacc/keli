@@ -35,6 +35,7 @@ export type CapabilityRunOptions = {
   jobId?: string;
   sources?: DispatchContext["sources"];
   config?: DispatchContext["config"];
+  allowedCapabilities?: string[];
 };
 
 export class CapabilityGate {
@@ -160,6 +161,7 @@ export class CapabilityGate {
       ownerId: this.ownerId,
       sources: options?.sources,
       config: options?.config,
+      allowedCapabilities: options?.allowedCapabilities,
     };
 
     let raw: CapabilityResult;

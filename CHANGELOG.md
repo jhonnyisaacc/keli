@@ -6,6 +6,13 @@ All notable changes to Keli follow [SemVer](https://semver.org/).
 
 **Release policy:** the full initial PRD product ships as **v0.1.0**. Increments 0.1-A–I are complete in code, including the integration/onboarding layer. **Do not tag v0.1.0** until human gates are recorded. See [PRD.md](PRD.md) §11.
 
+### General responsibilities
+
+- Approved watches may be `kind: responsibility` with scheduled review slots, objective/constraints, and an allowlisted capability set. Source-collection research remains the event-driven specialization.
+- Default responsibility cadence is the watch's own schedule (`daily:09:00` only when that contract says so). Repeated ticks in the same UTC slot do not open a second occurrence.
+- `capabilities.lookup` returns schemas for approved ids only. `tools.rocket` stays refused on default research watches.
+- Investigation attempts persist on `watch_occurrences.investigation_json` (schema v13). A healthy tool with no finding cannot verify the occurrence. `daily-brief` notifies on verified reviews even when the thesis is unchanged.
+
 ### Structured external tools (Rocket profile)
 
 - `tools.rocket` is a read-only structured CLI capability. The executable and argv template come from `ROCKET_BIN` / `tools.rocket.bin` and config; the model may pass only a declared `workflow`.

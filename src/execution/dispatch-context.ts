@@ -33,6 +33,8 @@ export type DispatchContext = {
   sources?: SourceReader;
   /** Structured CLI profiles; executables come from config/env, never from model argv. */
   config?: KeliConfig | null;
+  /** Responsibility-approved capability ids; capabilities.lookup cannot expand past this list. */
+  allowedCapabilities?: string[];
 };
 
 export const DEFAULT_ALLOWED_HOSTS = ["127.0.0.1", "localhost"];

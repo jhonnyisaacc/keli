@@ -35,9 +35,15 @@ Build one responsibility controller that can carry an approved commitment across
 evidence gaps, and interruptions in multiple domains. Portfolio management is a demanding
 example, not the product definition.
 
-## Implement in this order
+## Already implemented on this branch
 
-### 1. Generic structured-tool integration (Rocket first)
+Structured CLI tools (`tools.rocket`) and the general responsibility controller
+(`kind: responsibility`, scheduled review slots, `capabilities.lookup`, investigation
+receipts, no-finding waits) are fixture-verified. Do not re-implement them.
+
+## Remaining work
+
+### 1. Generic structured-tool integration (Rocket first) — done
 
 Extend the capability registry and gated dispatch path with a bounded external-CLI adapter:
 

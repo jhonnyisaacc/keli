@@ -43,9 +43,22 @@ keli invoke tools.rocket --workflow health --json
 ```
 
 `tools.rocket` is read-only. A successful command is not a sufficient research result and
-does not close a responsibility. Research watches cannot call it until a later
-responsibility contract approves the capability. A missing binary is reported as
+does not close a responsibility. Default source-collection research watches cannot call it.
+Approve a `kind: responsibility` watch that lists `tools.rocket` (and use
+`capabilities.lookup` to load its schema). A missing binary is reported as
 `integration_gap`.
+
+```md
+## portfolio-daily
+- kind: responsibility
+- objective: Maintain a current assessment with approved tools only
+- capabilities: tools.rocket
+- notify: daily-brief
+```
+
+`keli watches import` compiles that as a proposal. Nothing runs until `keli watches approve`.
+Daily 09:00 UTC is this watch's schedule, not Keli-wide behavior. `verified` still means the
+declared evidence contract passed, not that the investment thesis is true.
 
 ## Known limits (current increments)
 

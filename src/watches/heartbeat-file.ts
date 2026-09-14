@@ -65,9 +65,9 @@ export function compileHeartbeat(text: string): HeartbeatParse {
   for (const section of parseHeartbeatSections(text)) {
     const f = section.fields;
     const kind = (f.kind ?? (f.url ? "url" : f.collection || f.target ? "source-collection" : "")) as WatchKind | "";
-    const target = f.target ?? f.collection ?? f.url;
-    const schedule = scheduleFrom(f);
-    const question = f.question ?? f.ask;
+    const target = f.target ?? f.collection ?? f.url ?? (kind === "responsibility" ? section.name : "");
+    const schedule = scheduleFrom(f) ?? (kind === "responsibility" && (f.notify === "daily-brief" || !f.every) ? "daily:09:00" : null);
+    const question = f.question ?? f.ask ?? f.objective;
     if (!kind || !target || !schedule || !question) {
       const missing = [!kind && "kind", !target && "target", !schedule && "every", !question && "question"].filter(Boolean);
       problems.push({ section: section.name, line: section.line, message: `missing ${missing.join(", ")}` });
@@ -78,7 +78,7 @@ export function compileHeartbeat(text: string): HeartbeatParse {
       .map((s) => s.trim().toLowerCase())
       .filter(Boolean);
     const notify = (f.notify ?? "material-change") as WatchNotifyPolicy;
-    if (!["material-change", "always", "silent"].includes(notify)) {
+    if (!["material-change", "always", "silent", "daily-brief"].includes(notify)) {
       problems.push({ section: section.name, line: section.line, message: `unknown notify policy ${notify}` });
       continue;
     }
@@ -93,7 +93,20 @@ export function compileHeartbeat(text: string): HeartbeatParse {
       kind,
       trigger: { schedule, target },
       budget,
-      evidence: { question, autonomy: f.autonomy === "yes", requiredSubjects: f.subjects?.split(",").map(s => s.trim()).filter(Boolean), requiredCollections: requires.length ? requires : undefined, citationsRequired: f.citations ? f.citations !== "no" : undefined },
+      evidence: {
+        question,
+        autonomy: f.autonomy === "yes" || kind === "responsibility",
+        requiredSubjects: f.subjects?.split(",").map(s => s.trim()).filter(Boolean),
+        requiredCollections: requires.length ? requires : undefined,
+        citationsRequired: f.citations ? f.citations !== "no" : undefined,
+        objective: f.objective,
+        constraints: f.constraints,
+        completion: f.completion,
+        capabilities: ((ids) => ids.length ? ids : undefined)((f.capabilities ?? "").split(/[,\s]+/).map(s => s.trim()).filter(Boolean)),
+        review: f.review === "event" || f.review === "scheduled" || f.review === "event+scheduled" ? f.review : kind === "responsibility" ? "scheduled" : undefined,
+        hypotheses: f.hypotheses,
+        nextReview: f["next-review"],
+      },
       notify: { policy: notify, transport: f.channel || f.thread ? "discord" : undefined, channelId: f.channel, threadId: f.thread },
     });
   }

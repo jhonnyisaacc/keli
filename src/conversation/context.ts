@@ -33,6 +33,8 @@ export function buildSystemPrompt(input: {
   sources?: SourceReader;
   db: Database;
   prompt: string;
+  allowedCapabilities?: readonly string[];
+  commitments?: string;
 }): string {
   const { ctx, policy } = input;
   const lines: string[] = [];
@@ -72,13 +74,25 @@ export function buildSystemPrompt(input: {
     for (const note of notes) lines.push(`- ${note.title}: ${note.body.slice(0, 300)}`);
   }
 
+  if (input.commitments) {
+    lines.push("");
+    lines.push("Current commitments and constraints (authoritative; supersede older summaries):");
+    lines.push(input.commitments.slice(0, 4000));
+  }
+
   lines.push("");
-  lines.push("Tools you may request (one per step):");
-  for (const id of RESEARCH_CAPABILITIES) {
-    const descriptor = input.registry.get(id);
-    if (!descriptor) continue;
-    const props = Object.keys((descriptor.schema.properties as Record<string, unknown>) ?? {});
-    lines.push(`- ${id}: ${descriptor.summary}. input keys: ${props.join(", ") || "(none)"}`);
+  const listed = input.allowedCapabilities ?? RESEARCH_CAPABILITIES;
+  if (input.allowedCapabilities) {
+    lines.push("Approved tools (ids only). Call capabilities.lookup with a query to load one approved schema. You may not use a tool that is not listed.");
+    for (const id of listed) lines.push(`- ${id}`);
+  } else {
+    lines.push("Tools you may request (one per step):");
+    for (const id of listed) {
+      const descriptor = input.registry.get(id);
+      if (!descriptor) continue;
+      const props = Object.keys((descriptor.schema.properties as Record<string, unknown>) ?? {});
+      lines.push(`- ${id}: ${descriptor.summary}. input keys: ${props.join(", ") || "(none)"}`);
+    }
   }
 
   lines.push("");

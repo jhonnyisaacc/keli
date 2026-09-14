@@ -61,11 +61,16 @@ export function validateDefinition(def: WatchDefinition): void {
   if (!/^[a-z0-9][a-z0-9 _.-]{0,63}$/i.test(def.name)) {
     throw new KeliError(`Invalid watch name: ${def.name}`, "invalid_request");
   }
-  if (def.kind !== "source-collection" && def.kind !== "url") {
+  if (def.kind !== "source-collection" && def.kind !== "url" && def.kind !== "responsibility") {
     throw new KeliError(`Unsupported watch kind: ${String(def.kind)}`, "invalid_request");
   }
-  if (def.evidence.autonomy && def.kind !== "source-collection") {
-    throw new KeliError("Autonomous research currently requires an indexed source-collection", "invalid_request");
+  if (def.evidence.autonomy && def.kind === "url") {
+    throw new KeliError("Autonomous research requires a source-collection or responsibility watch", "invalid_request");
+  }
+  if (def.kind === "responsibility") {
+    for (const id of def.evidence.capabilities ?? []) {
+      if (!/^[a-z][a-z0-9._/-]*$/.test(id)) throw new KeliError(`Invalid approved capability: ${id}`, "invalid_request");
+    }
   }
   for (const [key, value] of Object.entries(def.budget ?? {})) {
     if (!Number.isFinite(value) || value < 0 || !Number.isInteger(value)) throw new KeliError(`Invalid watch budget ${key}`, "invalid_request");

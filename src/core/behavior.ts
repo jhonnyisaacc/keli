@@ -261,6 +261,7 @@ import { checkEvidence, type ResearchPolicy } from "./evidence.ts";
 import type { TurnOutcome } from "../conversation/types.ts";
 import { getWatch, appendWatchEvent } from "../watches/store.ts";
 import type { WatchRecord } from "../watches/types.ts";
+import { investigationOf, type InvestigationAttempt } from "../watches/occurrences.ts";
 import { getResearchOccurrence, listResearchOccurrences, type ResearchOccurrence } from "../watches/occurrences.ts";
 import { enqueueOutbox } from "../transports/outbox.ts";
 
@@ -324,6 +325,15 @@ export class ResearchResponsibilityService {
     this.db.run("UPDATE watch_occurrences SET phase=?, updated_at=? WHERE id=? AND token=?", [phase, new Date().toISOString(), o.id, o.token]);
   }
 
+  recordAttempt(o: ResearchOccurrence, attempt: InvestigationAttempt): void {
+    this.assertActive(o);
+    const current = getResearchOccurrence(this.db, o.id);
+    if (!current) throw new BehaviorError("Research occurrence disappeared", "cancelled");
+    const state = investigationOf(current);
+    state.attempts = [...state.attempts, attempt].slice(-32);
+    this.db.run("UPDATE watch_occurrences SET investigation_json=?, updated_at=? WHERE id=? AND token=?", [JSON.stringify(state), new Date().toISOString(), o.id, o.token]);
+  }
+
   /** Owner input is data, not authorization. Exact watch+scope and input-id dedupe are required. */
   supplyInput(watchId: string, scope: string, text: string, ref: string): boolean {
     return this.db.transaction(() => {
@@ -346,13 +356,19 @@ export class ResearchResponsibilityService {
       if (status === "verified") {
         const known = new Map(Object.entries(outcome.evidence ?? {}));
         for (const [id, evidence] of known) {
+          if (id.startsWith("tool:")) {
+            if (!evidence.hash || !evidence.text?.trim()) known.delete(id);
+            continue;
+          }
           const row = this.db.query("SELECT hash FROM source_documents WHERE id=?").get(id) as { hash: string } | null;
           if (!row || row.hash !== evidence.hash) known.delete(id);
         }
         const verdict = checkEvidence({ text: outcome.text, citations: outcome.citations ?? [], attributions: outcome.attributions ?? [] }, { ...policy, strict: true }, known);
-        if (!verdict.ok) {
+        const hashedTool = [...known.entries()].some(([id, evidence]) => id.startsWith("tool:") && Boolean(evidence.hash));
+        const citedHashed = (outcome.citations ?? []).some(c => Boolean(known.get(c.sourceId)?.hash));
+        if (!verdict.ok || ((policy.requiredCollections?.length ?? 0) === 0 && !hashedTool && !citedHashed)) {
           status = "waiting_for_evidence";
-          outcome = { ...outcome, kind: "missing_evidence", text: verdict.reasons.join("; ") };
+          outcome = { ...outcome, kind: "missing_evidence", text: verdict.ok ? "responsibility completion requires a sufficient tool receipt or current citation" : verdict.reasons.join("; ") };
         }
       }
       const previous = listResearchOccurrences(this.db, watch.id).find(p => p.id !== o.id && p.version === o.version && p.policy_key === o.policy_key && p.status === "verified");
@@ -363,7 +379,7 @@ export class ResearchResponsibilityService {
       const material = !prior || (thesis(prior) !== thesis(outcome) && support(prior) !== support(outcome));
       const old = listResearchOccurrences(this.db, watch.id).find(p => p.id === o.id);
       const previousWait = old?.result_json ? (JSON.parse(old.result_json) as TurnOutcome).kind : undefined;
-      const notify = watch.notify.policy !== "silent" && (status === "verified" ? watch.notify.policy === "always" || material : status.startsWith("waiting_") ? previousWait !== outcome.kind : true);
+      const notify = watch.notify.policy !== "silent" && (status === "verified" ? watch.notify.policy === "always" || watch.notify.policy === "daily-brief" || material : status.startsWith("waiting_") ? previousWait !== outcome.kind : true);
       let outboxId: string | undefined;
       if (notify) {
         outboxId = `research:${o.id}:${o.generation}:${status}`;

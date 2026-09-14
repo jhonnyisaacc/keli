@@ -1,6 +1,6 @@
 import type { Database } from "bun:sqlite";
 
-export const CURRENT_SCHEMA_VERSION = 12;
+export const CURRENT_SCHEMA_VERSION = 13;
 
 const MIGRATIONS: Record<number, string> = {
   1: `
@@ -386,6 +386,9 @@ const MIGRATIONS: Record<number, string> = {
       UNIQUE(watch_id, version, fingerprint, policy_key)
     );
     CREATE INDEX watch_occurrences_watch ON watch_occurrences(watch_id, created_at);
+  `,
+  13: `
+    ALTER TABLE watch_occurrences ADD COLUMN investigation_json TEXT;
   `,
 
 };

@@ -3,7 +3,7 @@
  * it: a scoped trigger with a budget, an evidence requirement, and a notification policy. The
  * heartbeat processes due watches; it never rereads a personality file looking for work.
  */
-export type WatchKind = "source-collection" | "url";
+export type WatchKind = "source-collection" | "url" | "responsibility";
 
 export type WatchStatus = "proposed" | "active" | "paused" | "retired";
 
@@ -23,8 +23,10 @@ export type WatchBudget = {
   maxConsecutiveFailures?: number;
 };
 
+export type WatchReviewMode = "event" | "scheduled" | "event+scheduled";
+
 export type WatchEvidence = {
-  /** Opt-in evidence-driven continuation; source-collection watches only. */
+  /** Opt-in evidence-driven continuation; source-collection or general responsibility. */
   autonomy?: boolean;
   requiredSubjects?: string[];
   /** Question the research turn answers when the fingerprint changes. */
@@ -32,9 +34,18 @@ export type WatchEvidence = {
   /** Collections that must be cited in the answer; merged with the scope's research policy. */
   requiredCollections?: string[];
   citationsRequired?: boolean;
+  objective?: string;
+  constraints?: string;
+  completion?: string;
+  /** Approved capability ids. Research defaults remain if omitted. */
+  capabilities?: string[];
+  /** event = source/tool fingerprint only; scheduled = cadence slot even without a changed feed. */
+  review?: WatchReviewMode;
+  hypotheses?: string;
+  nextReview?: string;
 };
 
-export type WatchNotifyPolicy = "material-change" | "always" | "silent";
+export type WatchNotifyPolicy = "material-change" | "always" | "silent" | "daily-brief";
 
 export type WatchNotify = {
   policy: WatchNotifyPolicy;

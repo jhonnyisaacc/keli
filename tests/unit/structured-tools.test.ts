@@ -168,6 +168,25 @@ describe("structured CLI tools", () => {
     }
   });
 
+  test("capabilities.lookup returns only allowlisted schemas", async () => {
+    const denied = await dispatchCapability(
+      defaultRegistry,
+      { capabilityId: "capabilities.lookup", input: { query: "files" }, resources: [] },
+      { ...ctx(config()), allowedCapabilities: ["capabilities.lookup", "tools.rocket"] },
+    );
+    expect(denied.ok).toBe(true);
+    expect((denied.output as { capabilities: Array<{ id: string }> }).capabilities).toEqual([]);
+
+    const found = await dispatchCapability(
+      defaultRegistry,
+      { capabilityId: "capabilities.lookup", input: { query: "rocket" }, resources: [] },
+      { ...ctx(config()), allowedCapabilities: ["capabilities.lookup", "tools.rocket"] },
+    );
+    const caps = (found.output as { capabilities: Array<{ id: string; schema: { required?: string[] } }> }).capabilities;
+    expect(caps.map(c => c.id)).toEqual(["tools.rocket"]);
+    expect(caps[0]!.schema.required).toEqual(["workflow"]);
+  });
+
   test("unknown research fields stay unknown rather than invented", () => {
     const mapped = projectResearchResult(
       { operational: { ok: true }, acquisition: { status: "healthy" }, research: { finding: null } },

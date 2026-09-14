@@ -16,7 +16,7 @@ import type { ModelLoop } from "../model/loop.ts";
 import type { SourceReader } from "../sources/reader.ts";
 import { getProjectByName, projectScope } from "../state/repos.ts";
 import type { KeliConfig } from "../state/config.ts";
-import { buildSystemPrompt, historyMessages, isResearchCapability } from "./context.ts";
+import { buildSystemPrompt, historyMessages, isResearchCapability, RESEARCH_CAPABILITIES } from "./context.ts";
 import { parseResearchCorrection } from "./corrections.ts";
 import { parseDecision } from "./decision.ts";
 import { appendTurn, findTurnBySource, listTurns, turnIdFor, type TurnKind } from "./turns.ts";
@@ -59,6 +59,9 @@ export type ResearchControl = {
   assertActive: () => void | Promise<void>;
   collections: string[];
   phase: (phase: string) => void;
+  allowedCapabilities?: string[];
+  commitments?: string;
+  observeAttempt?: (attempt: { capability: string; signature: string; ok: boolean; failure?: string }) => void;
 };
 
 /**
@@ -274,6 +277,8 @@ export class ConversationLoop {
       sources: this.deps.sources,
       db,
       prompt,
+      allowedCapabilities: control?.allowedCapabilities,
+      commitments: control?.commitments,
     });
     const history = historyMessages(listTurns(db, ctx.conversationId).filter((t) => t.sourceRef !== sourceRef));
     const messages: ChatMessage[] = [{ role: "system", content: system }, ...history, { role: "user", content: prompt }];
@@ -332,7 +337,7 @@ export class ConversationLoop {
       const currentPolicy = policyFromRules(behavior.listRulesByPrefix(ctx.scope, "research."));
       policy.requiredCollections = [...new Set([...currentPolicy.requiredCollections, ...(override?.requiredCollections ?? [])])];
       policy.citationsRequired = currentPolicy.citationsRequired || override?.citationsRequired === true;
-      if (control) messages[0] = { role: "system", content: buildSystemPrompt({ ctx, policy, language: behavior.getRule(ctx.scope, "conversation.language")?.value, registry: this.deps.registry, sources: this.deps.sources, db, prompt }) };
+      if (control) messages[0] = { role: "system", content: buildSystemPrompt({ ctx, policy, language: behavior.getRule(ctx.scope, "conversation.language")?.value, registry: this.deps.registry, sources: this.deps.sources, db, prompt, allowedCapabilities: control.allowedCapabilities, commitments: control.commitments }) };
       steps += 1;
       const run = getRun(db, runId);
       if (!run || run.status === "cancelled") {
@@ -402,6 +407,7 @@ export class ConversationLoop {
         const result = await this.executeTool(ctx, runId, decision.capability, decision.input, known, evidence, control);
         await control?.assertActive();
         attempts.add(signature);
+        control?.observeAttempt?.({ capability: decision.capability, signature, ok: result.ok, failure: result.ok ? undefined : result.content.slice(0, 400) });
         appendTurn(db, {
           conversationId: ctx.conversationId,
           scope: ctx.scope,
@@ -428,6 +434,10 @@ export class ConversationLoop {
       control?.phase("verify");
       if (policy.strict) {
         for (const [id, source] of known) {
+          if (id.startsWith("tool:")) {
+            if (!source.hash || !source.text?.trim()) known.delete(id);
+            continue;
+          }
           const current = this.deps.sources?.read({ sourceId: id, chars: 1 });
           if (!current || current.hash !== source.hash) known.delete(id);
         }
@@ -463,8 +473,12 @@ export class ConversationLoop {
     evidence: string[],
     control?: ResearchControl,
   ): Promise<{ ok: boolean; content: string; actionId?: string }> {
-    if (!isResearchCapability(capability)) {
+    const allowed = control?.allowedCapabilities ?? RESEARCH_CAPABILITIES;
+    if (!(allowed as readonly string[]).includes(capability) && !isResearchCapability(capability)) {
       return { ok: false, content: JSON.stringify({ error: `capability ${capability} is not allowed in research turns` }) };
+    }
+    if (control?.allowedCapabilities && !control.allowedCapabilities.includes(capability)) {
+      return { ok: false, content: JSON.stringify({ error: `capability ${capability} is not approved for this responsibility` }) };
     }
     const collections = control?.collections;
     const original = this.deps.sources;
@@ -487,6 +501,7 @@ export class ConversationLoop {
         networkHosts: this.deps.networkHosts,
         fixtures: this.deps.fixtures,
         config: this.deps.config,
+        allowedCapabilities: control?.allowedCapabilities,
       },
     );
     if (result.ok) this.registerSources(capability, input, result.output, known, evidence);
@@ -526,6 +541,17 @@ export class ConversationLoop {
       for (const r of out.results as Array<{ url?: string }>) {
         if (r.url) known.set(r.url, { collection: "web" });
       }
+    } else if (capability.startsWith("tools.")) {
+      const workflow = String(input.workflow ?? "unknown");
+      const id = `tool:${capability}:${workflow}`;
+      const toolEvidence = (out.evidence ?? {}) as { sufficiency?: string };
+      if (toolEvidence.sufficiency === "sufficient" && out.finding != null) {
+        const text = JSON.stringify(out.projection ?? out.finding);
+        known.set(id, { collection: "tool", hash: typeof out.testedRevision === "string" ? out.testedRevision : "tool", text, passages: [{ offset: 0, text }] });
+      } else {
+        known.set(id, { collection: "tool" });
+      }
+      evidence.push(id);
     }
   }
 

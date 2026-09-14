@@ -233,6 +233,17 @@ const BUILTIN: CapabilityDescriptor[] = [
     },
   },
   rocketDescriptor(),
+  {
+    id: "capabilities.lookup",
+    version: "0.1.0",
+    summary: "Look up an approved capability schema by id or query without expanding authority",
+    actionClass: "read",
+    resources: ["query"],
+    schema: {
+      type: "object",
+      properties: { query: { type: "string" }, id: { type: "string" } },
+    },
+  },
 ];
 
 export class CapabilityRegistry {
