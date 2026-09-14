@@ -54,6 +54,8 @@ export type KeliConfig = {
     transport?: "discord" | "telegram" | "none";
     calibrationSkipped?: boolean;
     mode?: "full" | "minimal";
+    providerConnected?: boolean;
+    providerDetail?: string;
   };
   /** Provider role routing (0.1-G). */
   routing?: ProviderRouting;

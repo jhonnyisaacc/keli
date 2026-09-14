@@ -1,0 +1,13 @@
+[Unit]
+Description=Keli personal agent (jobs, watches, transport poll)
+After=default.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/keli service run --loop 30
+Restart=on-failure
+RestartSec=5
+Environment=KELI_STATE_DIR=%h/.local/share/keli
+
+[Install]
+WantedBy=default.target

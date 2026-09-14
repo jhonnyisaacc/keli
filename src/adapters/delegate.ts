@@ -3,6 +3,7 @@ import type { CodingDelegate } from "../core/types.ts";
 import { KeliError } from "../core/errors.ts";
 import { isCodingDelegate } from "../core/types.ts";
 import { fixtureUrlFor } from "../integrations/env.ts";
+import { runCodexAppServerTurn } from "./codex-app-server.ts";
 
 export type DelegateHandoff = {
   actionId: string;
@@ -34,12 +35,15 @@ export async function delegateRun(
   }
   const url = fixtureUrl ?? fixtureUrlFor("delegate");
   if (!url) {
+    if (input.delegate === "Codex" && (process.env.KELI_CODEX_APP_SERVER_BIN || process.env.CODEX_BIN)) {
+      return runCodexAppServerTurn(input, signal);
+    }
     return {
       capabilityId: "delegate.run",
       ok: false,
       error: {
         code: "capability_unavailable",
-        message: `${input.delegate} requires a resolved delegate integration or KELI_FIXTURE_DELEGATE`,
+        message: `${input.delegate} requires a resolved delegate integration, KELI_FIXTURE_DELEGATE, or KELI_CODEX_APP_SERVER_BIN for Codex app-server`,
       },
     };
   }

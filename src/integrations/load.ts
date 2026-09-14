@@ -1,6 +1,7 @@
 import "./profiles/model-provider/fixture.ts";
 import "./profiles/model-provider/openai-compatible.ts";
 import "./profiles/model-provider/grok.ts";
+import "./profiles/model-provider/chatgpt.ts";
 import "./profiles/model-provider/named-later.ts";
 import "./profiles/transport/discord.ts";
 import "./profiles/transport/telegram.ts";

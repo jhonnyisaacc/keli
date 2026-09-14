@@ -28,6 +28,7 @@ describe("setup wizard", () => {
     expect(config?.setup?.completedAt).toBeTruthy();
     expect(config?.setup?.transport).toBe("discord");
     expect(config?.transports?.discord?.channelId).toBe("chan-setup");
+    expect(result.projectName).toBe("personal");
 
     const db = new Database(join(stateDir, "state.sqlite"));
     migrate(db);

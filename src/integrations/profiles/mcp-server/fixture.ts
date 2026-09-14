@@ -15,8 +15,8 @@ export const mcpFixtureProfile: IntegrationProfile = {
   ],
   fixtureKey: "mcp",
   reuse: {
-    upstream: "@modelcontextprotocol/sdk",
-    pin: "not-wired",
+    upstream: "MCP JSON-RPC 2024-11-05 (HTTP + stdio)",
+    pin: "protocol",
     license: "MIT",
     prdIds: ["A42", "A41"],
   },

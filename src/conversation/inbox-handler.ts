@@ -5,6 +5,8 @@ import type { ConversationRecord } from "../memory/conversations.ts";
 import { getProjectById } from "../state/repos.ts";
 import type { DiscordBackend } from "../transports/discord-backend.ts";
 import { pollDiscordRoutes, sendDiscordMessage, type DiscordPollResult } from "../transports/discord.ts";
+import { pollTelegramRoutes, sendTelegramMessage, type TelegramPollResult } from "../transports/telegram.ts";
+import type { TelegramBackend } from "../transports/telegram-backend.ts";
 import type { InboxRecord } from "../transports/inbox.ts";
 import { processTransportInbox, type InboxHandler, type InboxProcessResult, type InboxReplier } from "../transports/inbox-processor.ts";
 import type { TransportRoute } from "../transports/routes.ts";
@@ -112,6 +114,39 @@ export async function runDiscordCycle(
     limit: input.limit,
     handler: conversationInboxHandler(db, input.ownerId, input.loop, input.ownerUserId),
     reply: discordReplier(db, input.backend),
+  });
+  return { poll, inbox };
+}
+
+export function telegramReplier(db: Database, backend: TelegramBackend): InboxReplier {
+  return async (message, route, text) => {
+    const payload = message.payload;
+    const topicId = payload.topicId ?? payload.topic_id;
+    const chatId = payload.chatId ?? payload.chat_id;
+    await sendTelegramMessage(
+      db,
+      {
+        chatId: String(chatId ?? route.externalId.split(":")[0]),
+        topicId: topicId == null ? undefined : String(topicId),
+        message: text,
+        scope: route.scope,
+      },
+      backend,
+    );
+  };
+}
+
+export type TelegramCycleResult = { poll: TelegramPollResult; inbox: InboxProcessResult };
+
+export async function runTelegramCycle(
+  db: Database,
+  input: { ownerId: string; backend: TelegramBackend; loop: ConversationLoop; ownerUserId?: string; limit?: number },
+): Promise<TelegramCycleResult> {
+  const poll = await pollTelegramRoutes(db, input.backend, { limit: input.limit });
+  const inbox = await processTransportInbox(db, {
+    limit: input.limit,
+    handler: conversationInboxHandler(db, input.ownerId, input.loop, input.ownerUserId),
+    reply: telegramReplier(db, input.backend),
   });
   return { poll, inbox };
 }

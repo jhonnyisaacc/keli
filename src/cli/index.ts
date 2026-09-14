@@ -26,6 +26,7 @@ import { chatCommand } from "./commands/chat.ts";
 import { sessionsCommand } from "./commands/sessions.ts";
 import { sourcesCommand } from "./commands/sources.ts";
 import { watchesCommand } from "./commands/watches.ts";
+import { serviceCommand } from "./commands/service.ts";
 import {
   loginCommand,
   logoutCommand,
@@ -131,6 +132,7 @@ function createMain(globals: CliGlobals) {
       sessions: sessionsCommand(globals),
       sources: sourcesCommand(globals),
       watches: watchesCommand(globals),
+      service: serviceCommand(globals),
       agent: agentCommand(globals),
     },
   });
@@ -147,6 +149,8 @@ function printRootHelp() {
   console.log("  keli sources           add | index | list | search (read-only collections)");
   console.log("  keli watches           import | list | approve | tick (heartbeat)");
   console.log("  keli discord poll      Receive → converse → reply on bound routes");
+  console.log("  keli telegram poll     Receive → converse → reply on bound chats");
+  console.log("  keli service run       Jobs + watches + transport poll");
   console.log("  keli update --mode     off | notify | auto (daily, idle boundary)");
   console.log("  keli integrations      list | discover");
   console.log("  keli auth              add | list | status | remove");

@@ -28,9 +28,16 @@ export async function addCredential(integrationId: string, options: AuthAddOptio
     );
   }
   const type = options.type ?? (profile.auth.type === "none" ? "api-key" : profile.auth.type);
-  if (type === "oauth-device") {
+  if (type === "oauth-device" || profile.id === "chatgpt") {
+    if (profile.id === "chatgpt") {
+      const { chatgptConversationIncompatibility } = await import("./chatgpt-boundary.ts");
+      throw new KeliError(chatgptConversationIncompatibility(), "invalid_request");
+    }
+    if (profile.id === "codex") {
+      return { id: "external-cli", service: credentialService(profile.id) };
+    }
     throw new KeliError(
-      `OAuth/device flow for '${profile.id}' is not implemented. Use api-key or token.`,
+      `OAuth/device flow for '${profile.id}' is not implemented as a Keli conversation provider.`,
       "invalid_request",
     );
   }

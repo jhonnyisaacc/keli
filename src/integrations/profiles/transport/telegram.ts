@@ -16,9 +16,9 @@ export const telegramProfile: IntegrationProfile = {
   ],
   fixtureKey: "telegram",
   reuse: {
-    upstream: "grammY",
-    pin: "not-wired",
-    license: "MIT",
+    upstream: "Telegram Bot API (getUpdates/sendMessage/getMe)",
+    pin: "protocol",
+    license: "n/a",
     prdIds: ["A18", "A19"],
   },
   async probe(ctx) {

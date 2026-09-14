@@ -7,6 +7,7 @@ import { resolveDiscordBackend } from "../../transports/discord-resolve.ts";
 import { runDiscordCycle } from "../../conversation/inbox-handler.ts";
 import { emit, emitError } from "../output.ts";
 import { openApp, type CliGlobals } from "../context.ts";
+import { freshReconnectState, notePollFailure, notePollProgress, sleepBackoff } from "../../transports/reconnect.ts";
 
 export function discordCommand(globals: CliGlobals) {
   return defineCommand({
@@ -32,8 +33,11 @@ function discordPollCommand(globals: CliGlobals) {
         const app = await openApp(globals, { requireProvider: false });
         const backend = await resolveDiscordBackend(app.config);
         const limit = args.limit ? Number(args.limit) : undefined;
+        let reconnect = freshReconnectState();
         const once = async () => {
           const result = await runDiscordCycle(app.db, { ownerId: app.owner.id, backend, loop: app.conversation.loop, ownerUserId: app.config.transports?.discord?.ownerUserId, limit });
+          if (result.poll.errors.length) reconnect = notePollFailure(reconnect);
+          else reconnect = notePollProgress(reconnect);
           emit(
             result,
             globals.outputFormat,
@@ -54,7 +58,8 @@ function discordPollCommand(globals: CliGlobals) {
         });
         while (running) {
           await once();
-          await Bun.sleep(seconds * 1000);
+          const wait = reconnect.backoffMs > 0 ? reconnect.backoffMs : seconds * 1000;
+          await sleepBackoff(wait);
         }
         app.close();
       } catch (e) {

@@ -14,8 +14,8 @@ export const searchProfile: IntegrationProfile = {
   ],
   fixtureKey: "search",
   reuse: {
-    upstream: "configured search API",
-    pin: "not-wired",
+    upstream: "generic search HTTP + Brave Search API (Hermes web_search backend)",
+    pin: "protocol",
     license: "n/a",
     prdIds: ["I9"],
   },

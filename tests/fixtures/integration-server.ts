@@ -14,13 +14,29 @@ export type FixtureDiscordMessage = {
   timestamp: string;
 };
 
+export type FixtureTelegramUpdate = {
+  updateId: string;
+  chatId: string;
+  topicId?: string;
+  authorId: string;
+  authorIsBot: boolean;
+  content: string;
+  timestamp: string;
+};
+
 export function startIntegrationFixture(): IntegrationFixture & {
   discord: { inbound: FixtureDiscordMessage[]; sent: Array<{ channelId: string; threadId?: string; content: string }> };
+  telegram: { inbound: FixtureTelegramUpdate[]; sent: Array<{ chatId: string; topicId?: string; content: string }> };
 } {
   const sessions = new Map<string, { cancelled: boolean }>();
   const discord = {
     inbound: [] as FixtureDiscordMessage[],
     sent: [] as Array<{ channelId: string; threadId?: string; content: string }>,
+  };
+
+  const telegram = {
+    inbound: [] as FixtureTelegramUpdate[],
+    sent: [] as Array<{ chatId: string; topicId?: string; content: string }>,
   };
 
   const server = Bun.serve({
@@ -138,12 +154,42 @@ export function startIntegrationFixture(): IntegrationFixture & {
           return new Response("fixture telegram failure", { status: 503 });
         }
         const body = (await req.json()) as { chatId: string; topicId?: string; content: string };
+        telegram.sent.push({ chatId: body.chatId, topicId: body.topicId, content: body.content });
         return Response.json({
           messageId: `telegram-${crypto.randomUUID()}`,
           chatId: body.chatId,
           topicId: body.topicId ?? null,
           status: "delivered",
         });
+      }
+
+      if (path === "/telegram/inbound" && req.method === "POST") {
+        const body = (await req.json()) as Partial<FixtureTelegramUpdate> & { chatId: string; content: string };
+        const update: FixtureTelegramUpdate = {
+          updateId: body.updateId ?? String(telegram.inbound.length + 1),
+          chatId: body.chatId,
+          topicId: body.topicId,
+          authorId: body.authorId ?? "human-1",
+          authorIsBot: body.authorIsBot ?? false,
+          content: body.content,
+          timestamp: body.timestamp ?? new Date().toISOString(),
+        };
+        telegram.inbound.push(update);
+        return Response.json(update);
+      }
+
+      if (path === "/telegram/updates" && req.method === "GET") {
+        const offset = Number(url.searchParams.get("offset") ?? "0");
+        const updates = telegram.inbound.filter((u) => Number(u.updateId) >= offset);
+        return Response.json({ updates });
+      }
+
+      if (path.startsWith("/bot") && (path.endsWith("/sendMessage") || path.endsWith("/getMe") || path.includes("/getUpdates"))) {
+        return telegramBotApi(path, url, req, telegram);
+      }
+
+      if (path === "/mcp-rpc" && req.method === "POST") {
+        return mcpJsonRpc(await req.json());
       }
 
       if (path === "/page" && req.method === "GET") {
@@ -222,6 +268,66 @@ export function startIntegrationFixture(): IntegrationFixture & {
     server,
     endpoint,
     discord,
+    telegram,
     stop: () => server.stop(),
   };
+}
+
+async function telegramBotApi(
+  path: string,
+  url: URL,
+  req: Request,
+  telegram: { inbound: FixtureTelegramUpdate[]; sent: Array<{ chatId: string; topicId?: string; content: string }> },
+): Promise<Response> {
+  if (path.endsWith("/getMe")) {
+    return Response.json({ ok: true, result: { id: 1, is_bot: true, username: "keli-fixture" } });
+  }
+  if (path.endsWith("/sendMessage")) {
+    const body = (await req.json()) as { chat_id: string | number; text: string; message_thread_id?: number };
+    telegram.sent.push({
+      chatId: String(body.chat_id),
+      topicId: body.message_thread_id != null ? String(body.message_thread_id) : undefined,
+      content: body.text,
+    });
+    return Response.json({ ok: true, result: { message_id: telegram.sent.length, chat: { id: body.chat_id }, date: Math.floor(Date.now() / 1000), text: body.text } });
+  }
+  if (path.includes("/getUpdates")) {
+    const offset = Number(url.searchParams.get("offset") ?? "0");
+    const result = telegram.inbound
+      .filter((u) => Number(u.updateId) >= offset)
+      .map((u) => ({
+        update_id: Number(u.updateId),
+        message: {
+          message_id: Number(u.updateId),
+          date: Math.floor(Date.now() / 1000),
+          text: u.content,
+          message_thread_id: u.topicId ? Number(u.topicId) : undefined,
+          chat: { id: Number(u.chatId) || u.chatId },
+          from: { id: Number(u.authorId) || 2, is_bot: u.authorIsBot },
+        },
+      }));
+    return Response.json({ ok: true, result });
+  }
+  return new Response("not found", { status: 404 });
+}
+
+async function mcpJsonRpc(body: unknown): Promise<Response> {
+  const msg = body as { method?: string; id?: number; params?: { name?: string; arguments?: { text?: string } } };
+  if (msg.method === "initialize") {
+    return Response.json({ jsonrpc: "2.0", id: msg.id, result: { protocolVersion: "2024-11-05", capabilities: { tools: {} }, serverInfo: { name: "keli-fixture", version: "0" } } });
+  }
+  if (msg.method === "notifications/initialized") {
+    return new Response(null, { status: 204 });
+  }
+  if (msg.method === "tools/list") {
+    return Response.json({ jsonrpc: "2.0", id: msg.id, result: { tools: [{ name: "echo", description: "echo text" }] } });
+  }
+  if (msg.method === "tools/call") {
+    return Response.json({
+      jsonrpc: "2.0",
+      id: msg.id,
+      result: { content: [{ type: "text", text: String(msg.params?.arguments?.text ?? "ok") }] },
+    });
+  }
+  return Response.json({ jsonrpc: "2.0", id: msg.id, error: { code: -32601, message: "method not found" } });
 }

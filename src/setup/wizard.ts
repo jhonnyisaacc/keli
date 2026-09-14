@@ -1,13 +1,18 @@
 import * as readline from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import { initializeState } from "../state/init.ts";
+import { DEFAULT_PROJECT_NAME } from "../state/defaults.ts";
 import { readConfig, writeConfig, type KeliConfig } from "../state/config.ts";
 import { projectScope, getProjectById } from "../state/repos.ts";
 import { bindTransportRoute } from "../transports/routes.ts";
 import { sendDiscordMessage } from "../transports/discord.ts";
+import { resolveDiscordBackend } from "../transports/discord-resolve.ts";
 import { sendTelegramMessage } from "../transports/telegram.ts";
+import { resolveTelegramBackend } from "../transports/telegram-resolve.ts";
 import { listIntegrations, probeIntegration } from "../integrations/registry.ts";
 import { fixtureUrlFor } from "../integrations/env.ts";
+import { runLiveProbe } from "../integrations/live-probe.ts";
+import { chatgptConversationIncompatibility } from "../integrations/chatgpt-boundary.ts";
 import "../integrations/load.ts";
 
 export type SetupSection = "provider" | "transport" | "delegate" | "memory" | "mcp";
@@ -28,6 +33,7 @@ export type SetupOptions = {
   section?: SetupSection;
   quick?: boolean;
   minimal?: boolean;
+  projectName?: string;
 };
 
 export type SetupResult = {
@@ -36,6 +42,8 @@ export type SetupResult = {
   routeBound: boolean;
   transportTested: boolean;
   calibrationSkipped: boolean;
+  providerConnected: boolean;
+  projectName: string;
 };
 
 function explain(lines: string[]): void {
@@ -43,10 +51,21 @@ function explain(lines: string[]): void {
 }
 
 export async function runSetup(options: SetupOptions = {}): Promise<SetupResult> {
+  let projectName = options.projectName?.trim();
+  if (!options.nonInteractive && !projectName) {
+    const rl = readline.createInterface({ input, output });
+    try {
+      const answer = await rl.question(`Project name [${DEFAULT_PROJECT_NAME}]: `);
+      if (answer.trim()) projectName = answer.trim();
+    } finally {
+      rl.close();
+    }
+  }
   const init = await initializeState(options.stateDir, {
     cwd: options.cwd,
-    projectName: "Rocket",
+    projectName: projectName || DEFAULT_PROJECT_NAME,
   });
+  projectName = init.projectName;
   const stateDir = init.stateDir;
   const existing = (await readConfig(stateDir)) ?? {
     version: 2,
@@ -105,6 +124,9 @@ export async function runSetup(options: SetupOptions = {}): Promise<SetupResult>
         if (primaryAnswer.trim()) primaryModel = primaryAnswer.trim();
         const fallbackAnswer = await rl.question(`Fallback provider [${fallbackModel}] (optional): `);
         if (fallbackAnswer.trim()) fallbackModel = fallbackAnswer.trim();
+        if (primaryModel === "chatgpt" || fallbackModel === "chatgpt") {
+          explain(["", chatgptConversationIncompatibility(), ""]);
+        }
       } finally {
         rl.close();
       }
@@ -178,29 +200,47 @@ export async function runSetup(options: SetupOptions = {}): Promise<SetupResult>
   let transportTested = false;
   if (!options.skipTransportTest && transport !== "none") {
     if (transport === "discord") {
-      if (!fixtureUrlFor("discord")) {
-        if (!options.nonInteractive) {
-          explain(["Transport test skipped: configure discord or set KELI_FIXTURE_DISCORD."]);
-        }
-      } else {
-        await sendDiscordMessage(db, {
-          channelId: discordChannel!,
-          threadId: discordThread,
-          message: "Keli setup test message",
-          scope,
-        });
+      try {
+        const backend = fixtureUrlFor("discord")
+          ? undefined
+          : await resolveDiscordBackend(existing);
+        await sendDiscordMessage(
+          db,
+          {
+            channelId: discordChannel!,
+            threadId: discordThread,
+            message: "Keli setup test message",
+            scope,
+          },
+          backend,
+        );
         transportTested = true;
+      } catch {
+        if (!options.nonInteractive) {
+          explain(["Transport test skipped: keli auth add discord, then retry keli setup transport."]);
+        }
       }
-    } else if (fixtureUrlFor("telegram")) {
-      await sendTelegramMessage(db, {
-        chatId: telegramChat!,
-        topicId: telegramTopic,
-        message: "Keli setup test message",
-        scope,
-      });
-      transportTested = true;
-    } else if (!options.nonInteractive) {
-      explain(["Transport test skipped: configure telegram or set KELI_FIXTURE_TELEGRAM."]);
+    } else if (transport === "telegram") {
+      try {
+        const backend = fixtureUrlFor("telegram")
+          ? undefined
+          : await resolveTelegramBackend(existing);
+        await sendTelegramMessage(
+          db,
+          {
+            chatId: telegramChat!,
+            topicId: telegramTopic,
+            message: "Keli setup test message",
+            scope,
+          },
+          backend,
+        );
+        transportTested = true;
+      } catch {
+        if (!options.nonInteractive) {
+          explain(["Transport test skipped: keli auth add telegram, then retry keli setup transport."]);
+        }
+      }
     }
   }
 
@@ -257,12 +297,39 @@ export async function runSetup(options: SetupOptions = {}): Promise<SetupResult>
       mode: minimal ? "minimal" : "full",
     },
   };
+
+  let providerConnected = false;
+  let providerDetail = "";
+  if (primaryModel === "chatgpt") {
+    providerDetail = chatgptConversationIncompatibility();
+  } else {
+    try {
+      const probe = await runLiveProbe({
+        config: next,
+        only: [primaryModel],
+        timeoutMs: 8000,
+      });
+      const line = probe.lines.find((l) => l.id === primaryModel);
+      providerConnected =
+        line?.outcome === "pass" ||
+        (primaryModel === "fixture" && Boolean(fixtureUrlFor("model") || fixtureUrlFor("provider")));
+      providerDetail =
+        line?.detail ??
+        (providerConnected ? "fixture or configured endpoint reachable" : "provider round-trip not verified");
+    } catch (e) {
+      providerDetail = String(e);
+    }
+  }
+  next.setup = { ...next.setup, providerConnected, providerDetail };
   await writeConfig(next, stateDir);
 
   if (!options.nonInteractive) {
     explain([
       "",
-      `Setup complete. Transport: ${transport}. Route ${routeBound ? `bound to project ${project.name}` : "not bound (CLI recovery still works)"}.`,
+      `Setup complete. Project: ${projectName}. Transport: ${transport}. Route ${routeBound ? `bound to project ${project.name}` : "not bound (CLI recovery still works)"}.`,
+      providerConnected
+        ? `Primary provider connected (${providerDetail}).`
+        : `Primary provider not yet connected: ${providerDetail || "run keli auth add <provider> then keli doctor"}.`,
       skipCalibration
         ? "Optional calibration skipped — you can run a real task anytime."
         : "Run a real conversation when ready.",
@@ -276,5 +343,7 @@ export async function runSetup(options: SetupOptions = {}): Promise<SetupResult>
     routeBound,
     transportTested,
     calibrationSkipped: skipCalibration,
+    providerConnected,
+    projectName,
   };
 }

@@ -5,6 +5,10 @@ import { KeliError } from "../../src/core/errors.ts";
 import "../../src/integrations/load.ts";
 
 describe("auth flows", () => {
+  test("chatgpt oauth-device reports Codex App Server incompatibility", async () => {
+    await expect(addCredential("chatgpt", { type: "oauth-device", value: "x" })).rejects.toThrow(/Codex App Server/);
+  });
+
   test("oauth-device is a declared unimplemented seam", async () => {
     await expect(
       addCredential("openai-compatible", { type: "oauth-device", value: "x" }),

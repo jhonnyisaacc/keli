@@ -143,7 +143,10 @@ export async function dispatchCapability(
       result = await webFetch(proposal.input as { url: string }, ctx.network);
       break;
     case "search.query":
-      result = await searchQuery(proposal.input as { query: string }, fixtures.search);
+      result = await searchQuery(proposal.input as { query: string }, {
+        fixtureUrl: fixtures.search,
+        config: ctx.config,
+      });
       break;
     case "browser.navigate":
       result = await browserNavigate(proposal.input as { url: string }, ctx.network, {
@@ -174,12 +177,13 @@ export async function dispatchCapability(
       result = sourcesCollections(ctx.sources);
       break;
     case "mcp.tools/list":
-      result = await mcpListTools(fixtures.mcp);
+      result = await mcpListTools(fixtures.mcp, ctx.config);
       break;
     case "mcp.tools/call":
       result = await mcpCallTool(
         proposal.input as { name: string; arguments?: Record<string, unknown> },
         fixtures.mcp,
+        ctx.config,
       );
       break;
     case "jobs.observe":

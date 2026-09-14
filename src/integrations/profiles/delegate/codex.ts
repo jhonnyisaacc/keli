@@ -12,10 +12,10 @@ export const codexProfile: IntegrationProfile = {
   fixtureKey: "delegate",
   apiMode: "acp",
   reuse: {
-    upstream: "ACP + Codex CLI",
-    pin: "not-wired",
+    upstream: "Codex App Server JSON-RPC (delegate only; not a conversation model)",
+    pin: "docs/evidence/CODEX_APP_SERVER.md",
     license: "Apache-2.0",
-    prdIds: ["A19", "A20", "A37"],
+    prdIds: ["A19", "A20", "A24", "A37"],
   },
   async probe(ctx) {
     return statusOf({

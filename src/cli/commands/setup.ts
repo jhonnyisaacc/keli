@@ -27,6 +27,7 @@ export function setupCommand(globals: CliGlobals) {
       "telegram-topic": { type: "string", description: "Telegram topic id" },
       "primary-model": { type: "string", description: "Primary provider/model id" },
       "fallback-model": { type: "string", description: "Fallback provider/model id" },
+      project: { type: "string", description: "Default project name (neutral default: personal)" },
       "skip-calibration": { type: "boolean", default: false },
       "skip-transport-test": { type: "boolean", default: false },
       quick: { type: "boolean", default: false, description: "Only prompt for unset items" },
@@ -51,6 +52,7 @@ export function setupCommand(globals: CliGlobals) {
           section: args.section as SetupSection | undefined,
           quick: args.quick,
           minimal: args.minimal,
+          projectName: args.project,
         });
         emit(result, globals.outputFormat, `Setup complete (${result.transport})`);
       } catch (e) {
