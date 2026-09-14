@@ -12,5 +12,8 @@ import "./profiles/delegate/opencode.ts";
 import "./profiles/search/fixture.ts";
 import "./profiles/mcp-server/fixture.ts";
 import "./profiles/browser-backend/index.ts";
+import "./profiles/documents/pdf.ts";
+import "./profiles/ocr/tesseract.ts";
+import "./profiles/speech/openai-audio.ts";
 
 import "./profiles/model-provider/catalog-providers.ts";

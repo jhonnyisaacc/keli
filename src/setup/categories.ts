@@ -40,6 +40,7 @@ export function setupBadge(row: ManifestRow, config?: KeliConfig | null, allowFi
   if (readiness === "excluded" || readiness === "blocked" || row.status === "blocked") return "blocked";
   if (row.protocol === "fixture-only" || row.id === "fixture") return allowFixture ? "fixture only" : "blocked";
   if (readiness === "live-verified" || readiness === "configured") return "ready";
+  if (row.authStrategy === "none" && readiness === "fixture-verified") return "ready";
   if (row.authStrategy !== "none" && !config?.integrations?.[row.id]?.credentialRef && !fixtureUrlFor(row.id as never)) {
     return "needs credentials";
   }

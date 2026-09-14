@@ -7,7 +7,10 @@ export type IntegrationKind =
   | "delegate"
   | "mcp-server"
   | "browser-backend"
-  | "search";
+  | "search"
+  | "documents"
+  | "ocr"
+  | "speech";
 
 export type AuthType = "none" | "api-key" | "token" | "external-cli" | "oauth-device";
 

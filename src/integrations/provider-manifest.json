@@ -2775,15 +2775,15 @@
       "displayName": "PDF text extraction",
       "authStrategy": "none",
       "protocol": "local-process",
-      "runtimeAdapter": "none",
+      "runtimeAdapter": "documentsExtract",
       "sourceCommit": "in-tree",
-      "license": "n/a",
-      "status": "blocked",
+      "license": "Apache-2.0 (wrapper); no npm PDF parser adopted",
+      "status": "fixture-verified",
       "prdIds": [
         "I9"
       ],
       "origin": "keli",
-      "protocolNote": "No runtime in this slice; parser chosen after license/API check"
+      "protocolNote": "Uncompressed PDF strings in-process; optional pdftotext. No third-party PDF library until license/API is verified."
     },
     {
       "category": "ocr",
@@ -2794,14 +2794,15 @@
       "displayName": "Tesseract OCR",
       "authStrategy": "none",
       "protocol": "local-process",
-      "runtimeAdapter": "none",
+      "runtimeAdapter": "ocrExtract",
       "sourceCommit": "in-tree",
       "license": "Apache-2.0",
-      "status": "blocked",
+      "status": "fixture-verified",
       "prdIds": [
         "I9"
       ],
-      "origin": "keli"
+      "origin": "keli",
+      "protocolNote": "Optional tesseract binary; missing install is typed unavailable, not a CI dependency"
     },
     {
       "category": "speech",
@@ -2812,14 +2813,15 @@
       "displayName": "Speech transcription",
       "authStrategy": "api-key",
       "protocol": "openai-compatible-http",
-      "runtimeAdapter": "none",
+      "runtimeAdapter": "speechTranscribe",
       "sourceCommit": "in-tree",
       "license": "n/a",
-      "status": "blocked",
+      "status": "fixture-verified",
       "prdIds": [
         "I9"
       ],
-      "origin": "keli"
+      "origin": "keli",
+      "protocolNote": "OpenAI-compatible POST /audio/transcriptions; fixture proves request shape"
     },
     {
       "category": "speech",
@@ -2830,11 +2832,11 @@
       "displayName": "Speech synthesis",
       "authStrategy": "api-key",
       "protocol": "openai-compatible-http",
-      "protocolNote": "Optional; full upstream TTS plugin zoo is excluded",
-      "runtimeAdapter": "none",
+      "protocolNote": "Optional OpenAI-compatible POST /audio/speech; full TTS plugin zoo excluded",
+      "runtimeAdapter": "speechSynthesize",
       "sourceCommit": "in-tree",
       "license": "n/a",
-      "status": "blocked",
+      "status": "fixture-verified",
       "prdIds": [
         "I9"
       ],

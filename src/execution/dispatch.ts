@@ -13,6 +13,8 @@ import { jobsObserve } from "../adapters/jobs.ts";
 import { browserSessionConnect } from "../adapters/browser-session.ts";
 import { helpersSpawn } from "../adapters/helpers-spawn.ts";
 import { sourcesCollections, sourcesRead, sourcesSearch } from "../adapters/sources.ts";
+import { documentsExtract, ocrExtract } from "../adapters/documents.ts";
+import { speechSynthesize, speechTranscribe } from "../adapters/speech.ts";
 import { runStructuredTool } from "../tools/cli-adapter.ts";
 import { profileFor } from "../tools/profiles.ts";
 import { RESEARCH_CAPABILITIES } from "../conversation/context.ts";
@@ -189,6 +191,29 @@ export async function dispatchCapability(
       break;
     case "sources.collections":
       result = sourcesCollections(ctx.sources);
+      break;
+    case "documents.extract":
+      result = await documentsExtract(proposal.input as { path: string }, policy, {
+        config: ctx.config,
+        cwd,
+      });
+      break;
+    case "ocr.extract":
+      result = await ocrExtract(proposal.input as { path: string }, policy, {
+        config: ctx.config,
+        cwd,
+      });
+      break;
+    case "speech.transcribe":
+      result = await speechTranscribe(proposal.input as { path: string; model?: string }, policy, {
+        config: ctx.config,
+        cwd,
+      });
+      break;
+    case "speech.synthesize":
+      result = await speechSynthesize(proposal.input as { text: string; model?: string; voice?: string }, {
+        config: ctx.config,
+      });
       break;
     case "mcp.tools/list":
       result = await mcpListTools(fixtures.mcp, ctx.config);
