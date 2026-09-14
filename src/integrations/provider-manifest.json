@@ -1,0 +1,2844 @@
+{
+  "attribution": {
+    "hermes": {
+      "upstream": "NousResearch/hermes-agent",
+      "pin": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT"
+    },
+    "nanobot": {
+      "upstream": "HKUDS/nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "license": "MIT"
+    },
+    "piAi": {
+      "package": "@mariozechner/pi-ai",
+      "version": "0.73.1",
+      "license": "MIT"
+    }
+  },
+  "hermesInference": [
+    {
+      "name": "actual",
+      "display_name": "Actual Computer",
+      "aliases": [
+        "actual-computer",
+        "actualcomputer",
+        "aci"
+      ],
+      "base_url": "https://api.actual.inc/v1",
+      "env_vars": [
+        "ACTUAL_API_KEY",
+        "ACTUAL_BASE_URL"
+      ],
+      "auth_type": "api_key",
+      "api_mode": "codex_responses"
+    },
+    {
+      "name": "ai-gateway",
+      "aliases": [
+        "vercel",
+        "vercel-ai-gateway",
+        "ai_gateway",
+        "aigateway"
+      ],
+      "base_url": "https://ai-gateway.vercel.sh/v1",
+      "env_vars": [
+        "AI_GATEWAY_API_KEY"
+      ],
+      "default_aux_model": "google/gemini-3-flash"
+    },
+    {
+      "name": "alibaba-coding-plan",
+      "display_name": "Alibaba Cloud (Coding Plan)",
+      "aliases": [
+        "alibaba_coding",
+        "alibaba-coding",
+        "dashscope-coding"
+      ],
+      "base_url": "https://coding-intl.dashscope.aliyuncs.com/v1",
+      "env_vars": [
+        "ALIBABA_CODING_PLAN_API_KEY",
+        "DASHSCOPE_API_KEY",
+        "ALIBABA_CODING_PLAN_BASE_URL"
+      ],
+      "auth_type": "api_key"
+    },
+    {
+      "name": "alibaba-coding-plan-cn",
+      "display_name": "Alibaba Cloud (Coding Plan, China)",
+      "aliases": [
+        "alibaba-coding-cn",
+        "dashscope-coding-cn"
+      ],
+      "base_url": "https://coding.dashscope.aliyuncs.com/v1",
+      "env_vars": [
+        "ALIBABA_CODING_PLAN_CN_API_KEY",
+        "ALIBABA_CODING_PLAN_API_KEY",
+        "DASHSCOPE_API_KEY",
+        "ALIBABA_CODING_PLAN_CN_BASE_URL"
+      ],
+      "auth_type": "api_key"
+    },
+    {
+      "name": "alibaba",
+      "aliases": [
+        "dashscope",
+        "alibaba-cloud",
+        "qwen-dashscope"
+      ],
+      "base_url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+      "env_vars": [
+        "DASHSCOPE_API_KEY"
+      ]
+    },
+    {
+      "name": "alibaba-cn",
+      "display_name": "Alibaba Cloud DashScope (China)",
+      "aliases": [
+        "dashscope-cn",
+        "alibaba-cloud-cn"
+      ],
+      "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "env_vars": [
+        "DASHSCOPE_API_KEY",
+        "DASHSCOPE_CN_BASE_URL"
+      ]
+    },
+    {
+      "name": "alibaba-token-plan",
+      "display_name": "Alibaba Cloud (Token Plan)",
+      "aliases": [
+        "dashscope-token-plan"
+      ],
+      "base_url": "https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1",
+      "env_vars": [
+        "ALIBABA_TOKEN_PLAN_API_KEY",
+        "ALIBABA_TOKEN_PLAN_BASE_URL"
+      ],
+      "auth_type": "api_key"
+    },
+    {
+      "name": "alibaba-token-plan-cn",
+      "display_name": "Alibaba Cloud (Token Plan, China)",
+      "aliases": [
+        "dashscope-token-plan-cn"
+      ],
+      "base_url": "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+      "env_vars": [
+        "ALIBABA_TOKEN_PLAN_CN_API_KEY",
+        "ALIBABA_TOKEN_PLAN_API_KEY",
+        "ALIBABA_TOKEN_PLAN_CN_BASE_URL"
+      ],
+      "auth_type": "api_key"
+    },
+    {
+      "name": "anthropic",
+      "aliases": [
+        "claude",
+        "claude-oauth",
+        "claude-code"
+      ],
+      "base_url": "https://api.anthropic.com",
+      "env_vars": [
+        "ANTHROPIC_API_KEY",
+        "ANTHROPIC_TOKEN",
+        "CLAUDE_CODE_OAUTH_TOKEN"
+      ],
+      "auth_type": "api_key",
+      "api_mode": "anthropic_messages",
+      "default_aux_model": "claude-haiku-4-5-20251001"
+    },
+    {
+      "name": "arcee",
+      "aliases": [
+        "arcee-ai",
+        "arceeai"
+      ],
+      "base_url": "https://api.arcee.ai/api/v1",
+      "env_vars": [
+        "ARCEEAI_API_KEY"
+      ]
+    },
+    {
+      "name": "azure-foundry",
+      "display_name": "Azure Foundry",
+      "aliases": [
+        "azure",
+        "azure-ai-foundry",
+        "azure-ai"
+      ],
+      "base_url": "",
+      "env_vars": [
+        "AZURE_FOUNDRY_API_KEY",
+        "AZURE_FOUNDRY_BASE_URL"
+      ],
+      "auth_type": "api_key"
+    },
+    {
+      "name": "bedrock",
+      "aliases": [
+        "aws",
+        "aws-bedrock",
+        "amazon-bedrock",
+        "amazon"
+      ],
+      "base_url": "https://bedrock-runtime.us-east-1.amazonaws.com",
+      "env_vars": [],
+      "auth_type": "aws_sdk",
+      "api_mode": "bedrock_converse"
+    },
+    {
+      "name": "commandcode",
+      "display_name": "CommandCode",
+      "aliases": [
+        "commandcode-chat"
+      ],
+      "base_url": "https://api.commandcode.ai/provider/v1",
+      "env_vars": [
+        "COMMANDCODE_API_KEY",
+        "COMMANDCODE_BASE_URL"
+      ],
+      "api_mode": "chat_completions",
+      "default_aux_model": "deepseek/deepseek-v4-flash",
+      "fallback_models": [
+        "deepseek/deepseek-v4-pro",
+        "deepseek/deepseek-v4-flash",
+        "Qwen/Qwen3.7-Max",
+        "Qwen/Qwen3.6-Plus",
+        "moonshotai/Kimi-K2.6",
+        "zai-org/GLM-5.1",
+        "MiniMaxAI/MiniMax-M2.7",
+        "stepfun/Step-3.5-Flash",
+        "xiaomi/mimo-v2.5-pro",
+        "google/gemini-3.5-flash",
+        "gpt-5.5"
+      ]
+    },
+    {
+      "name": "commandcode-anthropic",
+      "display_name": "CommandCode (Anthropic)",
+      "aliases": [
+        "commandcode-claude"
+      ],
+      "base_url": "https://api.commandcode.ai/provider/v1",
+      "env_vars": [
+        "COMMANDCODE_API_KEY",
+        "COMMANDCODE_ANTHROPIC_BASE_URL"
+      ],
+      "api_mode": "anthropic_messages",
+      "default_aux_model": "claude-haiku-4-5-20251001",
+      "fallback_models": [
+        "claude-sonnet-4-6",
+        "claude-opus-4-7",
+        "claude-haiku-4-5-20251001"
+      ]
+    },
+    {
+      "name": "copilot-acp",
+      "aliases": [
+        "github-copilot-acp",
+        "copilot-acp-agent"
+      ],
+      "base_url": "acp://copilot",
+      "env_vars": [],
+      "auth_type": "external_process",
+      "api_mode": "chat_completions"
+    },
+    {
+      "name": "copilot",
+      "aliases": [
+        "github-copilot",
+        "github-models",
+        "github-model",
+        "github"
+      ],
+      "base_url": "https://api.githubcopilot.com",
+      "env_vars": [
+        "COPILOT_GITHUB_TOKEN",
+        "GH_TOKEN",
+        "GITHUB_TOKEN"
+      ],
+      "auth_type": "copilot"
+    },
+    {
+      "name": "custom",
+      "aliases": [
+        "ollama",
+        "local",
+        "vllm",
+        "llamacpp",
+        "llama.cpp",
+        "llama-cpp"
+      ],
+      "base_url": "",
+      "env_vars": []
+    },
+    {
+      "name": "deepinfra",
+      "display_name": "DeepInfra",
+      "aliases": [
+        "deep-infra",
+        "deepinfra-ai"
+      ],
+      "base_url": "https://api.deepinfra.com/v1/openai",
+      "env_vars": [
+        "DEEPINFRA_API_KEY",
+        "DEEPINFRA_BASE_URL"
+      ],
+      "auth_type": "api_key",
+      "default_aux_model": "deepseek-ai/DeepSeek-V4-Flash",
+      "fallback_models": []
+    },
+    {
+      "name": "deepseek",
+      "display_name": "DeepSeek",
+      "aliases": [
+        "deepseek-chat"
+      ],
+      "base_url": "https://api.deepseek.com/v1",
+      "env_vars": [
+        "DEEPSEEK_API_KEY"
+      ],
+      "default_aux_model": "deepseek-v4-flash",
+      "fallback_models": [
+        "deepseek-v4-pro",
+        "deepseek-v4-flash"
+      ]
+    },
+    {
+      "name": "fireworks",
+      "display_name": "Fireworks AI",
+      "aliases": [
+        "fireworks-ai",
+        "fw"
+      ],
+      "base_url": "https://api.fireworks.ai/inference/v1",
+      "env_vars": [
+        "FIREWORKS_API_KEY"
+      ],
+      "auth_type": "api_key",
+      "default_aux_model": "accounts/fireworks/models/glm-5p2",
+      "fallback_models": [
+        "accounts/fireworks/models/kimi-k2p6",
+        "accounts/fireworks/models/glm-5p2",
+        "accounts/fireworks/models/kimi-k2p7-code"
+      ]
+    },
+    {
+      "name": "gemini",
+      "aliases": [
+        "google",
+        "google-gemini",
+        "google-ai-studio"
+      ],
+      "base_url": "https://generativelanguage.googleapis.com/v1beta",
+      "env_vars": [
+        "GOOGLE_API_KEY",
+        "GEMINI_API_KEY"
+      ],
+      "auth_type": "api_key",
+      "api_mode": "chat_completions",
+      "default_aux_model": "gemini-3.6-flash"
+    },
+    {
+      "name": "gmi",
+      "display_name": "GMI Cloud",
+      "aliases": [
+        "gmi-cloud",
+        "gmicloud"
+      ],
+      "base_url": "https://api.gmi-serving.com/v1",
+      "env_vars": [
+        "GMI_API_KEY",
+        "GMI_BASE_URL"
+      ],
+      "auth_type": "api_key",
+      "default_aux_model": "google/gemini-3.1-flash-lite-preview",
+      "fallback_models": [
+        "zai-org/GLM-5.1-FP8",
+        "deepseek-ai/DeepSeek-V3.2",
+        "moonshotai/Kimi-K2.5",
+        "google/gemini-3.1-flash-lite-preview",
+        "anthropic/claude-sonnet-5",
+        "anthropic/claude-sonnet-4.6",
+        "openai/gpt-5.4"
+      ]
+    },
+    {
+      "name": "huggingface",
+      "display_name": "HuggingFace",
+      "aliases": [
+        "hf",
+        "hugging-face",
+        "huggingface-hub"
+      ],
+      "base_url": "https://router.huggingface.co/v1",
+      "env_vars": [
+        "HF_TOKEN"
+      ],
+      "fallback_models": [
+        "Qwen/Qwen3.5-72B-Instruct",
+        "deepseek-ai/DeepSeek-V3.2"
+      ]
+    },
+    {
+      "name": "kilocode",
+      "aliases": [
+        "kilo-code",
+        "kilo",
+        "kilo-gateway"
+      ],
+      "base_url": "https://api.kilo.ai/api/gateway",
+      "env_vars": [
+        "KILOCODE_API_KEY"
+      ],
+      "default_aux_model": "google/gemini-3.6-flash"
+    },
+    {
+      "name": "meta-ai",
+      "display_name": "Meta Model API",
+      "aliases": [
+        "meta",
+        "muse",
+        "muse-spark",
+        "model-api",
+        "msl"
+      ],
+      "env_vars": [
+        "MODEL_API_KEY",
+        "META_API_KEY",
+        "META_MODEL_API_KEY",
+        "META_BASE_URL"
+      ],
+      "auth_type": "api_key",
+      "api_mode": "codex_responses",
+      "default_aux_model": "muse-spark-1.2-contributor",
+      "fallback_models": [
+        "muse-spark-1.2"
+      ],
+      "base_url": "https://api.meta.ai/v1"
+    },
+    {
+      "name": "minimax",
+      "aliases": [
+        "mini-max"
+      ],
+      "base_url": "https://api.minimax.io/anthropic",
+      "env_vars": [
+        "MINIMAX_API_KEY"
+      ],
+      "auth_type": "api_key",
+      "api_mode": "anthropic_messages",
+      "default_aux_model": "MiniMax-M3"
+    },
+    {
+      "name": "minimax-cn",
+      "aliases": [
+        "minimax-china",
+        "minimax_cn"
+      ],
+      "base_url": "https://api.minimaxi.com/anthropic",
+      "env_vars": [
+        "MINIMAX_CN_API_KEY"
+      ],
+      "auth_type": "api_key",
+      "api_mode": "anthropic_messages",
+      "default_aux_model": "MiniMax-M3"
+    },
+    {
+      "name": "minimax-oauth",
+      "display_name": "MiniMax (OAuth)",
+      "aliases": [
+        "minimax_oauth",
+        "minimax-oauth-io"
+      ],
+      "base_url": "https://api.minimax.io/anthropic",
+      "env_vars": [],
+      "auth_type": "oauth_external",
+      "api_mode": "anthropic_messages",
+      "default_aux_model": "MiniMax-M2.7"
+    },
+    {
+      "name": "nebius-token-factory",
+      "display_name": "Nebius Token Factory",
+      "aliases": [
+        "nebius",
+        "nebius-tokenfactory",
+        "nebius-tf",
+        "token-factory",
+        "tokenfactory"
+      ],
+      "base_url": "https://api.tokenfactory.nebius.com/v1",
+      "env_vars": [
+        "NEBIUS_API_KEY",
+        "NEBIUS_TOKEN_FACTORY_API_KEY",
+        "NEBIUS_BASE_URL"
+      ],
+      "auth_type": "api_key",
+      "default_aux_model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+      "fallback_models": [
+        "Qwen/Qwen3.5-397B-A17B-fast",
+        "deepseek-ai/DeepSeek-V4-Pro",
+        "zai-org/GLM-5.1",
+        "moonshotai/Kimi-K2.5-fast",
+        "MiniMaxAI/MiniMax-M2.5-fast",
+        "deepseek-ai/DeepSeek-V3.2-fast",
+        "NousResearch/Hermes-4-70B",
+        "openai/gpt-oss-120b-fast",
+        "meta-llama/Llama-3.3-70B-Instruct"
+      ]
+    },
+    {
+      "name": "nous",
+      "display_name": "Nous Research",
+      "aliases": [
+        "nous-portal",
+        "nousresearch"
+      ],
+      "base_url": "https://inference-api.nousresearch.com/v1",
+      "env_vars": [
+        "NOUS_API_KEY"
+      ],
+      "auth_type": "oauth_device_code",
+      "fallback_models": [
+        "hermes-3-405b",
+        "hermes-3-70b"
+      ]
+    },
+    {
+      "name": "novita",
+      "display_name": "NovitaAI",
+      "aliases": [
+        "novita-ai",
+        "novitaai"
+      ],
+      "base_url": "https://api.novita.ai/openai/v1",
+      "env_vars": [
+        "NOVITA_API_KEY",
+        "NOVITA_BASE_URL"
+      ],
+      "auth_type": "api_key",
+      "default_aux_model": "deepseek/deepseek-v3-0324",
+      "fallback_models": [
+        "moonshotai/kimi-k2.5",
+        "minimax/minimax-m2.7",
+        "zai-org/glm-5",
+        "deepseek/deepseek-v3-0324",
+        "deepseek/deepseek-r1-0528",
+        "qwen/qwen3-235b-a22b-fp8"
+      ]
+    },
+    {
+      "name": "nvidia",
+      "display_name": "NVIDIA NIM",
+      "aliases": [
+        "nvidia-nim"
+      ],
+      "base_url": "https://integrate.api.nvidia.com/v1",
+      "env_vars": [
+        "NVIDIA_API_KEY"
+      ],
+      "fallback_models": [
+        "nvidia/llama-3.1-nemotron-70b-instruct",
+        "nvidia/llama-3.3-70b-instruct"
+      ]
+    },
+    {
+      "name": "ollama-cloud",
+      "aliases": [
+        "ollama_cloud"
+      ],
+      "base_url": "https://ollama.com/v1",
+      "env_vars": [
+        "OLLAMA_API_KEY"
+      ],
+      "default_aux_model": "nemotron-3-nano:30b"
+    },
+    {
+      "name": "openai-codex",
+      "aliases": [
+        "codex",
+        "openai_codex"
+      ],
+      "base_url": "https://chatgpt.com/backend-api/codex",
+      "env_vars": [],
+      "auth_type": "oauth_external",
+      "api_mode": "codex_responses"
+    },
+    {
+      "name": "opencode-free",
+      "display_name": "OpenCode Free",
+      "aliases": [
+        "free",
+        "opencode_free"
+      ],
+      "base_url": "https://opencode.ai/zen/v1",
+      "env_vars": [],
+      "default_aux_model": "laguna-s-2.1-free"
+    },
+    {
+      "name": "opencode-zen",
+      "aliases": [
+        "opencode",
+        "opencode_zen",
+        "zen"
+      ],
+      "base_url": "https://opencode.ai/zen/v1",
+      "env_vars": [
+        "OPENCODE_ZEN_API_KEY"
+      ],
+      "default_aux_model": "gemini-3-flash"
+    },
+    {
+      "name": "opencode-go",
+      "aliases": [
+        "opencode_go",
+        "go",
+        "opencode-go-sub"
+      ],
+      "base_url": "https://opencode.ai/zen/go/v1",
+      "env_vars": [
+        "OPENCODE_GO_API_KEY"
+      ],
+      "default_aux_model": "glm-5"
+    },
+    {
+      "name": "openrouter",
+      "display_name": "OpenRouter",
+      "aliases": [
+        "or"
+      ],
+      "base_url": "https://openrouter.ai/api/v1",
+      "env_vars": [
+        "OPENROUTER_API_KEY"
+      ],
+      "fallback_models": [
+        "anthropic/claude-sonnet-4.6",
+        "openai/gpt-5.4",
+        "deepseek/deepseek-chat",
+        "google/gemini-3.8-flash",
+        "qwen/qwen3-plus"
+      ]
+    },
+    {
+      "name": "qwen-oauth",
+      "aliases": [
+        "qwen",
+        "qwen-portal",
+        "qwen-cli"
+      ],
+      "base_url": "https://portal.qwen.ai/v1",
+      "env_vars": [
+        "QWEN_API_KEY"
+      ],
+      "auth_type": "oauth_external"
+    },
+    {
+      "name": "router",
+      "display_name": "Ramp Router",
+      "aliases": [
+        "ramp-router",
+        "ramp",
+        "router.com"
+      ],
+      "env_vars": [
+        "RAMP_ROUTER_API_KEY",
+        "ROUTER_API_KEY",
+        "RAMP_ROUTER_BASE_URL"
+      ],
+      "auth_type": "api_key",
+      "api_mode": "codex_responses",
+      "default_aux_model": "gpt-5.4-mini",
+      "fallback_models": [],
+      "base_url": "https://api.router.com/v1"
+    },
+    {
+      "name": "stepfun",
+      "aliases": [
+        "step",
+        "stepfun-coding-plan"
+      ],
+      "base_url": "https://api.stepfun.ai/step_plan/v1",
+      "env_vars": [
+        "STEPFUN_API_KEY"
+      ],
+      "default_aux_model": "step-3.5-flash"
+    },
+    {
+      "name": "upstage",
+      "display_name": "Upstage Solar",
+      "aliases": [
+        "solar"
+      ],
+      "base_url": "https://api.upstage.ai/v1",
+      "env_vars": [
+        "UPSTAGE_API_KEY",
+        "UPSTAGE_BASE_URL"
+      ],
+      "auth_type": "api_key",
+      "fallback_models": [
+        "solar-pro3"
+      ]
+    },
+    {
+      "name": "vertex",
+      "aliases": [
+        "google-vertex",
+        "vertex-ai",
+        "gcp-vertex"
+      ],
+      "base_url": "https://aiplatform.googleapis.com",
+      "env_vars": [],
+      "auth_type": "vertex",
+      "api_mode": "chat_completions",
+      "default_aux_model": "google/gemini-3.6-flash"
+    },
+    {
+      "name": "grok",
+      "aliases": [
+        "xai",
+        "x-ai",
+        "x.ai"
+      ],
+      "base_url": "https://api.x.ai/v1",
+      "env_vars": [
+        "XAI_API_KEY"
+      ],
+      "auth_type": "api_key",
+      "api_mode": "codex_responses",
+      "default_aux_model": "grok-4"
+    },
+    {
+      "name": "xiaomi",
+      "aliases": [
+        "mimo",
+        "xiaomi-mimo"
+      ],
+      "base_url": "https://api.xiaomimimo.com/v1",
+      "env_vars": [
+        "XIAOMI_API_KEY"
+      ]
+    },
+    {
+      "name": "zai",
+      "display_name": "Z.AI (GLM)",
+      "aliases": [
+        "glm",
+        "z-ai",
+        "z.ai",
+        "zhipu"
+      ],
+      "base_url": "https://api.z.ai/api/paas/v4",
+      "env_vars": [
+        "GLM_API_KEY",
+        "ZAI_API_KEY",
+        "Z_AI_API_KEY"
+      ],
+      "default_aux_model": "glm-4.5-flash",
+      "fallback_models": [
+        "glm-5.2",
+        "glm-5",
+        "glm-4-9b"
+      ]
+    },
+    {
+      "name": "openai-api",
+      "base_url": "https://api.openai.com/v1",
+      "env_vars": [
+        "OPENAI_API_KEY"
+      ],
+      "default_aux_model": "gpt-5.4-mini",
+      "api_mode": "codex_responses"
+    },
+    {
+      "name": "lmstudio",
+      "base_url": "http://localhost:1234/v1",
+      "env_vars": [],
+      "default_aux_model": null,
+      "api_mode": "chat_completions"
+    },
+    {
+      "name": "kimi-coding",
+      "base_url": "https://api.moonshot.ai/v1",
+      "env_vars": [
+        "KIMI_API_KEY",
+        "KIMI_CODING_API_KEY"
+      ],
+      "default_aux_model": "kimi-k2-turbo-preview",
+      "api_mode": "chat_completions"
+    },
+    {
+      "name": "kimi-coding-cn",
+      "base_url": "https://api.moonshot.cn/v1",
+      "env_vars": [
+        "KIMI_CN_API_KEY"
+      ],
+      "default_aux_model": "kimi-k2-turbo-preview",
+      "api_mode": "chat_completions"
+    },
+    {
+      "name": "tencent-tokenhub",
+      "base_url": "https://tokenhub.tencentmaas.com/v1",
+      "env_vars": [
+        "TOKENHUB_API_KEY",
+        "TOKENHUB_BASE_URL"
+      ],
+      "default_aux_model": null,
+      "api_mode": "chat_completions"
+    },
+    {
+      "name": "tencent-tokenplan",
+      "base_url": "https://api.lkeap.cloud.tencent.com/plan/anthropic",
+      "env_vars": [
+        "TOKENPLAN_API_KEY",
+        "TOKENPLAN_BASE_URL"
+      ],
+      "default_aux_model": null,
+      "api_mode": "anthropic_messages"
+    },
+    {
+      "name": "xai-oauth",
+      "base_url": "https://api.x.ai/v1",
+      "env_vars": [],
+      "default_aux_model": "grok-4",
+      "api_mode": "codex_responses"
+    },
+    {
+      "name": "moa",
+      "display_name": "Mixture of Agents",
+      "auth_type": "virtual"
+    }
+  ],
+  "providers": [
+    {
+      "category": "model-provider",
+      "id": "actual",
+      "aliases": [
+        "actual-computer",
+        "actualcomputer",
+        "aci"
+      ],
+      "displayName": "Actual Computer",
+      "authStrategy": "api-key",
+      "protocol": "openai-responses",
+      "endpointDefaults": "https://api.actual.inc/v1",
+      "envVars": [
+        "ACTUAL_API_KEY",
+        "ACTUAL_BASE_URL"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "codex_responses"
+    },
+    {
+      "category": "model-provider",
+      "id": "ai-gateway",
+      "aliases": [
+        "vercel",
+        "vercel-ai-gateway",
+        "ai_gateway",
+        "aigateway"
+      ],
+      "displayName": "ai-gateway",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://ai-gateway.vercel.sh/v1",
+      "envVars": [
+        "AI_GATEWAY_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "defaultAuxModel": "google/gemini-3-flash"
+    },
+    {
+      "category": "model-provider",
+      "id": "alibaba-coding-plan",
+      "aliases": [
+        "alibaba_coding",
+        "alibaba-coding",
+        "dashscope-coding"
+      ],
+      "displayName": "Alibaba Cloud (Coding Plan)",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://coding-intl.dashscope.aliyuncs.com/v1",
+      "envVars": [
+        "ALIBABA_CODING_PLAN_API_KEY",
+        "DASHSCOPE_API_KEY",
+        "ALIBABA_CODING_PLAN_BASE_URL"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes"
+    },
+    {
+      "category": "model-provider",
+      "id": "alibaba-coding-plan-cn",
+      "aliases": [
+        "alibaba-coding-cn",
+        "dashscope-coding-cn"
+      ],
+      "displayName": "Alibaba Cloud (Coding Plan, China)",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://coding.dashscope.aliyuncs.com/v1",
+      "envVars": [
+        "ALIBABA_CODING_PLAN_CN_API_KEY",
+        "ALIBABA_CODING_PLAN_API_KEY",
+        "DASHSCOPE_API_KEY",
+        "ALIBABA_CODING_PLAN_CN_BASE_URL"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes"
+    },
+    {
+      "category": "model-provider",
+      "id": "alibaba",
+      "aliases": [
+        "dashscope",
+        "alibaba-cloud",
+        "qwen-dashscope"
+      ],
+      "displayName": "alibaba",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+      "envVars": [
+        "DASHSCOPE_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes"
+    },
+    {
+      "category": "model-provider",
+      "id": "alibaba-cn",
+      "aliases": [
+        "dashscope-cn",
+        "alibaba-cloud-cn"
+      ],
+      "displayName": "Alibaba Cloud DashScope (China)",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "envVars": [
+        "DASHSCOPE_API_KEY",
+        "DASHSCOPE_CN_BASE_URL"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes"
+    },
+    {
+      "category": "model-provider",
+      "id": "alibaba-token-plan",
+      "aliases": [
+        "dashscope-token-plan"
+      ],
+      "displayName": "Alibaba Cloud (Token Plan)",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1",
+      "envVars": [
+        "ALIBABA_TOKEN_PLAN_API_KEY",
+        "ALIBABA_TOKEN_PLAN_BASE_URL"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes"
+    },
+    {
+      "category": "model-provider",
+      "id": "alibaba-token-plan-cn",
+      "aliases": [
+        "dashscope-token-plan-cn"
+      ],
+      "displayName": "Alibaba Cloud (Token Plan, China)",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+      "envVars": [
+        "ALIBABA_TOKEN_PLAN_CN_API_KEY",
+        "ALIBABA_TOKEN_PLAN_API_KEY",
+        "ALIBABA_TOKEN_PLAN_CN_BASE_URL"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes"
+    },
+    {
+      "category": "model-provider",
+      "id": "anthropic",
+      "aliases": [
+        "claude",
+        "claude-oauth",
+        "claude-code"
+      ],
+      "displayName": "anthropic",
+      "authStrategy": "api-key",
+      "protocol": "anthropic-messages",
+      "endpointDefaults": "https://api.anthropic.com",
+      "envVars": [
+        "ANTHROPIC_API_KEY",
+        "ANTHROPIC_TOKEN",
+        "CLAUDE_CODE_OAUTH_TOKEN"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "anthropic_messages",
+      "defaultAuxModel": "claude-haiku-4-5-20251001"
+    },
+    {
+      "category": "model-provider",
+      "id": "arcee",
+      "aliases": [
+        "arcee-ai",
+        "arceeai"
+      ],
+      "displayName": "arcee",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://api.arcee.ai/api/v1",
+      "envVars": [
+        "ARCEEAI_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes"
+    },
+    {
+      "category": "model-provider",
+      "id": "azure-foundry",
+      "aliases": [
+        "azure",
+        "azure-ai-foundry",
+        "azure-ai"
+      ],
+      "displayName": "Azure Foundry",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "",
+      "envVars": [
+        "AZURE_FOUNDRY_API_KEY",
+        "AZURE_FOUNDRY_BASE_URL"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "options": [
+        "deployment",
+        "apiMode",
+        "apiVersion"
+      ],
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes"
+    },
+    {
+      "category": "model-provider",
+      "id": "bedrock",
+      "aliases": [
+        "aws",
+        "aws-bedrock",
+        "amazon-bedrock",
+        "amazon"
+      ],
+      "displayName": "bedrock",
+      "authStrategy": "cloud-sdk",
+      "protocol": "cloud-sdk",
+      "protocolNote": "AWS credential chain, not an API key header",
+      "endpointDefaults": "https://bedrock-runtime.us-east-1.amazonaws.com",
+      "envVars": [],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "options": [
+        "region",
+        "profile"
+      ],
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "bedrock_converse"
+    },
+    {
+      "category": "model-provider",
+      "id": "commandcode",
+      "aliases": [
+        "commandcode-chat"
+      ],
+      "displayName": "CommandCode",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://api.commandcode.ai/provider/v1",
+      "envVars": [
+        "COMMANDCODE_API_KEY",
+        "COMMANDCODE_BASE_URL"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "chat_completions",
+      "defaultAuxModel": "deepseek/deepseek-v4-flash",
+      "fallbackModels": [
+        "deepseek/deepseek-v4-pro",
+        "deepseek/deepseek-v4-flash",
+        "Qwen/Qwen3.7-Max",
+        "Qwen/Qwen3.6-Plus",
+        "moonshotai/Kimi-K2.6",
+        "zai-org/GLM-5.1",
+        "MiniMaxAI/MiniMax-M2.7",
+        "stepfun/Step-3.5-Flash",
+        "xiaomi/mimo-v2.5-pro",
+        "google/gemini-3.5-flash",
+        "gpt-5.5"
+      ]
+    },
+    {
+      "category": "model-provider",
+      "id": "commandcode-anthropic",
+      "aliases": [
+        "commandcode-claude"
+      ],
+      "displayName": "CommandCode (Anthropic)",
+      "authStrategy": "api-key",
+      "protocol": "anthropic-messages",
+      "protocolNote": "Same host as commandcode but Anthropic Messages, not Chat Completions",
+      "endpointDefaults": "https://api.commandcode.ai/provider/v1",
+      "envVars": [
+        "COMMANDCODE_API_KEY",
+        "COMMANDCODE_ANTHROPIC_BASE_URL"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "anthropic_messages",
+      "defaultAuxModel": "claude-haiku-4-5-20251001",
+      "fallbackModels": [
+        "claude-sonnet-4-6",
+        "claude-opus-4-7",
+        "claude-haiku-4-5-20251001"
+      ]
+    },
+    {
+      "category": "model-provider",
+      "id": "copilot-acp",
+      "aliases": [
+        "github-copilot-acp",
+        "copilot-acp-agent"
+      ],
+      "displayName": "copilot-acp",
+      "authStrategy": "external-cli",
+      "protocol": "unsupported",
+      "protocolNote": "ACP agent process, not Chat Completions; keep as a gated delegate identity",
+      "endpointDefaults": "acp://copilot",
+      "envVars": [],
+      "runtimeAdapter": "none",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "excluded",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "chat_completions"
+    },
+    {
+      "category": "model-provider",
+      "id": "copilot",
+      "aliases": [
+        "github-copilot",
+        "github-models",
+        "github-model",
+        "github"
+      ],
+      "displayName": "copilot",
+      "authStrategy": "oauth-device",
+      "protocol": "oauth-external-cli",
+      "protocolNote": "Copilot inference OAuth, distinct from copilot-acp",
+      "endpointDefaults": "https://api.githubcopilot.com",
+      "envVars": [
+        "COPILOT_GITHUB_TOKEN",
+        "GH_TOKEN",
+        "GITHUB_TOKEN"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes"
+    },
+    {
+      "category": "model-provider",
+      "id": "custom",
+      "aliases": [
+        "ollama",
+        "local",
+        "vllm",
+        "llamacpp",
+        "llama.cpp",
+        "llama-cpp"
+      ],
+      "displayName": "custom",
+      "authStrategy": "none",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "",
+      "envVars": [],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes"
+    },
+    {
+      "category": "model-provider",
+      "id": "deepinfra",
+      "aliases": [
+        "deep-infra",
+        "deepinfra-ai"
+      ],
+      "displayName": "DeepInfra",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://api.deepinfra.com/v1/openai",
+      "envVars": [
+        "DEEPINFRA_API_KEY",
+        "DEEPINFRA_BASE_URL"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "defaultAuxModel": "deepseek-ai/DeepSeek-V4-Flash",
+      "fallbackModels": []
+    },
+    {
+      "category": "model-provider",
+      "id": "deepseek",
+      "aliases": [
+        "deepseek-chat"
+      ],
+      "displayName": "DeepSeek",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://api.deepseek.com/v1",
+      "envVars": [
+        "DEEPSEEK_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "defaultAuxModel": "deepseek-v4-flash",
+      "fallbackModels": [
+        "deepseek-v4-pro",
+        "deepseek-v4-flash"
+      ]
+    },
+    {
+      "category": "model-provider",
+      "id": "fireworks",
+      "aliases": [
+        "fireworks-ai",
+        "fw"
+      ],
+      "displayName": "Fireworks AI",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://api.fireworks.ai/inference/v1",
+      "envVars": [
+        "FIREWORKS_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "defaultAuxModel": "accounts/fireworks/models/glm-5p2",
+      "fallbackModels": [
+        "accounts/fireworks/models/kimi-k2p6",
+        "accounts/fireworks/models/glm-5p2",
+        "accounts/fireworks/models/kimi-k2p7-code"
+      ]
+    },
+    {
+      "category": "model-provider",
+      "id": "gemini",
+      "aliases": [
+        "google",
+        "google-gemini",
+        "google-ai-studio"
+      ],
+      "displayName": "gemini",
+      "authStrategy": "api-key",
+      "protocol": "native-sdk",
+      "protocolNote": "Google AI Studio native API, not Vertex",
+      "endpointDefaults": "https://generativelanguage.googleapis.com/v1beta",
+      "envVars": [
+        "GOOGLE_API_KEY",
+        "GEMINI_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "chat_completions",
+      "defaultAuxModel": "gemini-3.6-flash"
+    },
+    {
+      "category": "model-provider",
+      "id": "gmi",
+      "aliases": [
+        "gmi-cloud",
+        "gmicloud"
+      ],
+      "displayName": "GMI Cloud",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://api.gmi-serving.com/v1",
+      "envVars": [
+        "GMI_API_KEY",
+        "GMI_BASE_URL"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "defaultAuxModel": "google/gemini-3.1-flash-lite-preview",
+      "fallbackModels": [
+        "zai-org/GLM-5.1-FP8",
+        "deepseek-ai/DeepSeek-V3.2",
+        "moonshotai/Kimi-K2.5",
+        "google/gemini-3.1-flash-lite-preview",
+        "anthropic/claude-sonnet-5",
+        "anthropic/claude-sonnet-4.6",
+        "openai/gpt-5.4"
+      ]
+    },
+    {
+      "category": "model-provider",
+      "id": "huggingface",
+      "aliases": [
+        "hf",
+        "hugging-face",
+        "huggingface-hub"
+      ],
+      "displayName": "HuggingFace",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://router.huggingface.co/v1",
+      "envVars": [
+        "HF_TOKEN"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "fallbackModels": [
+        "Qwen/Qwen3.5-72B-Instruct",
+        "deepseek-ai/DeepSeek-V3.2"
+      ]
+    },
+    {
+      "category": "model-provider",
+      "id": "kilocode",
+      "aliases": [
+        "kilo-code",
+        "kilo",
+        "kilo-gateway"
+      ],
+      "displayName": "kilocode",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://api.kilo.ai/api/gateway",
+      "envVars": [
+        "KILOCODE_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "defaultAuxModel": "google/gemini-3.6-flash"
+    },
+    {
+      "category": "model-provider",
+      "id": "meta-ai",
+      "aliases": [
+        "meta",
+        "muse",
+        "muse-spark",
+        "model-api",
+        "msl"
+      ],
+      "displayName": "Meta Model API",
+      "authStrategy": "api-key",
+      "protocol": "openai-responses",
+      "endpointDefaults": "https://api.meta.ai/v1",
+      "envVars": [
+        "MODEL_API_KEY",
+        "META_API_KEY",
+        "META_MODEL_API_KEY",
+        "META_BASE_URL"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "codex_responses",
+      "defaultAuxModel": "muse-spark-1.2-contributor",
+      "fallbackModels": [
+        "muse-spark-1.2"
+      ]
+    },
+    {
+      "category": "model-provider",
+      "id": "minimax",
+      "aliases": [
+        "mini-max"
+      ],
+      "displayName": "minimax",
+      "authStrategy": "api-key",
+      "protocol": "anthropic-messages",
+      "endpointDefaults": "https://api.minimax.io/anthropic",
+      "envVars": [
+        "MINIMAX_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "anthropic_messages",
+      "defaultAuxModel": "MiniMax-M3"
+    },
+    {
+      "category": "model-provider",
+      "id": "minimax-cn",
+      "aliases": [
+        "minimax-china",
+        "minimax_cn"
+      ],
+      "displayName": "minimax-cn",
+      "authStrategy": "api-key",
+      "protocol": "anthropic-messages",
+      "endpointDefaults": "https://api.minimaxi.com/anthropic",
+      "envVars": [
+        "MINIMAX_CN_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "anthropic_messages",
+      "defaultAuxModel": "MiniMax-M3"
+    },
+    {
+      "category": "model-provider",
+      "id": "minimax-oauth",
+      "aliases": [
+        "minimax_oauth",
+        "minimax-oauth-io"
+      ],
+      "displayName": "MiniMax (OAuth)",
+      "authStrategy": "oauth-device",
+      "protocol": "oauth-external-cli",
+      "endpointDefaults": "https://api.minimax.io/anthropic",
+      "envVars": [],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "anthropic_messages",
+      "defaultAuxModel": "MiniMax-M2.7"
+    },
+    {
+      "category": "model-provider",
+      "id": "nebius-token-factory",
+      "aliases": [
+        "nebius",
+        "nebius-tokenfactory",
+        "nebius-tf",
+        "token-factory",
+        "tokenfactory"
+      ],
+      "displayName": "Nebius Token Factory",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://api.tokenfactory.nebius.com/v1",
+      "envVars": [
+        "NEBIUS_API_KEY",
+        "NEBIUS_TOKEN_FACTORY_API_KEY",
+        "NEBIUS_BASE_URL"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "defaultAuxModel": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+      "fallbackModels": [
+        "Qwen/Qwen3.5-397B-A17B-fast",
+        "deepseek-ai/DeepSeek-V4-Pro",
+        "zai-org/GLM-5.1",
+        "moonshotai/Kimi-K2.5-fast",
+        "MiniMaxAI/MiniMax-M2.5-fast",
+        "deepseek-ai/DeepSeek-V3.2-fast",
+        "NousResearch/Hermes-4-70B",
+        "openai/gpt-oss-120b-fast",
+        "meta-llama/Llama-3.3-70B-Instruct"
+      ]
+    },
+    {
+      "category": "model-provider",
+      "id": "nous",
+      "aliases": [
+        "nous-portal",
+        "nousresearch"
+      ],
+      "displayName": "Nous Research",
+      "authStrategy": "oauth-device",
+      "protocol": "oauth-external-cli",
+      "endpointDefaults": "https://inference-api.nousresearch.com/v1",
+      "envVars": [
+        "NOUS_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "fallbackModels": [
+        "hermes-3-405b",
+        "hermes-3-70b"
+      ]
+    },
+    {
+      "category": "model-provider",
+      "id": "novita",
+      "aliases": [
+        "novita-ai",
+        "novitaai"
+      ],
+      "displayName": "NovitaAI",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://api.novita.ai/openai/v1",
+      "envVars": [
+        "NOVITA_API_KEY",
+        "NOVITA_BASE_URL"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "defaultAuxModel": "deepseek/deepseek-v3-0324",
+      "fallbackModels": [
+        "moonshotai/kimi-k2.5",
+        "minimax/minimax-m2.7",
+        "zai-org/glm-5",
+        "deepseek/deepseek-v3-0324",
+        "deepseek/deepseek-r1-0528",
+        "qwen/qwen3-235b-a22b-fp8"
+      ]
+    },
+    {
+      "category": "model-provider",
+      "id": "nvidia",
+      "aliases": [
+        "nvidia-nim"
+      ],
+      "displayName": "NVIDIA NIM",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://integrate.api.nvidia.com/v1",
+      "envVars": [
+        "NVIDIA_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "fallbackModels": [
+        "nvidia/llama-3.1-nemotron-70b-instruct",
+        "nvidia/llama-3.3-70b-instruct"
+      ]
+    },
+    {
+      "category": "model-provider",
+      "id": "ollama-cloud",
+      "aliases": [
+        "ollama_cloud"
+      ],
+      "displayName": "ollama-cloud",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://ollama.com/v1",
+      "envVars": [
+        "OLLAMA_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "defaultAuxModel": "nemotron-3-nano:30b"
+    },
+    {
+      "category": "model-provider",
+      "id": "openai-codex",
+      "aliases": [
+        "codex",
+        "openai_codex"
+      ],
+      "displayName": "openai-codex",
+      "authStrategy": "oauth-device",
+      "protocol": "oauth-external-cli",
+      "protocolNote": "ChatGPT inference is the Keli chatgpt profile; Codex app-server remains a delegate",
+      "endpointDefaults": "https://chatgpt.com/backend-api/codex",
+      "envVars": [],
+      "runtimeAdapter": "none",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "excluded",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "codex_responses"
+    },
+    {
+      "category": "model-provider",
+      "id": "opencode-free",
+      "aliases": [
+        "free",
+        "opencode_free"
+      ],
+      "displayName": "OpenCode Free",
+      "authStrategy": "none",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://opencode.ai/zen/v1",
+      "envVars": [],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "defaultAuxModel": "laguna-s-2.1-free"
+    },
+    {
+      "category": "model-provider",
+      "id": "opencode-zen",
+      "aliases": [
+        "opencode",
+        "opencode_zen",
+        "zen"
+      ],
+      "displayName": "opencode-zen",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://opencode.ai/zen/v1",
+      "envVars": [
+        "OPENCODE_ZEN_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "defaultAuxModel": "gemini-3-flash"
+    },
+    {
+      "category": "model-provider",
+      "id": "opencode-go",
+      "aliases": [
+        "opencode_go",
+        "go",
+        "opencode-go-sub"
+      ],
+      "displayName": "opencode-go",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://opencode.ai/zen/go/v1",
+      "envVars": [
+        "OPENCODE_GO_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "defaultAuxModel": "glm-5"
+    },
+    {
+      "category": "model-provider",
+      "id": "openrouter",
+      "aliases": [
+        "or"
+      ],
+      "displayName": "OpenRouter",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://openrouter.ai/api/v1",
+      "envVars": [
+        "OPENROUTER_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "fallbackModels": [
+        "anthropic/claude-sonnet-4.6",
+        "openai/gpt-5.4",
+        "deepseek/deepseek-chat",
+        "google/gemini-3.8-flash",
+        "qwen/qwen3-plus"
+      ]
+    },
+    {
+      "category": "model-provider",
+      "id": "qwen-oauth",
+      "aliases": [
+        "qwen",
+        "qwen-portal",
+        "qwen-cli"
+      ],
+      "displayName": "qwen-oauth",
+      "authStrategy": "oauth-device",
+      "protocol": "oauth-external-cli",
+      "protocolNote": "Read-only link to an existing Qwen CLI session, not a Keli OAuth client",
+      "endpointDefaults": "https://portal.qwen.ai/v1",
+      "envVars": [
+        "QWEN_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes"
+    },
+    {
+      "category": "model-provider",
+      "id": "router",
+      "aliases": [
+        "ramp-router",
+        "ramp",
+        "router.com"
+      ],
+      "displayName": "Ramp Router",
+      "authStrategy": "api-key",
+      "protocol": "openai-responses",
+      "endpointDefaults": "https://api.router.com/v1",
+      "envVars": [
+        "RAMP_ROUTER_API_KEY",
+        "ROUTER_API_KEY",
+        "RAMP_ROUTER_BASE_URL"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "codex_responses",
+      "defaultAuxModel": "gpt-5.4-mini",
+      "fallbackModels": []
+    },
+    {
+      "category": "model-provider",
+      "id": "stepfun",
+      "aliases": [
+        "step",
+        "stepfun-coding-plan"
+      ],
+      "displayName": "stepfun",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://api.stepfun.ai/step_plan/v1",
+      "envVars": [
+        "STEPFUN_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "defaultAuxModel": "step-3.5-flash"
+    },
+    {
+      "category": "model-provider",
+      "id": "upstage",
+      "aliases": [
+        "solar"
+      ],
+      "displayName": "Upstage Solar",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://api.upstage.ai/v1",
+      "envVars": [
+        "UPSTAGE_API_KEY",
+        "UPSTAGE_BASE_URL"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "fallbackModels": [
+        "solar-pro3"
+      ]
+    },
+    {
+      "category": "model-provider",
+      "id": "vertex",
+      "aliases": [
+        "google-vertex",
+        "vertex-ai",
+        "gcp-vertex"
+      ],
+      "displayName": "vertex",
+      "authStrategy": "cloud-sdk",
+      "protocol": "cloud-sdk",
+      "protocolNote": "Google ADC/project/location, not Gemini AI Studio",
+      "endpointDefaults": "https://aiplatform.googleapis.com",
+      "envVars": [],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "options": [
+        "project",
+        "location"
+      ],
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "chat_completions",
+      "defaultAuxModel": "google/gemini-3.6-flash"
+    },
+    {
+      "category": "model-provider",
+      "id": "xiaomi",
+      "aliases": [
+        "mimo",
+        "xiaomi-mimo"
+      ],
+      "displayName": "xiaomi",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://api.xiaomimimo.com/v1",
+      "envVars": [
+        "XIAOMI_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes"
+    },
+    {
+      "category": "model-provider",
+      "id": "zai",
+      "aliases": [
+        "glm",
+        "z-ai",
+        "z.ai",
+        "zhipu"
+      ],
+      "displayName": "Z.AI (GLM)",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://api.z.ai/api/paas/v4",
+      "envVars": [
+        "GLM_API_KEY",
+        "ZAI_API_KEY",
+        "Z_AI_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "defaultAuxModel": "glm-4.5-flash",
+      "fallbackModels": [
+        "glm-5.2",
+        "glm-5",
+        "glm-4-9b"
+      ]
+    },
+    {
+      "category": "model-provider",
+      "id": "openai-api",
+      "aliases": [],
+      "displayName": "openai-api",
+      "authStrategy": "api-key",
+      "protocol": "openai-responses",
+      "endpointDefaults": "https://api.openai.com/v1",
+      "envVars": [
+        "OPENAI_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "codex_responses",
+      "defaultAuxModel": "gpt-5.4-mini"
+    },
+    {
+      "category": "model-provider",
+      "id": "lmstudio",
+      "aliases": [],
+      "displayName": "lmstudio",
+      "authStrategy": "none",
+      "protocol": "local-process",
+      "protocolNote": "Local OpenAI-compatible server, not a cloud account",
+      "endpointDefaults": "http://localhost:1234/v1",
+      "envVars": [],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "chat_completions",
+      "defaultAuxModel": null
+    },
+    {
+      "category": "model-provider",
+      "id": "kimi-coding",
+      "aliases": [],
+      "displayName": "kimi-coding",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://api.moonshot.ai/v1",
+      "envVars": [
+        "KIMI_API_KEY",
+        "KIMI_CODING_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "chat_completions",
+      "defaultAuxModel": "kimi-k2-turbo-preview"
+    },
+    {
+      "category": "model-provider",
+      "id": "kimi-coding-cn",
+      "aliases": [],
+      "displayName": "kimi-coding-cn",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://api.moonshot.cn/v1",
+      "envVars": [
+        "KIMI_CN_API_KEY"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "chat_completions",
+      "defaultAuxModel": "kimi-k2-turbo-preview"
+    },
+    {
+      "category": "model-provider",
+      "id": "tencent-tokenhub",
+      "aliases": [],
+      "displayName": "tencent-tokenhub",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "endpointDefaults": "https://tokenhub.tencentmaas.com/v1",
+      "envVars": [
+        "TOKENHUB_API_KEY",
+        "TOKENHUB_BASE_URL"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "chat_completions",
+      "defaultAuxModel": null
+    },
+    {
+      "category": "model-provider",
+      "id": "tencent-tokenplan",
+      "aliases": [],
+      "displayName": "tencent-tokenplan",
+      "authStrategy": "api-key",
+      "protocol": "anthropic-messages",
+      "endpointDefaults": "https://api.lkeap.cloud.tencent.com/plan/anthropic",
+      "envVars": [
+        "TOKENPLAN_API_KEY",
+        "TOKENPLAN_BASE_URL"
+      ],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "anthropic_messages",
+      "defaultAuxModel": null
+    },
+    {
+      "category": "model-provider",
+      "id": "xai-oauth",
+      "aliases": [],
+      "displayName": "xai-oauth",
+      "authStrategy": "oauth-device",
+      "protocol": "oauth-external-cli",
+      "protocolNote": "Subscription OAuth, distinct from grok API-key HTTP",
+      "endpointDefaults": "https://api.x.ai/v1",
+      "envVars": [],
+      "modelDiscovery": "pi-ai getModels plus fallback_models",
+      "runtimeAdapter": "SdkModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "catalogued",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes",
+      "apiMode": "codex_responses",
+      "defaultAuxModel": "grok-4"
+    },
+    {
+      "category": "model-provider",
+      "id": "moa",
+      "aliases": [],
+      "displayName": "Mixture of Agents",
+      "authStrategy": "none",
+      "protocol": "unsupported",
+      "protocolNote": "Mixture composition is not a model provider; opt-in gated capability later, never implicit fallback",
+      "runtimeAdapter": "none",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "excluded",
+      "prdIds": [
+        "I8",
+        "A05",
+        "A25",
+        "A35"
+      ],
+      "origin": "hermes"
+    },
+    {
+      "category": "model-provider",
+      "id": "fixture",
+      "aliases": [
+        "keli-fixture"
+      ],
+      "displayName": "Fixture provider",
+      "authStrategy": "none",
+      "protocol": "fixture-only",
+      "protocolNote": "Explicit test/dev only; never an implicit production default",
+      "runtimeAdapter": "FixtureModelProvider",
+      "sourceCommit": "in-tree",
+      "license": "Apache-2.0",
+      "status": "fixture-verified",
+      "prdIds": [
+        "A01"
+      ],
+      "origin": "keli",
+      "modelDiscovery": "fixed:keli-fixture"
+    },
+    {
+      "category": "model-provider",
+      "id": "openai-compatible",
+      "aliases": [
+        "openai"
+      ],
+      "displayName": "OpenAI-compatible",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "protocolNote": "Configurable endpoint; openai-api is the OpenAI platform catalog row",
+      "runtimeAdapter": "HttpModelProvider",
+      "sourceCommit": "in-tree",
+      "license": "n/a",
+      "status": "fixture-verified",
+      "prdIds": [
+        "I8"
+      ],
+      "origin": "keli",
+      "modelDiscovery": "GET /models"
+    },
+    {
+      "category": "model-provider",
+      "id": "grok",
+      "aliases": [
+        "xai",
+        "grok-build"
+      ],
+      "displayName": "Grok (xAI)",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "protocolNote": "A05 HTTP API-key override; xai-oauth is the subscription path",
+      "endpointDefaults": "https://api.x.ai/v1",
+      "envVars": [
+        "XAI_API_KEY"
+      ],
+      "runtimeAdapter": "HttpModelProvider",
+      "sourceCommit": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "license": "MIT",
+      "status": "fixture-verified",
+      "prdIds": [
+        "A05"
+      ],
+      "origin": "keli",
+      "modelDiscovery": "GET /models"
+    },
+    {
+      "category": "model-provider",
+      "id": "chatgpt",
+      "aliases": [
+        "chatgpt-account",
+        "chatgpt-oauth",
+        "openai-codex"
+      ],
+      "displayName": "ChatGPT account",
+      "authStrategy": "oauth-device",
+      "protocol": "oauth-external-cli",
+      "protocolNote": "Account inference via pi-ai; not Codex app-server delegation",
+      "endpointDefaults": "https://chatgpt.com/backend-api/codex",
+      "runtimeAdapter": "ChatGptModelProvider",
+      "sourceCommit": "0.73.1",
+      "license": "MIT",
+      "status": "fixture-verified",
+      "prdIds": [
+        "I8",
+        "A25",
+        "A35"
+      ],
+      "origin": "keli",
+      "modelDiscovery": "bundled suggestions"
+    },
+    {
+      "category": "model-provider",
+      "id": "claude-code",
+      "aliases": [],
+      "displayName": "Claude Code",
+      "authStrategy": "api-key",
+      "protocol": "anthropic-messages",
+      "protocolNote": "Named-later until release-pinned; not the anthropic catalog row",
+      "runtimeAdapter": "none",
+      "sourceCommit": "in-tree",
+      "license": "n/a",
+      "status": "blocked",
+      "prdIds": [
+        "I8"
+      ],
+      "origin": "keli"
+    },
+    {
+      "category": "model-provider",
+      "id": "antigravity",
+      "aliases": [],
+      "displayName": "Antigravity",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "runtimeAdapter": "none",
+      "sourceCommit": "in-tree",
+      "license": "n/a",
+      "status": "blocked",
+      "prdIds": [
+        "I8"
+      ],
+      "origin": "keli"
+    },
+    {
+      "category": "search",
+      "id": "search",
+      "aliases": [
+        "web-search"
+      ],
+      "displayName": "Search",
+      "authStrategy": "api-key",
+      "protocol": "other-http",
+      "protocolNote": "Brave GET /res/v1/web/search or generic JSON POST /search; extra vendors after protocol check",
+      "runtimeAdapter": "searchQuery",
+      "sourceCommit": "in-tree",
+      "license": "n/a",
+      "status": "fixture-verified",
+      "prdIds": [
+        "I9"
+      ],
+      "origin": "keli"
+    },
+    {
+      "category": "memory",
+      "id": "local-notes",
+      "aliases": [
+        "notes"
+      ],
+      "displayName": "Local notes (FTS)",
+      "authStrategy": "none",
+      "protocol": "local-process",
+      "runtimeAdapter": "notes.ts",
+      "sourceCommit": "in-tree",
+      "license": "Apache-2.0",
+      "status": "fixture-verified",
+      "prdIds": [
+        "I1",
+        "A29"
+      ],
+      "origin": "keli"
+    },
+    {
+      "category": "memory",
+      "id": "honcho",
+      "aliases": [
+        "dialectic"
+      ],
+      "displayName": "Honcho",
+      "authStrategy": "api-key",
+      "protocol": "other-http",
+      "protocolNote": "Fixture path only until a stable HTTP contract is verified; not a second authority",
+      "runtimeAdapter": "honcho.ts",
+      "sourceCommit": "f49965445152361b779b465e8a5111549ac934c4",
+      "license": "MIT",
+      "status": "blocked",
+      "prdIds": [
+        "A29",
+        "I1"
+      ],
+      "origin": "nanobot"
+    },
+    {
+      "category": "browser-backend",
+      "id": "browser-fixture",
+      "aliases": [
+        "browser"
+      ],
+      "displayName": "Browser fixture",
+      "authStrategy": "none",
+      "protocol": "fixture-only",
+      "runtimeAdapter": "browser-backends.ts",
+      "sourceCommit": "in-tree",
+      "license": "Apache-2.0",
+      "status": "fixture-verified",
+      "prdIds": [
+        "I9"
+      ],
+      "origin": "keli"
+    },
+    {
+      "category": "browser-backend",
+      "id": "browser-playwright",
+      "aliases": [
+        "playwright"
+      ],
+      "displayName": "Playwright",
+      "authStrategy": "none",
+      "protocol": "local-process",
+      "protocolNote": "Optional binary; missing install is blocked not a hidden dependency",
+      "runtimeAdapter": "browser-backends.ts",
+      "sourceCommit": "in-tree",
+      "license": "Apache-2.0",
+      "status": "catalogued",
+      "prdIds": [
+        "I9"
+      ],
+      "origin": "keli"
+    },
+    {
+      "category": "browser-backend",
+      "id": "browser-cdp",
+      "aliases": [
+        "cdp"
+      ],
+      "displayName": "CDP",
+      "authStrategy": "local-endpoint",
+      "protocol": "other-http",
+      "runtimeAdapter": "browser-backends.ts",
+      "sourceCommit": "in-tree",
+      "license": "Apache-2.0",
+      "status": "catalogued",
+      "prdIds": [
+        "I9"
+      ],
+      "origin": "keli"
+    },
+    {
+      "category": "browser-backend",
+      "id": "browser-mcp",
+      "aliases": [
+        "mcp"
+      ],
+      "displayName": "Browser MCP",
+      "authStrategy": "none",
+      "protocol": "other-http",
+      "runtimeAdapter": "browser-backends.ts",
+      "sourceCommit": "in-tree",
+      "license": "Apache-2.0",
+      "status": "catalogued",
+      "prdIds": [
+        "I9"
+      ],
+      "origin": "keli"
+    },
+    {
+      "category": "mcp-server",
+      "id": "mcp",
+      "aliases": [
+        "modelcontextprotocol"
+      ],
+      "displayName": "MCP",
+      "authStrategy": "none",
+      "protocol": "other-http",
+      "protocolNote": "JSON-RPC HTTP or owned stdio; schema inspect is a later slice",
+      "runtimeAdapter": "mcp.ts",
+      "sourceCommit": "in-tree",
+      "license": "MIT",
+      "status": "fixture-verified",
+      "prdIds": [
+        "A41",
+        "A42"
+      ],
+      "origin": "keli"
+    },
+    {
+      "category": "transport",
+      "id": "discord",
+      "aliases": [
+        "discord.js"
+      ],
+      "displayName": "Discord",
+      "authStrategy": "token",
+      "protocol": "other-http",
+      "protocolNote": "Discord REST v10; discord.js is not wired",
+      "runtimeAdapter": "discord-backend.ts",
+      "sourceCommit": "in-tree",
+      "license": "n/a",
+      "status": "fixture-verified",
+      "prdIds": [
+        "A17",
+        "A18"
+      ],
+      "origin": "keli"
+    },
+    {
+      "category": "transport",
+      "id": "telegram",
+      "aliases": [
+        "grammy",
+        "grammY"
+      ],
+      "displayName": "Telegram",
+      "authStrategy": "token",
+      "protocol": "other-http",
+      "protocolNote": "Telegram Bot API; grammY is not wired",
+      "runtimeAdapter": "telegram-backend.ts",
+      "sourceCommit": "in-tree",
+      "license": "n/a",
+      "status": "fixture-verified",
+      "prdIds": [
+        "A17",
+        "A18"
+      ],
+      "origin": "keli"
+    },
+    {
+      "category": "delegate",
+      "id": "codex",
+      "aliases": [],
+      "displayName": "Codex CLI",
+      "authStrategy": "external-cli",
+      "protocol": "local-process",
+      "protocolNote": "App-server coding delegate, not ChatGPT inference",
+      "runtimeAdapter": "codex-app-server.ts",
+      "sourceCommit": "in-tree",
+      "license": "Apache-2.0",
+      "status": "fixture-verified",
+      "prdIds": [
+        "A19",
+        "A20",
+        "A24",
+        "A37"
+      ],
+      "origin": "keli"
+    },
+    {
+      "category": "delegate",
+      "id": "opencode",
+      "aliases": [
+        "open-code"
+      ],
+      "displayName": "OpenCode CLI",
+      "authStrategy": "external-cli",
+      "protocol": "local-process",
+      "protocolNote": "ACP delegate; opencode-zen is hosted inference",
+      "runtimeAdapter": "none",
+      "sourceCommit": "in-tree",
+      "license": "Apache-2.0",
+      "status": "blocked",
+      "prdIds": [
+        "A19",
+        "A20",
+        "A37"
+      ],
+      "origin": "keli"
+    },
+    {
+      "category": "documents",
+      "id": "documents-pdf",
+      "aliases": [
+        "pdf"
+      ],
+      "displayName": "PDF text extraction",
+      "authStrategy": "none",
+      "protocol": "local-process",
+      "runtimeAdapter": "none",
+      "sourceCommit": "in-tree",
+      "license": "n/a",
+      "status": "blocked",
+      "prdIds": [
+        "I9"
+      ],
+      "origin": "keli",
+      "protocolNote": "No runtime in this slice; parser chosen after license/API check"
+    },
+    {
+      "category": "ocr",
+      "id": "ocr-tesseract",
+      "aliases": [
+        "tesseract"
+      ],
+      "displayName": "Tesseract OCR",
+      "authStrategy": "none",
+      "protocol": "local-process",
+      "runtimeAdapter": "none",
+      "sourceCommit": "in-tree",
+      "license": "Apache-2.0",
+      "status": "blocked",
+      "prdIds": [
+        "I9"
+      ],
+      "origin": "keli"
+    },
+    {
+      "category": "speech",
+      "id": "speech-transcribe",
+      "aliases": [
+        "stt"
+      ],
+      "displayName": "Speech transcription",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "runtimeAdapter": "none",
+      "sourceCommit": "in-tree",
+      "license": "n/a",
+      "status": "blocked",
+      "prdIds": [
+        "I9"
+      ],
+      "origin": "keli"
+    },
+    {
+      "category": "speech",
+      "id": "speech-synthesize",
+      "aliases": [
+        "tts"
+      ],
+      "displayName": "Speech synthesis",
+      "authStrategy": "api-key",
+      "protocol": "openai-compatible-http",
+      "protocolNote": "Optional; full upstream TTS plugin zoo is excluded",
+      "runtimeAdapter": "none",
+      "sourceCommit": "in-tree",
+      "license": "n/a",
+      "status": "blocked",
+      "prdIds": [
+        "I9"
+      ],
+      "origin": "keli"
+    }
+  ]
+}

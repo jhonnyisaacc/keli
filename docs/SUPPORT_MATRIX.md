@@ -13,7 +13,7 @@
 |---------|----------------------|-----------------|
 | Model provider | `KELI_FIXTURE_MODEL` / `KELI_FIXTURE_URL` | `keli setup provider` + live probe for the **selected** model only |
 | Grok override (A05) | `KELI_FIXTURE_GROK` / `KELI_GROK_FIXTURE_URL` | `grok` HTTP API-key path; `xai-oauth` is the subscription account path |
-| Catalog inference ids | Construction + protocol mocks | Not live-verified; `keli providers list` shows catalog/configured/live-checked |
+| Catalog inference ids | Construction + protocol mocks | Not live-verified; `keli providers list` shows catalogued/configured/live-verified |
 | Honcho memory | `KELI_FIXTURE_HONCHO` + `KELI_HONCHO_ENABLED=1` | `memory.provider=honcho` + credential ref (v0.2.0) |
 | Browser session | `KELI_FIXTURE_BROWSER_SESSION` | Playwright with credential ref |
 | Delegate | `KELI_FIXTURE_DELEGATE` | External-cli / ACP when pinned |

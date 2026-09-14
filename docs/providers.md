@@ -8,8 +8,8 @@ reference, never the key. Provider environment variables also work on headless
 hosts; they are read only for the selected provider. No Hermes installation is
 needed to run Keli.
 
-`keli providers list` reports **catalog**, **configured**, or **live-checked** for the
-selected model. Live-checked is not account-wide entitlement. Model suggestions are not
+`keli providers list` reports **catalogued**, **configured**, **fixture-verified**, or
+**live-verified** for the selected model. Live-verified is not account-wide entitlement. Model suggestions are not
 proof of access. Setup tests the selected model with one bounded inference request.
 `grok` is the A05 HTTP API-key path; `xai-oauth` is the Grok subscription login.
 
@@ -42,7 +42,7 @@ API-key providers also include `openai-api`, `grok` (alias `xai`), `openrouter`,
 `opencode-go`, `ai-gateway`, `novita`, `nebius-token-factory`, `upstage`,
 `actual`, `meta-ai`, `router`, `commandcode`, and `commandcode-anthropic`.
 Exact default endpoints and accepted environment-variable names are in the
-[provider catalog](../src/integrations/hermes-catalog.json).
+[provider manifest](../src/integrations/provider-manifest.json).
 
 Keli-owned account sessions refresh under a cross-process lock. Linked Codex and
 Qwen sessions are read-only: their owning CLI renews them. Keli does not import

@@ -6,6 +6,8 @@ import type {
 } from "./types.ts";
 import { fixtureUrlFor, type FixtureSlot } from "./env.ts";
 
+export { listByCategory, listByStatus } from "./manifest.ts";
+
 const profiles = new Map<string, IntegrationProfile>();
 const aliases = new Map<string, string>();
 

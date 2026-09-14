@@ -11,7 +11,7 @@ import "../integrations/load.ts";
 
 export type ProviderKind = "fixture" | "openai-compatible" | "claude-code" | "grok-build" | "antigravity";
 
-export type ProviderReadiness = "catalog" | "configured" | "live-checked";
+export type ProviderReadiness = "catalogued" | "configured" | "fixture-verified" | "live-verified" | "blocked" | "excluded";
 
 export type ProviderDescriptor = {
   id: string;
@@ -59,9 +59,9 @@ function readinessOf(
   model?: string,
 ): { readiness: ProviderReadiness; reason: string } | undefined {
   const at = liveCheckedAt(config, id, model);
-  if (at) return { readiness: "live-checked", reason: `Live-checked ${at} for ${model ?? "the selected model"}; not account-wide entitlement` };
+  if (at) return { readiness: "live-verified", reason: `Live-verified ${at} for ${model ?? "the selected model"}; not account-wide entitlement` };
   if (configured) return { readiness: "configured", reason: "Configured; live inference not yet verified for this model" };
-  return { readiness: "catalog", reason: `Catalog entry only. Run keli setup provider (${id})` };
+  return { readiness: "catalogued", reason: `Catalogued only. Run keli setup provider (${id})` };
 }
 
 export function listProviders(config?: KeliConfig | null): ProviderDescriptor[] {
@@ -75,10 +75,10 @@ export function listProviders(config?: KeliConfig | null): ProviderDescriptor[] 
         kind: "openai-compatible" as const,
         available: linked,
         source: "config" as const,
-        readiness: live ? "live-checked" : linked ? "configured" : "catalog",
+        readiness: live ? "live-verified" : linked ? "configured" : "catalogued",
         model,
         reason: live
-          ? `Live-checked ${live} for ${model}; not account-wide entitlement`
+          ? `Live-verified ${live} for ${model}; not account-wide entitlement`
           : linked
             ? "Account linked; live inference not yet verified for this model"
             : "Run keli auth add chatgpt",
@@ -99,6 +99,7 @@ export function listProviders(config?: KeliConfig | null): ProviderDescriptor[] 
         id: profile.id,
         kind: KIND_BY_ID[profile.id] ?? "openai-compatible",
         available: false,
+        readiness: "blocked",
         reason: `unavailable until configured and release-pinned${unsupported ? ` (${unsupported})` : ""}`,
       };
     }

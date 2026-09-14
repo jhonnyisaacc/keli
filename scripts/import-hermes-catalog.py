@@ -66,4 +66,5 @@ for row in rows:
 rows.append(dict(name="moa", display_name="Mixture of Agents", auth_type="virtual"))
 target = pathlib.Path(__file__).resolve().parent.parent / "src/integrations/hermes-catalog.json"
 target.write_text(json.dumps(rows, indent=2) + "\n")
-print(f"Wrote {len(rows)} entries from Hermes {PIN}")
+print(f"Wrote {len(rows)} inference snapshot rows from Hermes {PIN}")
+print("Run bun run scripts/import-provider-manifest.ts to refresh the public manifest.")

@@ -173,7 +173,7 @@ test("xAI discovery cannot redirect an OAuth exchange to another host", async ()
   finally { globalThis.fetch = original; }
 });
 
-test("live-checked applies only to the probed model, not a later replacement", () => {
+test("live-verified applies only to the probed model, not a later replacement", () => {
   const base = {
     ...defaultConfig(),
     providers: { primary: { id: "chatgpt" as const, model: "gpt-5.4" } },
@@ -185,5 +185,5 @@ test("live-checked applies only to the probed model, not a later replacement", (
     ...base,
     providers: { primary: { id: "chatgpt" as const, model: "gpt-5.5" } },
   };
-  expect(listProviders(same).find((p) => p.id === "chatgpt")?.readiness).toBe("live-checked");
+  expect(listProviders(same).find((p) => p.id === "chatgpt")?.readiness).toBe("live-verified");
 });

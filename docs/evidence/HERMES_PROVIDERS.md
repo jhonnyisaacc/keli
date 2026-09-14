@@ -17,7 +17,8 @@ ADOPT → ADAPT → BUILD (I8, A05, A25, A35):
 The catalog includes the pinned canonical inference providers and bundled API-key
 plugins. The extractor reads committed Git objects with Python's AST; it never
 imports Hermes, runs its plugins, or reads its user configuration. Reproduce with
-`python3 scripts/import-hermes-catalog.py <hermes-checkout>` and review the diff.
+`python3 scripts/import-hermes-catalog.py <hermes-checkout>` then
+`bun run scripts/import-provider-manifest.ts` and review the diff.
 Helper-generated provider definitions are explicitly resolved in the extractor.
 Hermes's complete MIT notice is retained in the repository third-party notices.
 

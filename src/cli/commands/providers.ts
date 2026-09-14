@@ -31,7 +31,7 @@ export function providersCommand(globals: CliGlobals) {
             globals.outputFormat,
             providers
               .map((p) => {
-                const layer = p.readiness ?? (p.available ? "configured" : "catalog");
+                const layer = p.readiness ?? (p.available ? "configured" : "catalogued");
                 const avail = p.available ? `available via ${p.source ?? "config"}` : "unavailable";
                 return `${p.id}\t${layer}\t${avail}${p.model ? ` (model ${p.model})` : ""}${p.reason ? ` (${p.reason})` : ""}`;
               })

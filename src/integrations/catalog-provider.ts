@@ -1,14 +1,13 @@
 import { getModels, type Api, type Model, type KnownProvider } from "@mariozechner/pi-ai";
-import data from "./hermes-catalog.json";
 import { SdkModelProvider } from "../model/sdk-provider.ts";
 import { defaultCredentialSource, type CredentialSource } from "../credentials/source.ts";
 import { KeliError } from "../core/errors.ts";
 import type { ResolvedIntegration } from "./types.ts";
+import { HERMES_PIN, inferenceCatalogEntries, type CatalogEntry } from "./manifest.ts";
 
-export const HERMES_PIN = "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544";
-export type CatalogEntry = { name: string; display_name?: string; aliases?: string[]; base_url?: string; env_vars?: string[]; auth_type?: string; api_mode?: string; default_aux_model?: string | null; fallback_models?: string[] };
+export { HERMES_PIN, type CatalogEntry };
 /** Pinned Hermes import data. Keli-owned identities (grok, chatgpt/openai-codex) are not catalog runtime providers. */
-export const providerCatalog: CatalogEntry[] = data;
+export const providerCatalog: CatalogEntry[] = inferenceCatalogEntries();
 const CATALOG_RUNTIME_SKIP = new Set(["openai-codex", "grok", "copilot-acp", "moa"]);
 export const catalogEntry = (id: string) =>
   CATALOG_RUNTIME_SKIP.has(id) ? undefined : providerCatalog.find((r) => r.name === id);
