@@ -13,13 +13,14 @@ export function routingFromConfig(config: KeliConfig | null): ProviderRouting {
 export function selectProviderForTurn(
   routing: ProviderRouting,
   turnKind: TurnKind,
-  fallback = "fixture",
+  fallback?: string,
 ): string {
-  if (turnKind === "action" || turnKind === "override") {
-    return routing.task ?? routing.agent ?? routing.provider ?? fallback;
-  }
-  if (turnKind === "correction") {
-    return routing.strong ?? routing.provider ?? fallback;
-  }
-  return routing.cheap ?? routing.provider ?? fallback;
+  const resolved =
+    turnKind === "action" || turnKind === "override"
+      ? routing.task ?? routing.agent ?? routing.provider ?? fallback
+      : turnKind === "correction"
+        ? routing.strong ?? routing.provider ?? fallback
+        : routing.cheap ?? routing.provider ?? fallback;
+  if (!resolved) throw new Error("No provider configured. Run keli setup and choose Chat/Models.");
+  return resolved;
 }

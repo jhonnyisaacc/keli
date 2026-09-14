@@ -5,7 +5,7 @@ import type { CliGlobals } from "../context.ts";
 
 export function setupCommand(globals: CliGlobals) {
   return defineCommand({
-    meta: { description: "Explained setup wizard driven by the integration registry" },
+    meta: { description: "Selection-first setup driven by the provider registry" },
     args: {
       section: {
         type: "positional",
@@ -36,7 +36,11 @@ export function setupCommand(globals: CliGlobals) {
       "pairing-code": { type: "string", description: "KELI-PAIR code from the bound chat" },
       "pairing-actor": { type: "string", description: "Transport actor id that sent the pairing code" },
       quick: { type: "boolean", default: false, description: "Only prompt for unset items" },
-      minimal: { type: "boolean", default: false, description: "Provider + CLI only; no transport" },
+      fixture: {
+        type: "boolean",
+        default: false,
+        description: "Allow the fixture provider; never an implicit production default",
+      },
     },
     async run({ args }) {
       try {
@@ -63,6 +67,7 @@ export function setupCommand(globals: CliGlobals) {
           quick: args.quick,
           minimal: args.minimal,
           projectName: args.project,
+          fixture: args.fixture || globals.fixture,
         });
         emit(result, globals.outputFormat, `Setup complete (${result.transport})`);
       } catch (e) {
