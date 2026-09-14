@@ -1,17 +1,17 @@
-# Plan: general-purpose autonomy, validated through real use cases
+# Plan: finish Keli through reuse and focused autonomy improvements
 
-Status: current development plan on `feat/v0.1.0`. Supersedes
-[plans/evidence-driven-autonomy.md](evidence-driven-autonomy.md) as next work and replaces
-wallet-adapter / in-Keli portfolio-engine proposals.
+Status: current development plan on `feat/v0.1.0`. Continues the general-purpose
+autonomy work; does not start another architecture proposal. The PRD remains the
+product completion contract. Compact ledger:
+[docs/evidence/COMPLETION_LEDGER.md](../docs/evidence/COMPLETION_LEDGER.md).
 
-Implementation baseline: `e32b2ad` on `feat/v0.1.0`. That commit already contains the
-evidence-driven research-watch slice (occurrences, budgets, waits, verification, outbox) and
-its fixture demonstrations. This plan extends that machinery into a reusable responsibility
-controller that uses structured domain tools without absorbing their engines.
+Implementation baseline: `d9e51d2` on `feat/v0.1.0` (clean primary worktree). That
+commit already contains structured CLI tools, the general responsibility controller,
+and three scripted cross-domain scenarios. This plan completes ordinary capabilities
+by **ADOPT → ADAPT → BUILD**, then evaluates usefulness on the same controller.
 
-Validation at the baseline: `bun run check` passed; `bun test` reported 195 pass, 1 platform
-skip, 0 fail, using temporary `KELI_STATE_DIR`. Those checks do not certify live providers,
-transports, or Rocket.
+Validation at `d9e51d2`: `bun test` is the regression baseline (temporary
+`KELI_STATE_DIR`). Those checks do not certify live providers, transports, or Rocket.
 
 ## Product direction
 
@@ -55,7 +55,29 @@ The following is current runtime truth. Historical spike documents remain dated 
 `verified` still means the declared evidence/coverage contract passed. It is not semantic
 truth.
 
-## 2. Next implementation: responsibilities that use tools intelligently
+## 2. Completion stages (this work)
+
+Follow ADOPT → ADAPT → BUILD per [ledger](../docs/evidence/COMPLETION_LEDGER.md) row.
+Preserve working Keli implementations. Do not import Hermes/Nanobot as a second runtime.
+
+1. **Ledger and product defaults.** Neutral project name (`personal`) unless supplied;
+   preserve existing names; Rocket stays an optional tool profile.
+2. **Transports.** Telegram Bot API receiver/sender/reconnect connected to existing
+   inbox, pairing, and outbox. Discord poll uses the same reconnect helper.
+3. **Model onboarding.** Successful OpenAI-compatible / Grok round-trip is an ordinary
+   setup outcome. ChatGPT-account via Codex App Server is assessed in
+   [CODEX_APP_SERVER.md](../docs/evidence/CODEX_APP_SERVER.md): **not** a conversation
+   provider; optional gated coding delegate only.
+4. **Tools, search, MCP, delegates.** Replace fixture-only dispatch with resolved
+   integrations; keep fixture paths. MCP JSON-RPC (HTTP + stdio); search HTTP/Brave;
+   Codex app-server JSON-RPC behind `delegate.run`.
+5. **Operational lifecycle.** systemd user unit and launchd agent; `keli service run`
+   composes existing job/watch/transport ticks.
+6. **Evaluation.** One bounded round of the three scenarios (scripted always; live when
+   binaries/keys exist). Open a paper only if a listed failure appears.
+7. **Release report.** Implemented/fixture-verified vs live vs awaiting owner/hardware.
+
+## 2b. Already implemented: responsibilities that use tools intelligently
 
 ### A. General responsibility contract
 
@@ -251,19 +273,20 @@ separately in [docs/evidence/PORTABILITY.md](../docs/evidence/PORTABILITY.md).
 
 ## 5. Delivery sequence
 
-Scoped commits:
+Fixture-verified slices 1–4 (research consolidation, structured tools, responsibility
+controller, scripted scenarios) are on `feat/v0.1.0` through `d9e51d2`.
 
-1. Research consolidation, superseded-plan cleanup, and portable references (this document
-   and the imported 2026-fast-spike evidence).
-2. Generic structured-tool integration with the Rocket profile.
-3. General responsibility scheduling, evidence-directed investigation, and reporting.
-4. Cross-domain acceptance scenarios, evidence report, and operating guide.
+This completion pass:
 
-Run existing checks and targeted regressions for authority changes, cancellation, process
-ownership, migration preservation, restart recovery, budgets, and outbox behavior.
+1. Completion ledger, Codex App Server assessment, updated plan.
+2. Neutral project default (preserve existing names).
+3. Telegram Bot API + shared reconnect; Discord poll backoff.
+4. Search/MCP real integration paths; Codex app-server as gated delegate.
+5. Setup round-trip; systemd/launchd; operating docs and release report.
 
-Slices 1–4 are on `feat/v0.1.0` as fixture-verified work. Live Rocket and live-model
-evaluation remain later milestones.
+Run existing checks and targeted regressions for authority, cancellation, process
+ownership, migration, restart, budgets, and outbox. Extra review for `src/state/`,
+`src/core/gate.ts`, `src/execution/`, `scripts/build.ts`, and `install/`.
 
 The final handoff on `feat/v0.1.0` must contain:
 
@@ -306,5 +329,8 @@ research watch remains one specialization of this shape, not a second product.
 | Evidence-bound terminal status | ADAPT existing checker/core | Matrix M17; A24 analogous false-completion contract |
 
 Reference pins: Hermes `93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544` and Nanobot
-`f49965445152361b779b465e8a5111549ac934c4`, both MIT. No upstream code copying is required.
-Paper/source links remain in the [research matrix](../docs/research/2026-agent-architecture-matrix.md).
+`f49965445152361b779b465e8a5111549ac934c4`, both MIT. Telegram/Discord channel Python
+is not copied; Bot API / REST protocols are adopted. Codex App Server is Apache-2.0 and
+is used only as a gated coding delegate — see
+[CODEX_APP_SERVER.md](../docs/evidence/CODEX_APP_SERVER.md). Paper/source links remain in
+the [research matrix](../docs/research/2026-agent-architecture-matrix.md).

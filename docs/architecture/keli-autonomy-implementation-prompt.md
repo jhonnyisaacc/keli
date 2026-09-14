@@ -41,11 +41,15 @@ Structured CLI tools (`tools.rocket`) and the general responsibility controller
 (`kind: responsibility`, scheduled review slots, `capabilities.lookup`, investigation
 receipts, no-finding waits) are fixture-verified. Do not re-implement them.
 
-## Remaining work (live only)
+## Remaining work (this completion pass)
 
-Fixture-verified work on this branch is complete: structured tools, the responsibility
-controller, and the three scripted domain scenarios. Remaining work is live Rocket,
-live-model quality, and transport acknowledgement — not another controller rewrite.
+See [plans/general-purpose-autonomy.md](../../plans/general-purpose-autonomy.md) and
+[docs/evidence/COMPLETION_LEDGER.md](../evidence/COMPLETION_LEDGER.md).
+
+Start from `feat/v0.1.0` at `d9e51d2` or its reviewed successor. Do not rewrite the
+responsibility controller. ADOPT protocols (Telegram Bot API, MCP JSON-RPC, Codex
+app-server as **delegate only**). ChatGPT-account is not a conversation model —
+[CODEX_APP_SERVER.md](../evidence/CODEX_APP_SERVER.md).
 
 Historical implementation notes for the finished slices remain below.
 

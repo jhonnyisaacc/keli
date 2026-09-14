@@ -18,6 +18,7 @@ bun run build
 
 # Initialize user state (outside this repo)
 ./dist/keli init
+# or: ./dist/keli init --project emunah
 ./dist/keli doctor
 ./dist/keli inspect --json
 
@@ -39,8 +40,8 @@ Contains `state.sqlite`, `config.json`, and cache subdirectories.
 
 | Command | Purpose |
 |---------|---------|
-| `keli init` | Create state, run migrations, seed owner/project |
-| `keli setup` | Registry-driven wizard: provider, one transport, optional delegate; `--quick` / `--minimal` |
+| `keli init` | Create state, run migrations, seed owner/project (`personal` unless `--project`) |
+| `keli setup` | Registry-driven wizard: project name, provider round-trip, one transport, optional delegate; `--quick` / `--minimal` |
 | `keli doctor [--fix]` | Health checks plus integration probes (safe repairs only) |
 | `keli integrations` | `list [--kind]` and `discover` (static catalog; never installs) |
 | `keli auth` | `add` / `list` / `status` / `remove` / `logout` (keychain refs) |
@@ -54,8 +55,9 @@ Contains `state.sqlite`, `config.json`, and cache subdirectories.
 | `keli capabilities` | List indexed capabilities |
 | `keli invoke <cap>` | Run a gated capability (`--path`, `--url`, `--command`, etc.) |
 | `keli jobs` | Scheduled jobs: `list`, `add`, `tick`, `occurrences`, `pause` |
-| `keli discord` | Discord transport: `send`, `ingest`, `process` (fixture-backed) |
-| `keli telegram` | Telegram transport: `send`, `ingest`, `process` (fixture-backed) |
+| `keli discord` | Discord transport: `send`, `ingest`, `process`, `poll` |
+| `keli telegram` | Telegram transport: `send`, `ingest`, `process`, `poll` |
+| `keli service` | `install` / `status` / `run` (systemd user or launchd unit; tick loop) |
 | `keli routes` | Transport route bindings: `list`, `bind` |
 | `keli notes` | Local advisory notes: `add`, `list`, `search` |
 | `keli providers` | Alias of `integrations list --kind model-provider` |

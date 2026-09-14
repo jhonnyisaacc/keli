@@ -46,6 +46,21 @@ Contract tests in `tests/invariants/` trace to PRD A01–A11.
 
 Upstream records above are issue reports and proposals, not reproduced defects in current releases. No third-party code was vendored in 0.1-J; pins are protocol-level.
 
+## Completion pass (ordinary capabilities)
+
+| Area | ADOPT | ADAPT | BUILD (Keli-owned) | PRD trace |
+|------|-------|-------|--------------------|-----------|
+| Telegram | Bot API getUpdates/sendMessage/getMe (protocol) | Nanobot offset + 5–300s backoff; Keli Discord backend seam | `TelegramBackend` fixture+REST; inbox/outbox unchanged | A18, A19 |
+| Discord poll | REST v10 (existing) | Same reconnect helper | CLI `--loop` uses backoff | A17 |
+| Search | Generic JSON search HTTP; Brave `GET /res/v1/web/search` | Hermes web_search backend choice | Config-resolved adapter; fixture POST preserved | I9 |
+| MCP | JSON-RPC 2024-11-05 HTTP + stdio | Hermes lifecycle: initialize then list/call; Keli owns the child | `src/adapters/mcp.ts`; fixture `/mcp` preserved | A41, A42 |
+| ChatGPT / Codex | App-server JSON-RPC as **delegate** | — | Incompatibility report for conversation model | A24, A25, A35 |
+| Service | systemd user unit, launchd plist | — | `keli service run` composes existing ticks | A33, §9 |
+| Project default | — | — | `personal` unless supplied | product default |
+
+Hermes pin `93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544` MIT. Nanobot pin
+`f49965445152361b779b465e8a5111549ac934c4` MIT. No Python channel runtime copied.
+
 ## Evidence-driven research autonomy
 
 ADOPT existing Keli watches, run budgets, scoped capability dispatch, source index, turns and outbox; ADAPT addressed evidence and phase-memory/verification principles; BUILD the missing resumable watch-occurrence connection. Reference pins, MIT licenses, I1–I7/I9–I10 and acceptance trace IDs are recorded in the [integration evidence note](research-autonomy/README.md#reuse-and-review). No upstream implementation was copied. Paired demonstrations use baseline `4bd3b9e` and scripted providers through actual Keli runtime paths.

@@ -67,5 +67,22 @@ Full operating path: [responsibilities](responsibilities.md). Scenario evidence:
 
 - **0.1-A–E shipped:** packaging, backup/restore, global pause, fixture-backed transports in CI
 - **0.1-F–I remaining** before `v0.1.0` tag: Honcho adapter, broader providers/delegates, routing/budgets/skills, helper fan-out, release evidence
-- Discord/Telegram live tokens optional until integration validation in 0.1-F
+- Discord/Telegram live tokens optional until the operator pairs a bot. Fixture and REST backends are both wired to inbox/outbox; `keli discord poll` / `keli telegram poll` use reconnect backoff.
+- ChatGPT-account is **not** a conversation provider. See [CODEX_APP_SERVER.md](evidence/CODEX_APP_SERVER.md). Use `keli auth add openai-compatible` for chat; optional Codex app-server is a gated coding delegate.
 - Held-out correction eval, five-user usability check, and macOS notarization are **0.1-I** human gates
+
+## User service (Linux systemd / macOS launchd)
+
+```sh
+keli service install
+# Linux (user lingering is the operator's choice):
+# systemctl --user enable --now keli.service
+# macOS:
+# launchctl load ~/Library/LaunchAgents/io.keli.plist
+keli service run          # one jobs + watches + transport cycle
+keli service run --loop 30
+```
+
+Templates: `install/keli.service`, `install/io.keli.plist`. Install writes to
+`~/.config/systemd/user` or `~/Library/LaunchAgents` unless `KELI_SERVICE_DIR` is set.
+This does not enable lingering or pre-login macOS execution.

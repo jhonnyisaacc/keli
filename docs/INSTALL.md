@@ -22,7 +22,8 @@ Override paths with `KELI_INSTALL_ROOT` and `KELI_INSTALL_BIN`.
 ```sh
 bun install
 bun run build
-./dist/keli init
+./dist/keli init                 # project name defaults to "personal"
+./dist/keli init --project emunah
 ```
 
 ## `keli update`

@@ -30,7 +30,7 @@ What "configured" means per surface, and what has actually been exercised:
 | Research corrections | Scoped rule commit/undo, quoted-text rejection, leak test across projects | Same code path | — |
 | Source collections | Index, FTS search, read, fingerprint; Augustine/Shaul and Cava fixture corpora | Point `keli sources add` at the real Shaul index / transcript folders | Transcript ingestion from YouTube itself is outside Keli (bounded adapter feeds a folder) |
 | Discord | Fixture receiver + sender: thread binding, dedupe, cursor, stored replies on restart | `RestDiscordBackend` polling (REST v10, bot token) via `keli discord poll --loop 10` | First live run against a **separate Keli bot identity**; Nancy's receiver is not taken over |
-| Telegram | Outbox/inbox fixtures, `/getMe` round trip | Sender only | Inbox receiver + conversation handler |
+| Telegram | Outbox/inbox fixtures, Bot API mock getUpdates/sendMessage, conversation cycle, `/getMe` | `RestTelegramBackend` + `keli telegram poll` | Live bot token + owner pairing |
 | Watches / heartbeat | Fingerprint gating, one wake per change, notify-once, pause after failures, HEARTBEAT import as proposals | `keli watches tick` from cron/systemd timer | URL watches beyond loopback need `network.allowedHosts` |
 | Updates | Install/rollback bookkeeping, snapshot + migration rehearsal, off/notify/auto policy, idle deferral | `keli update --scheduled` from a daily timer | Published release manifest URL; native-runner evidence |
 | Structured CLI tools (`tools.rocket`) | Fixture CLI: argv lock, timeout/cancel, ResearchResult mapping, integration_gap | `ROCKET_BIN` + `ROCKET_STATE_DIR` when configured | Live Rocket revision pin |

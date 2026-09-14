@@ -6,6 +6,14 @@ All notable changes to Keli follow [SemVer](https://semver.org/).
 
 **Release policy:** the full initial PRD product ships as **v0.1.0**. Increments 0.1-A–I are complete in code, including the integration/onboarding layer. **Do not tag v0.1.0** until human gates are recorded. See [PRD.md](PRD.md) §11.
 
+## Completion pass (reuse + onboarding)
+
+- Completion ledger: [COMPLETION_LEDGER.md](docs/evidence/COMPLETION_LEDGER.md). Codex App Server ChatGPT auth cannot be a conversation provider: [CODEX_APP_SERVER.md](docs/evidence/CODEX_APP_SERVER.md).
+- New installs default the project name to `personal` (or `--project`); existing names are preserved. Rocket is not a product default.
+- Telegram Bot API getUpdates/sendMessage connected to inbox/outbox; `keli telegram poll`. Shared reconnect backoff with Discord poll (Nanobot 5–300s).
+- Search and MCP use configured HTTP/stdio JSON-RPC when fixture env is absent. Codex app-server is a gated coding delegate only.
+- `keli service install|status|run` writes systemd/launchd units. Setup records `setup.providerConnected` from a live `/models` probe.
+
 ### Cross-domain responsibility scenarios
 
 - Same controller covers portfolio (Rocket fixture), Augustine/Shaul sources, and read-only maintenance triage. Scripted measurements and status labels: [evidence](docs/evidence/general-purpose-autonomy/README.md). Operating path: [responsibilities](docs/responsibilities.md).

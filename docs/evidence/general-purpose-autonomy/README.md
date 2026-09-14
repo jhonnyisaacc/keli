@@ -42,5 +42,7 @@ the scripted path, not model quality.
 - Live-model evaluation of daily briefs and maintenance triage.
 - Transport acknowledgement of `daily-brief` on a dedicated Keli bot identity.
 
-See the [operating guide](../../responsibilities.md) and
+See the [operating guide](../../responsibilities.md),
+[completion ledger](../COMPLETION_LEDGER.md),
+[release report](../RELEASE_REPORT.md), and
 [current plan](../../../plans/general-purpose-autonomy.md).
