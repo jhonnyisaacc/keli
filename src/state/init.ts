@@ -1,8 +1,9 @@
 import { mkdir } from "node:fs/promises";
 import { openDatabase } from "./db.ts";
 import { writeConfig, defaultConfig, readConfig } from "./config.ts";
+import { DEFAULT_PROJECT_NAME } from "./defaults.ts";
 import { resolveStateDir, statePaths } from "./paths.ts";
-import { createOwner, createProject, getOwner } from "./repos.ts";
+import { createOwner, createProject, getOwner, getProjectById } from "./repos.ts";
 
 export type InitResult = {
   stateDir: string;
@@ -25,20 +26,21 @@ export async function initializeState(
   if (existing?.ownerId) {
     const db = await openDatabase(dir);
     const owner = getOwner(db);
+    const project = getProjectById(db, existing.defaultProjectId);
     db.close();
     if (!owner) throw new Error("Config exists but owner record missing");
     return {
       stateDir: dir,
       ownerId: existing.ownerId,
       projectId: existing.defaultProjectId,
-      projectName: options?.projectName ?? "Rocket",
+      projectName: project?.name ?? DEFAULT_PROJECT_NAME,
       created: false,
     };
   }
 
   const ownerId = crypto.randomUUID();
   const projectId = crypto.randomUUID();
-  const projectName = options?.projectName ?? "Rocket";
+  const projectName = options?.projectName?.trim() || DEFAULT_PROJECT_NAME;
   const cwd = options?.cwd ?? process.cwd();
 
   const db = await openDatabase(dir);

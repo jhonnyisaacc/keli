@@ -9,8 +9,7 @@ export function initCommand(globals: CliGlobals) {
     args: {
       project: {
         type: "string",
-        description: "Default project name",
-        default: "Rocket",
+        description: "Default project name (neutral default: personal)",
       },
     },
     async run({ args }) {
