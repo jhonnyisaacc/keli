@@ -57,3 +57,6 @@ bun test tests/integration/research-autonomy.test.ts
 ```
 
 See [paired results and limitations](evidence/research-autonomy/README.md). This demonstration uses scripted providers through the real runtime and temporary state. A live provider run is a separate milestone.
+
+General responsibilities (scheduled reviews, Rocket, other domains) use the same controller.
+See [responsibilities](responsibilities.md).

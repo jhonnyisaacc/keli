@@ -37,6 +37,21 @@ const payloads: Record<string, Record<string, unknown>> = {
     acquisition: { status: "unavailable", error: "rpc unavailable" },
     research: { sufficient: false, finding: null },
   },
+  "macro-shift": {
+    operational: { ok: true, health: "ok" },
+    acquisition: { status: "healthy", freshness: "2026-09-16T09:00:00Z" },
+    research: { sufficient: true, finding: { thesis: "risk-off", reason: "macro coverage closed" }, coverage: { wallets: 1 } },
+  },
+  "diag-wrong": {
+    operational: { ok: true, health: "ok" },
+    acquisition: { status: "healthy" },
+    research: { sufficient: true, finding: { cause: "disk-full", note: "misleading first diagnostic" } },
+  },
+  logs: {
+    operational: { ok: true, health: "ok" },
+    acquisition: { status: "healthy" },
+    research: { sufficient: true, finding: { cause: "stale-lock", next: "restart the worker; no deploy" } },
+  },
   sleep: {
     operational: { ok: true },
     acquisition: { status: "healthy" },

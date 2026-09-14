@@ -41,7 +41,13 @@ Structured CLI tools (`tools.rocket`) and the general responsibility controller
 (`kind: responsibility`, scheduled review slots, `capabilities.lookup`, investigation
 receipts, no-finding waits) are fixture-verified. Do not re-implement them.
 
-## Remaining work
+## Remaining work (live only)
+
+Fixture-verified work on this branch is complete: structured tools, the responsibility
+controller, and the three scripted domain scenarios. Remaining work is live Rocket,
+live-model quality, and transport acknowledgement — not another controller rewrite.
+
+Historical implementation notes for the finished slices remain below.
 
 ### 1. Generic structured-tool integration (Rocket first) — done
 

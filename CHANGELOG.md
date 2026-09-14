@@ -6,6 +6,11 @@ All notable changes to Keli follow [SemVer](https://semver.org/).
 
 **Release policy:** the full initial PRD product ships as **v0.1.0**. Increments 0.1-A–I are complete in code, including the integration/onboarding layer. **Do not tag v0.1.0** until human gates are recorded. See [PRD.md](PRD.md) §11.
 
+### Cross-domain responsibility scenarios
+
+- Same controller covers portfolio (Rocket fixture), Augustine/Shaul sources, and read-only maintenance triage. Scripted measurements and status labels: [evidence](docs/evidence/general-purpose-autonomy/README.md). Operating path: [responsibilities](docs/responsibilities.md).
+- A scheduled responsibility waiting on evidence can open the next UTC review slot; unchanged holdings do not cancel tomorrow's brief.
+
 ### General responsibilities
 
 - Approved watches may be `kind: responsibility` with scheduled review slots, objective/constraints, and an allowlisted capability set. Source-collection research remains the event-driven specialization.

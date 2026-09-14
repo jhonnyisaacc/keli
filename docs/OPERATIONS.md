@@ -60,6 +60,9 @@ Approve a `kind: responsibility` watch that lists `tools.rocket` (and use
 Daily 09:00 UTC is this watch's schedule, not Keli-wide behavior. `verified` still means the
 declared evidence contract passed, not that the investment thesis is true.
 
+Full operating path: [responsibilities](responsibilities.md). Scenario evidence:
+[general-purpose autonomy](evidence/general-purpose-autonomy/README.md).
+
 ## Known limits (current increments)
 
 - **0.1-A–E shipped:** packaging, backup/restore, global pause, fixture-backed transports in CI

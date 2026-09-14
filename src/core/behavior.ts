@@ -288,7 +288,11 @@ export class ResearchResponsibilityService {
       }
       let o = rows.find(o => o.version === watch.version && o.policy_key === policyKey && ["active", "waiting_for_evidence", "waiting_for_user"].includes(o.status));
       if (o && o.status === "waiting_for_user" && !o.input_ref) return null;
-      if (o && o.status === "waiting_for_evidence" && o.dependency_key === dependencyKey && !o.input_ref) return null;
+      if (o && o.status === "waiting_for_evidence" && o.dependency_key === dependencyKey && !o.input_ref) {
+        const sameSlot = o.fingerprint === fingerprint || o.observed_fingerprint === fingerprint;
+        if (sameSlot || watch.kind !== "responsibility") return null;
+        o = undefined;
+      }
       if (!o) {
         o = rows.find(o => o.version === watch.version && o.policy_key === policyKey && (o.fingerprint === fingerprint || o.observed_fingerprint === fingerprint));
         if (o) return null;

@@ -47,6 +47,8 @@ The following is current runtime truth. Historical spike documents remain dated 
 | Generic structured external-CLI tools (Rocket profile) | implemented, fixture-verified | `src/tools/`, `tools.rocket`; live Rocket deferred |
 | General responsibility contract beyond source-collection watches | implemented, fixture-verified | `kind: responsibility`, `src/watches/review.ts`; live cadence deferred |
 | Evidence-directed investigation across domains | implemented, fixture-verified | same occurrence controller; cross-domain live use deferred |
+| Cross-domain portfolio / Augustine / maintenance scenarios | fixture-verified (scripted) | `tests/integration/responsibility-scenarios.test.ts`; live use deferred |
+| Operating guide | implemented | [docs/responsibilities.md](../docs/responsibilities.md) |
 | Live provider / live Rocket evaluation | deferred onboarding milestone | section 3 |
 | Learned memory policies, RL controllers, general world models | deferred | research matrix M06–M08, M12 |
 
@@ -259,6 +261,9 @@ Scoped commits:
 
 Run existing checks and targeted regressions for authority changes, cancellation, process
 ownership, migration preservation, restart recovery, budgets, and outbox behavior.
+
+Slices 1–4 are on `feat/v0.1.0` as fixture-verified work. Live Rocket and live-model
+evaluation remain later milestones.
 
 The final handoff on `feat/v0.1.0` must contain:
 
