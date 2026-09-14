@@ -39,7 +39,7 @@ This demonstrates the control-flow connection hypothesized by H11. It does not e
 
 ADOPT existing watches, approval, capability dispatch, run budgets, source index, conversation storage, provider retries and outbox. ADAPT narrow addressed-evidence/current-context principles (Scroll/InMind), phase-memory coupling (PMCoder) and verification-grounded completion. BUILD only missing watch-occurrence state and connecting controller behavior. Existing job occurrences are scheduled action records and `recoverRunningOccurrences` terminally fails them on restart; research waits therefore use one watch-specific ledger instead of a second copy of job truth.
 
-Research reference pins: Hermes `93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544`, Nanobot `f49965445152361b779b465e8a5111549ac934c4`, both MIT. No upstream code copied. The 17-paper matrix and exact-source probes remain on `research/2026-fast-spike`; they are design evidence, not runtime dependencies.
+Research reference pins: Hermes `93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544`, Nanobot `f49965445152361b779b465e8a5111549ac934c4`, both MIT. No upstream code copied. The 17-paper matrix and exact-source probes are in [docs/research/](../../research/2026-agent-architecture-matrix.md) and [docs/evidence/2026-fast-spike/](../2026-fast-spike/README.md); they are design evidence, not runtime dependencies. Current next work is [general-purpose autonomy](../../../plans/general-purpose-autonomy.md).
 
 PRD traces: I1–I7, I9–I10; A07–A08, A11–A16, A19–A22, A24 (analogous false-completion criterion), A30, A32, A39–A40, A43, A45. These are relevant contracts, not claims that every complete release gate is satisfied.
 

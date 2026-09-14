@@ -1,0 +1,340 @@
+{
+  "_sanitization": {
+    "kind": "sanitized-derivative",
+    "original_bytes": "not original evidence; see ORIGINAL_HASHES.json",
+    "rule": "personal-home prefixes replaced with $HOME; commit hashes, pins, and measured values preserved"
+  },
+  "kind": "pinned_reference_unit_probes",
+  "head": "7a6e9af7b6c55cbe0e1f7a818662d0e30bd75ab3",
+  "repos": {
+    "hermes": [
+      "$KELI_HERMES_ROOT",
+      "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544"
+    ],
+    "nanobot": [
+      "$KELI_NANOBOT_ROOT",
+      "f49965445152361b779b465e8a5111549ac934c4"
+    ]
+  },
+  "units": [
+    {
+      "project": "hermes",
+      "pin": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "path": "tools/session_search_tool.py",
+      "symbol": "session_search",
+      "line": 533,
+      "source_sha256": "d2412556ce125352dd2af897e2691150c16fba85b7fd5b53456caf51ba540b29",
+      "ast_sha256": "587be438cdb08829cb669d1ef264adf58ce65a09b42872ddfb3ea232d3f9d7d0"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/webui/session_access.py",
+      "symbol": "constants",
+      "line": 24,
+      "source_sha256": "400f11367e4a9c64aac2d387ce4e10ebebf90c401c3abcdae339c65f66ac8835",
+      "ast_sha256": "d7b191ce8a1e0135e0a0eed0d1a6a3114ee36cbeeab44f7d0c2a7c5fe97ed916"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/webui/session_access.py",
+      "symbol": "_message_text",
+      "line": 48,
+      "source_sha256": "400f11367e4a9c64aac2d387ce4e10ebebf90c401c3abcdae339c65f66ac8835",
+      "ast_sha256": "b58c6870201125a50873492798822b65da308efa9755be59b9375d45cf7c5546"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/webui/session_access.py",
+      "symbol": "_visible_messages",
+      "line": 65,
+      "source_sha256": "400f11367e4a9c64aac2d387ce4e10ebebf90c401c3abcdae339c65f66ac8835",
+      "ast_sha256": "4f662c1368ebe4fc1cf4fbae65bbe638042d9a9cd8bbd4c12f2cce570a502348"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/webui/session_access.py",
+      "symbol": "_text",
+      "line": 90,
+      "source_sha256": "400f11367e4a9c64aac2d387ce4e10ebebf90c401c3abcdae339c65f66ac8835",
+      "ast_sha256": "2017f633c04b65ddfaedc80d93a76602ba096c65177e867aace7f4763e581ab5"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/webui/session_access.py",
+      "symbol": "_session_metadata",
+      "line": 94,
+      "source_sha256": "400f11367e4a9c64aac2d387ce4e10ebebf90c401c3abcdae339c65f66ac8835",
+      "ast_sha256": "6e831023a58cf1628bfb640b27d9c49b4769af44e218042073f6e00af575c876"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/webui/session_access.py",
+      "symbol": "_row_title",
+      "line": 99,
+      "source_sha256": "400f11367e4a9c64aac2d387ce4e10ebebf90c401c3abcdae339c65f66ac8835",
+      "ast_sha256": "cc42573f3c469f553b3b7e2a20e7e95bc0ffea0a37146f8bbeed97b55e7c5059"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/webui/session_access.py",
+      "symbol": "WebuiSessionAccess",
+      "line": 103,
+      "source_sha256": "400f11367e4a9c64aac2d387ce4e10ebebf90c401c3abcdae339c65f66ac8835",
+      "ast_sha256": "f4abcd8db296894effaa6a172bc2f3c261d9ef230fb40ccf18643f55187e70ef"
+    },
+    {
+      "project": "hermes",
+      "pin": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "path": "tools/todo_tool.py",
+      "symbol": "constants",
+      "line": 9,
+      "source_sha256": "cd86aad0d6545d2085824049085e5e65a9fd51022d2af254a7679a9cb3525c66",
+      "ast_sha256": "7cbc0048552f10b9fc65e6a74f77e353fb26304cdf24ba4af51a3f06038542df"
+    },
+    {
+      "project": "hermes",
+      "pin": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "path": "tools/todo_tool.py",
+      "symbol": "constants",
+      "line": 13,
+      "source_sha256": "cd86aad0d6545d2085824049085e5e65a9fd51022d2af254a7679a9cb3525c66",
+      "ast_sha256": "2da378af08e47098512cadf0305c298186aff2a9c0f39423235f7ee7e310cade"
+    },
+    {
+      "project": "hermes",
+      "pin": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "path": "tools/todo_tool.py",
+      "symbol": "constants",
+      "line": 14,
+      "source_sha256": "cd86aad0d6545d2085824049085e5e65a9fd51022d2af254a7679a9cb3525c66",
+      "ast_sha256": "575718e88d60f7dc143db80420ab464bdeb2e17568ecdfaf65713ecdff584f83"
+    },
+    {
+      "project": "hermes",
+      "pin": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "path": "tools/todo_tool.py",
+      "symbol": "constants",
+      "line": 18,
+      "source_sha256": "cd86aad0d6545d2085824049085e5e65a9fd51022d2af254a7679a9cb3525c66",
+      "ast_sha256": "83cf49f4403ca789d8b21f8d0215a02d737bc6ad0bc45caef4178e291dc627b6"
+    },
+    {
+      "project": "hermes",
+      "pin": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "path": "tools/todo_tool.py",
+      "symbol": "constants",
+      "line": 21,
+      "source_sha256": "cd86aad0d6545d2085824049085e5e65a9fd51022d2af254a7679a9cb3525c66",
+      "ast_sha256": "f015f990190b95b3ec5c6b0f78f2cda8316929bb032dc1f873ffcf73c2be1772"
+    },
+    {
+      "project": "hermes",
+      "pin": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "path": "tools/todo_tool.py",
+      "symbol": "constants",
+      "line": 22,
+      "source_sha256": "cd86aad0d6545d2085824049085e5e65a9fd51022d2af254a7679a9cb3525c66",
+      "ast_sha256": "758b80c9cdd5a36addcb3bd7c7064ca56110b5a950b6a8e908716c7fa7e01da4"
+    },
+    {
+      "project": "hermes",
+      "pin": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "path": "tools/todo_tool.py",
+      "symbol": "constants",
+      "line": 23,
+      "source_sha256": "cd86aad0d6545d2085824049085e5e65a9fd51022d2af254a7679a9cb3525c66",
+      "ast_sha256": "1c043c2b76c52478e2c9729b2ea1da45c6616accc7a8592e2d87c39f71ccb33d"
+    },
+    {
+      "project": "hermes",
+      "pin": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "path": "tools/todo_tool.py",
+      "symbol": "TodoStore",
+      "line": 26,
+      "source_sha256": "cd86aad0d6545d2085824049085e5e65a9fd51022d2af254a7679a9cb3525c66",
+      "ast_sha256": "977e4400700a28c8ee6828e7c9bf0ecfe32ed7e2a14181a7dda8b270a75343de"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/session/goal_state.py",
+      "symbol": "constants",
+      "line": 15,
+      "source_sha256": "6ec7802984ac38f84244e29374f3611bfe5076a72ba6a6731225ee378a4fec99",
+      "ast_sha256": "22753758c5bd080e78ab0b9d0dcac7919c81c987f2267db4dffec6e266582dd1"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/session/goal_state.py",
+      "symbol": "constants",
+      "line": 16,
+      "source_sha256": "6ec7802984ac38f84244e29374f3611bfe5076a72ba6a6731225ee378a4fec99",
+      "ast_sha256": "0a351ad6bcef6ff7fc5bdbc6ae534507417aaa82b4772ce7bb8185e6bd0908a2"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/session/goal_state.py",
+      "symbol": "constants",
+      "line": 17,
+      "source_sha256": "6ec7802984ac38f84244e29374f3611bfe5076a72ba6a6731225ee378a4fec99",
+      "ast_sha256": "9a015024c3a0800fb8209700f8aa498738225a5c2f1696cd22208b5fa29110ed"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/session/goal_state.py",
+      "symbol": "constants",
+      "line": 19,
+      "source_sha256": "6ec7802984ac38f84244e29374f3611bfe5076a72ba6a6731225ee378a4fec99",
+      "ast_sha256": "25daff54e6c66869e87fc04472efaeb37a6c02a1daf5950729300c04cadeaa06"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/session/goal_state.py",
+      "symbol": "_session_goal_raw",
+      "line": 23,
+      "source_sha256": "6ec7802984ac38f84244e29374f3611bfe5076a72ba6a6731225ee378a4fec99",
+      "ast_sha256": "2ed0b552d98d296697bbf0526fc0802ba0efb454d42e5ff2c8f04934135ff408"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/session/goal_state.py",
+      "symbol": "goal_state_raw",
+      "line": 36,
+      "source_sha256": "6ec7802984ac38f84244e29374f3611bfe5076a72ba6a6731225ee378a4fec99",
+      "ast_sha256": "255c68e202572e7c31a8dcc4449b3ac6d2aef6d13348b5f13dc90f71866698e2"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/session/goal_state.py",
+      "symbol": "sustained_goal_active",
+      "line": 41,
+      "source_sha256": "6ec7802984ac38f84244e29374f3611bfe5076a72ba6a6731225ee378a4fec99",
+      "ast_sha256": "d7e249a34058d468fbcd24a31695d41cfc5c058577c0d54ce9c789c5db1d020a"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/session/goal_state.py",
+      "symbol": "explicit_goal_requested",
+      "line": 47,
+      "source_sha256": "6ec7802984ac38f84244e29374f3611bfe5076a72ba6a6731225ee378a4fec99",
+      "ast_sha256": "83a92fa6bc65b27c245e391834c090892b15a4de7db023ec664be4331c1f17f8"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/session/goal_state.py",
+      "symbol": "sustained_goal_turn",
+      "line": 56,
+      "source_sha256": "6ec7802984ac38f84244e29374f3611bfe5076a72ba6a6731225ee378a4fec99",
+      "ast_sha256": "7b9e4ae45eb3c07edaa4226b38ca1a4838c72d4b2d1956fbb632d23ffaf42088"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/session/goal_state.py",
+      "symbol": "parse_goal_state",
+      "line": 65,
+      "source_sha256": "6ec7802984ac38f84244e29374f3611bfe5076a72ba6a6731225ee378a4fec99",
+      "ast_sha256": "3d4850502967ea246320d442eea811169c2784085f45bc1afabd9a0ce923ac7d"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/session/goal_state.py",
+      "symbol": "goal_state_runtime_lines",
+      "line": 79,
+      "source_sha256": "6ec7802984ac38f84244e29374f3611bfe5076a72ba6a6731225ee378a4fec99",
+      "ast_sha256": "8b4d5e8f10c575806919ef3aa5d9751741d3da1c7013dc33fd9737a22a4c2f93"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/session/turn_continuation.py",
+      "symbol": "constants",
+      "line": 32,
+      "source_sha256": "c85d69bb236aa191e3fa317c4552ef9c31a3903144ed08e48ec762a5de1a24a0",
+      "ast_sha256": "7c74c27a4637742f60dd2601ae1f2d417fe8a44e238ea2e4a527d636cb4f183d"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/session/turn_continuation.py",
+      "symbol": "constants",
+      "line": 33,
+      "source_sha256": "c85d69bb236aa191e3fa317c4552ef9c31a3903144ed08e48ec762a5de1a24a0",
+      "ast_sha256": "6b57709bba822ed0a8cd36ce253824ca2a0f5f7091804323b05aff464136e4ab"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/session/turn_continuation.py",
+      "symbol": "_continuation_available",
+      "line": 158,
+      "source_sha256": "c85d69bb236aa191e3fa317c4552ef9c31a3903144ed08e48ec762a5de1a24a0",
+      "ast_sha256": "a4f43b03d0116df146bcc6f64bad9a56d01bc6bd8b3553945a20c68e245696ba"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/session/turn_continuation.py",
+      "symbol": "_goal_continuation_available",
+      "line": 200,
+      "source_sha256": "c85d69bb236aa191e3fa317c4552ef9c31a3903144ed08e48ec762a5de1a24a0",
+      "ast_sha256": "ecc21f8568d9624f350827bcb586677b0c1f811cbf6d9c6ba0e8747345f0895f"
+    },
+    {
+      "project": "nanobot",
+      "pin": "f49965445152361b779b465e8a5111549ac934c4",
+      "path": "nanobot/agent/tools/long_task.py",
+      "symbol": "UpdateGoalTool.execute",
+      "line": 301,
+      "source_sha256": "3c589e12f41a20b3cb1f14b6f8e512dbfd7699c929ff921f932aa657ebfeecb2",
+      "ast_sha256": "9ad5a69b6d523ed549ffc575a770fa42e0cb7dc5798714749e962a6d017139fb"
+    },
+    {
+      "project": "hermes",
+      "pin": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "path": "agent/verify/runner.py",
+      "symbol": "PhaseResult",
+      "line": 35,
+      "source_sha256": "33b5b3c618a3259d847ee2ab41e7f620c178f462b89e41111494d54cc08e9165",
+      "ast_sha256": "b13ab0266a19b258c487b8dd8ec4f487ac9ff60c93bf1470cde785ab888e5c7d"
+    },
+    {
+      "project": "hermes",
+      "pin": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "path": "agent/verify/runner.py",
+      "symbol": "ReadinessResult",
+      "line": 56,
+      "source_sha256": "33b5b3c618a3259d847ee2ab41e7f620c178f462b89e41111494d54cc08e9165",
+      "ast_sha256": "840c72bd884f59288bc804707d10b11d022fd804821ce8694e4a2cae57d69f12"
+    },
+    {
+      "project": "hermes",
+      "pin": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544",
+      "path": "agent/verify/runner.py",
+      "symbol": "VerifyResult",
+      "line": 72,
+      "source_sha256": "33b5b3c618a3259d847ee2ab41e7f620c178f462b89e41111494d54cc08e9165",
+      "ast_sha256": "ad2f8777ad81ce8a478598a0f9e70b206cb59272019c39617bd5e1395badaca2"
+    }
+  ],
+  "cases": 21,
+  "passed": 21,
+  "interpretation": "Contract pass confirms an observed behavior, including gaps. Not end-to-end agent failure rate.",
+  "method": "Exact AST-selected definitions loaded from git show at immutable pins. External listing/storage/session-save boundaries are fixtures. No model, imported agent runtime, network, production state or copied upstream source files."
+}

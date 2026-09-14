@@ -1,5 +1,8 @@
 # Agent and contributor boundaries
 
+Current development plan: `plans/general-purpose-autonomy.md`. Keli investigates and
+coordinates; domain tools return evidence. Adapters still must not write canonical state.
+
 ## Authority
 
 - `src/core/gate.ts`, `src/core/capability-gate.ts` (existing capability execution receipts), and `src/core/behavior.ts` own durable behavior and terminal action truth. Research occurrence verification is committed by `ResearchResponsibilityService` in `behavior.ts`; adapters and the conversation loop cannot mark occurrences verified. Run lifecycle and transport delivery remain separate bookkeeping.

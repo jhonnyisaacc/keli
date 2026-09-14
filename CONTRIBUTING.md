@@ -27,4 +27,8 @@ Never commit credentials or real user state.
 
 ## Architecture
 
-See [AGENTS.md](AGENTS.md) and [PRD.md](PRD.md). Adapt spike patterns from `docs/evidence/`; do not import disposable experiment code into `src/`.
+See [AGENTS.md](AGENTS.md), [PRD.md](PRD.md), and the current
+[general-purpose autonomy plan](plans/general-purpose-autonomy.md). Adapt spike patterns
+from `docs/evidence/`; do not import disposable experiment code into `src/`. Keep
+repository docs portable: relative links, env/config for private executables and state,
+no personal-home paths.

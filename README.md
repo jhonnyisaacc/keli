@@ -77,6 +77,10 @@ bun run release  # local build + smoke
 
 See [PRD.md](PRD.md), [REPO_GOVERNANCE.md](REPO_GOVERNANCE.md), and [CONTRIBUTING.md](CONTRIBUTING.md).
 
+Current development plan: [plans/general-purpose-autonomy.md](plans/general-purpose-autonomy.md).
+Keli is the general-purpose agent; Rocket and other tools provide domain capabilities.
+The earlier in-Keli wallet/portfolio-engine proposal is superseded.
+
 ## Evidence
 
-Sanitized architecture spike reports are in [docs/evidence/](docs/evidence/). Production code adapts Architecture B gate patterns; spike source is not imported.
+Sanitized architecture spike reports are in [docs/evidence/](docs/evidence/). Production code adapts Architecture B gate patterns; spike source is not imported. The 2026 mechanism matrix and fast-spike evidence now live in-tree under [docs/research/](docs/research/2026-agent-architecture-matrix.md) and [docs/evidence/2026-fast-spike/](docs/evidence/2026-fast-spike/README.md).

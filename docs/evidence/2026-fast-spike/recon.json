@@ -1,0 +1,131 @@
+{
+  "_sanitization": {
+    "kind": "sanitized-derivative",
+    "original_bytes": "not original evidence; see ORIGINAL_HASHES.json",
+    "rule": "personal-home prefixes replaced with $HOME; commit hashes, pins, and measured values preserved"
+  },
+  "keli": {
+    "path": "$HOME/keli-research-2026-fast-spike",
+    "branch": {
+      "exit": 0,
+      "stdout": "research/2026-fast-spike\n",
+      "stderr": ""
+    },
+    "head": {
+      "exit": 0,
+      "stdout": "40743b53fa884a2eec00bfdf5aebc432f97967fa\n",
+      "stderr": ""
+    },
+    "remotes": {
+      "exit": 0,
+      "stdout": "origin\thttps://github.com/jhonnyisaacc/keli.git (fetch)\norigin\thttps://github.com/jhonnyisaacc/keli.git (push)\n",
+      "stderr": ""
+    },
+    "status": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "worktrees": {
+      "exit": 0,
+      "stdout": "$HOME/keli                           40743b5 [feat/v0.1.0]\n$HOME/keli-research-2026-fast-spike  40743b5 [research/2026-fast-spike]\n",
+      "stderr": ""
+    },
+    "recent": {
+      "exit": 0,
+      "stdout": "40743b5 Add 0.1-F through 0.1-I memory, routing, helpers, and release harness.\n2f494eb Remap later SemVer milestones into 0.1-F through 0.1-I increments.\nfb5dade Add 0.1-E packaging, backup/restore, global pause, and remaining A-gates.\ncf12b34 Add 0.1-D jobs, Discord/Telegram transports, and setup wizard.\n",
+      "stderr": ""
+    },
+    "shallow": {
+      "exit": 0,
+      "stdout": "false\n",
+      "stderr": ""
+    }
+  },
+  "hermes": {
+    "path": "$HOME/.hermes/hermes-agent",
+    "branch": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "head": {
+      "exit": 0,
+      "stdout": "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544\n",
+      "stderr": ""
+    },
+    "remotes": {
+      "exit": 0,
+      "stdout": "origin\tgit@github.com:NousResearch/hermes-agent.git (fetch)\norigin\tgit@github.com:NousResearch/hermes-agent.git (push)\n",
+      "stderr": ""
+    },
+    "status": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "worktrees": {
+      "exit": 0,
+      "stdout": "$HOME/.hermes/hermes-agent                                  93e2525a0b (detached HEAD)\n$HOME/worktrees/consolidation-hermes-20260906               93e2525a0b [consolidation/abi-origin-20260906]\n$HOME/worktrees/consolidation-hermes-reproduction-20260906  13e72fb205 (detached HEAD)\n$HOME/worktrees/hermes-quant-autonomy                       610014f2a7 [fix/quant-autonomy-runtime]\n$HOME/worktrees/hermes-quant-delivery                       e480de5946 [fix/quant-shared-discord-delivery]\n/tmp/attention-replay-MgttAw                                      a0a63a1bc2 (detached HEAD)\n/tmp/attention-verify2-rQFpcF                                     a0a63a1bc2 (detached HEAD)\n",
+      "stderr": ""
+    },
+    "recent": {
+      "exit": 0,
+      "stdout": "93e2525a0b fix(delivery): retain failed destinations and never acknowledge pending sends\nb5a7062c0a test(delivery): require unconfirmed status when acknowledgement times out\n7075872ccd docs(delivery): describe in-flight acknowledgement truthfully\n0676c4c8ba fix(discord): preserve configured thread origins and durable delivery receipts\n",
+      "stderr": ""
+    },
+    "shallow": {
+      "exit": 0,
+      "stdout": "false\n",
+      "stderr": ""
+    },
+    "upstream_head": {
+      "exit": 0,
+      "stdout": "a7254e2d4c170725a4136591e96efc5066251d2c\tHEAD\n",
+      "stderr": ""
+    }
+  },
+  "nanobot": {
+    "path": "$HOME/.nanobot/src/nanobot",
+    "branch": {
+      "exit": 0,
+      "stdout": "honcho-2183-clean\n",
+      "stderr": ""
+    },
+    "head": {
+      "exit": 0,
+      "stdout": "f49965445152361b779b465e8a5111549ac934c4\n",
+      "stderr": ""
+    },
+    "remotes": {
+      "exit": 0,
+      "stdout": "origin\thttps://github.com/HKUDS/nanobot.git (fetch)\norigin\thttps://github.com/HKUDS/nanobot.git (push)\n",
+      "stderr": ""
+    },
+    "status": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "worktrees": {
+      "exit": 0,
+      "stdout": "$HOME/.nanobot/src/nanobot                     f4996544 [honcho-2183-clean]\n$HOME/.nanobot/src/worktrees/nancy-honcho-vps  82a5cb72 [nancy-honcho-vps]\n",
+      "stderr": ""
+    },
+    "recent": {
+      "exit": 0,
+      "stdout": "f4996544 feat(honcho): opt-in long-term memory rebased from erosika #2183\nc4a25c9a docs: unify personal agent installation with quick start\n",
+      "stderr": ""
+    },
+    "shallow": {
+      "exit": 0,
+      "stdout": "true\n",
+      "stderr": ""
+    },
+    "upstream_head": {
+      "exit": 0,
+      "stdout": "08b130cdd1e8dc221c1a0651b8d18872af121106\tHEAD\n",
+      "stderr": ""
+    }
+  }
+}

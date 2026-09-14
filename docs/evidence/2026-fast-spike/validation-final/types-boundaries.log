@@ -1,0 +1,2 @@
+$ bun run scripts/check.ts
+check: types and boundaries ok

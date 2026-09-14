@@ -12,7 +12,7 @@ The independent Python probe was executed first. It demonstrates that the OS bou
 
 ## 2. Exact files / authored LOC
 
-All paths are under `/home/david/personal-agent-rust-spike/`.
+All paths are under `$HOME/personal-agent-rust-spike/`.
 
 | File | Lines | Role |
 |---|---:|---|
@@ -83,10 +83,10 @@ No product, PRD, E2, scheduler, transport, real delegate, external message, brow
 Reproduce locally on compatible Linux (writes only spike fixtures):
 
 ```sh
-cd /home/david/personal-agent-rust-spike
+cd $HOME/personal-agent-rust-spike
 python3 os_probe.py
 ./toolchain/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc --edition 2024 -O broker.rs -o broker
-/home/david/.hermes/node/bin/bun controller.ts
+$HOME/.hermes/node/bin/bun controller.ts
 ```
 
 
@@ -98,7 +98,7 @@ The replacement is a 29-line Bun adapter using built-in `fetch`. It sends one sm
 
 **Files and code size**
 
-All files are in `/home/david/personal-agent-native-spike`.
+All files are in `$HOME/personal-agent-native-spike`.
 
 | Source | Lines | Provenance |
 |---|---:|---|

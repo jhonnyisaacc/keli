@@ -1,0 +1,17 @@
+{
+  "checks": {
+    "trace_sequence": true,
+    "trace_summary_counts": true,
+    "no_fatal_trace": true,
+    "source_hashes_match": true,
+    "63_checks": true,
+    "completion_metrics_match": true,
+    "local_links_resolve": true,
+    "research_paths_only": true,
+    "isolated_branch": true
+  },
+  "broken_links": [],
+  "benchmark_head": "9f3898f80aa5b9eac68e0c72483238ebcc3fa9d5",
+  "trace_rows": 126,
+  "scope": "artifact consistency; not model evaluation or production safety certification"
+}

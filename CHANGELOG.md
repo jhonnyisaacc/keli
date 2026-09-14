@@ -6,6 +6,12 @@ All notable changes to Keli follow [SemVer](https://semver.org/).
 
 **Release policy:** the full initial PRD product ships as **v0.1.0**. Increments 0.1-A–I are complete in code, including the integration/onboarding layer. **Do not tag v0.1.0** until human gates are recorded. See [PRD.md](PRD.md) §11.
 
+### Current plan (general-purpose autonomy)
+
+- Current development plan is [general-purpose autonomy](plans/general-purpose-autonomy.md). Keli coordinates; domain tools such as Rocket return evidence. In-Keli wallet/portfolio engines are superseded.
+- 2026-fast-spike matrix, experiments, and architecture decisions are imported onto `feat/v0.1.0` as historical evidence. The research-watch slice remains implemented; its plan is retained as history.
+- Tracked docs no longer embed personal-home paths. Sanitized spike artifacts are labeled derivatives. `bun run check` rejects home-path leaks and broken local documentation links.
+
 ### Evidence-driven research autonomy (opt-in)
 
 - Approved `autonomy: yes` source-collection watches retain occurrences, evidence dependencies, phases and cumulative budgets across waits/restarts.

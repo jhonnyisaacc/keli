@@ -1,0 +1,430 @@
+{
+  "schema_version": 1,
+  "kind": "deterministic_mechanism_spike",
+  "baseline": "40743b53fa884a2eec00bfdf5aebc432f97967fa",
+  "head": "45554f32612abd90c00d39e25f4022feb841e350",
+  "branch": "research/2026-fast-spike",
+  "runtime": "1.4.0",
+  "created_at": "2026-09-13T23:14:36.606Z",
+  "selected": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J"
+  ],
+  "source_files": [
+    {
+      "path": "experiments/2026-fast-spike/mechanisms.ts",
+      "sha256": "fbf67b6a3d75b608f18a62b3689e1504798a7ba1165a6b4875fe376b4b02244c"
+    },
+    {
+      "path": "experiments/2026-fast-spike/run.ts",
+      "sha256": "7ea2ed1500b3daf649e3083ef71351c0d29254d98f3042fbce8c9d79b300c550"
+    }
+  ],
+  "results": [
+    {
+      "experiment": "A",
+      "checks": 7,
+      "passed": 7,
+      "contract_pass": true,
+      "wall_clock_ms": 3384.761154,
+      "metrics": {
+        "task_success": null,
+        "verified_success": null,
+        "false_completion_rate": null,
+        "repeated_action_rate": null,
+        "repeated_failed_hypothesis_rate": null,
+        "replans": null,
+        "useful_replans": null,
+        "tool_calls": null,
+        "tokens": null,
+        "context_growth_bytes": null,
+        "retrieval_precision": null,
+        "retrieval_recall": null,
+        "memory_write_volume": null,
+        "memory_usefulness": null,
+        "stale_memory_usage": null,
+        "human_intervention_requirement": null
+      },
+      "null_reason": "No model episode; experiment-specific measured metrics follow. Contract assertions are not agent success.",
+      "full_history_bytes": 114749,
+      "projected_bytes": 80,
+      "exact_recovery": {
+        "full_transcript": true,
+        "tail": false,
+        "projection_expand": true
+      },
+      "event_writes": 250,
+      "derived_writes": 1,
+      "limitation": "Typed projection and SQLite restart only; no crash/power-loss test, Python kernel or LLM eviction policy."
+    },
+    {
+      "experiment": "B",
+      "checks": 10,
+      "passed": 10,
+      "contract_pass": true,
+      "wall_clock_ms": 655.3792010000002,
+      "metrics": {
+        "task_success": null,
+        "verified_success": null,
+        "false_completion_rate": null,
+        "repeated_action_rate": null,
+        "repeated_failed_hypothesis_rate": null,
+        "replans": null,
+        "useful_replans": null,
+        "tool_calls": null,
+        "tokens": null,
+        "context_growth_bytes": null,
+        "retrieval_precision": null,
+        "retrieval_recall": null,
+        "memory_write_volume": null,
+        "memory_usefulness": null,
+        "stale_memory_usage": null,
+        "human_intervention_requirement": null
+      },
+      "null_reason": "No model episode; experiment-specific measured metrics follow. Contract assertions are not agent success.",
+      "positive_target_recall": {
+        "keli_notes": 0,
+        "controlled": 1
+      },
+      "controlled_precision": 0.5,
+      "retrieval_calls": 8,
+      "adversarial_failures": [
+        "paraphrase",
+        "premature seen-session exclusion"
+      ],
+      "limitation": "One positive retrieval target; fixed scripted controller. No measured RRF quality gain; no reference agents launched."
+    },
+    {
+      "experiment": "C",
+      "checks": 4,
+      "passed": 4,
+      "contract_pass": true,
+      "wall_clock_ms": 0.5398340000001554,
+      "metrics": {
+        "task_success": null,
+        "verified_success": null,
+        "false_completion_rate": null,
+        "repeated_action_rate": null,
+        "repeated_failed_hypothesis_rate": null,
+        "replans": null,
+        "useful_replans": null,
+        "tool_calls": null,
+        "tokens": null,
+        "context_growth_bytes": null,
+        "retrieval_precision": null,
+        "retrieval_recall": null,
+        "memory_write_volume": null,
+        "memory_usefulness": null,
+        "stale_memory_usage": null,
+        "human_intervention_requirement": null
+      },
+      "null_reason": "No model episode; experiment-specific measured metrics follow. Contract assertions are not agent success.",
+      "deterministic_failures": {
+        "fixed_retry": 5,
+        "phase_memory": 2
+      },
+      "repeated_failures": {
+        "fixed_retry": 4,
+        "phase_memory": 1
+      },
+      "replans": 1,
+      "useful_replans": null,
+      "limitation": "Replan emits an inspection proposal; no model repair or successful replacement hypothesis measured."
+    },
+    {
+      "experiment": "D",
+      "checks": 5,
+      "passed": 5,
+      "contract_pass": true,
+      "wall_clock_ms": 112.52378500000032,
+      "metrics": {
+        "task_success": null,
+        "verified_success": null,
+        "false_completion_rate": null,
+        "repeated_action_rate": null,
+        "repeated_failed_hypothesis_rate": null,
+        "replans": null,
+        "useful_replans": null,
+        "tool_calls": null,
+        "tokens": null,
+        "context_growth_bytes": null,
+        "retrieval_precision": null,
+        "retrieval_recall": null,
+        "memory_write_volume": null,
+        "memory_usefulness": null,
+        "stale_memory_usage": null,
+        "human_intervention_requirement": null
+      },
+      "null_reason": "No model episode; experiment-specific measured metrics follow. Contract assertions are not agent success.",
+      "query_only_target_recall": 0,
+      "authoritative_projection_target_recall": 1,
+      "stale_cache_would_use": "Codex",
+      "projected_bytes": 283,
+      "limitation": "Keli-native policy constraint, not an InMind world-knowledge reasoning evaluation."
+    },
+    {
+      "experiment": "E",
+      "checks": 5,
+      "passed": 5,
+      "contract_pass": true,
+      "wall_clock_ms": 0.4138300000004165,
+      "metrics": {
+        "task_success": null,
+        "verified_success": null,
+        "false_completion_rate": null,
+        "repeated_action_rate": null,
+        "repeated_failed_hypothesis_rate": null,
+        "replans": null,
+        "useful_replans": null,
+        "tool_calls": null,
+        "tokens": null,
+        "context_growth_bytes": null,
+        "retrieval_precision": null,
+        "retrieval_recall": null,
+        "memory_write_volume": null,
+        "memory_usefulness": null,
+        "stale_memory_usage": null,
+        "human_intervention_requirement": null
+      },
+      "null_reason": "No model episode; experiment-specific measured metrics follow. Contract assertions are not agent success.",
+      "cache_hits_before_conflict": 1,
+      "scope_leaks": 0,
+      "limitation": "Fixed transition cache; no model-generated predictions, semantic distillation or real task gain."
+    },
+    {
+      "experiment": "F",
+      "checks": 4,
+      "passed": 4,
+      "contract_pass": true,
+      "wall_clock_ms": 71.06421099999989,
+      "metrics": {
+        "task_success": null,
+        "verified_success": null,
+        "false_completion_rate": null,
+        "repeated_action_rate": null,
+        "repeated_failed_hypothesis_rate": null,
+        "replans": null,
+        "useful_replans": null,
+        "tool_calls": null,
+        "tokens": null,
+        "context_growth_bytes": null,
+        "retrieval_precision": null,
+        "retrieval_recall": null,
+        "memory_write_volume": null,
+        "memory_usefulness": null,
+        "stale_memory_usage": null,
+        "human_intervention_requirement": null
+      },
+      "null_reason": "No model episode; experiment-specific measured metrics follow. Contract assertions are not agent success.",
+      "actual_process_calls": 2,
+      "analytical_calls": [
+        {
+          "tasks": 1,
+          "blind_calls": 2,
+          "mapped_calls": 2
+        },
+        {
+          "tasks": 5,
+          "blind_calls": 10,
+          "mapped_calls": 6
+        }
+      ],
+      "easy_task_calls": {
+        "blind_calls": 1,
+        "mapped_calls": 2
+      },
+      "limitation": "Only one real wrong/right command pair. Amortization counts are analytical, not timed repeated agent tasks."
+    },
+    {
+      "experiment": "G",
+      "checks": 6,
+      "passed": 6,
+      "contract_pass": true,
+      "wall_clock_ms": 0.1456209999996645,
+      "metrics": {
+        "task_success": null,
+        "verified_success": null,
+        "false_completion_rate": null,
+        "repeated_action_rate": null,
+        "repeated_failed_hypothesis_rate": null,
+        "replans": null,
+        "useful_replans": null,
+        "tool_calls": null,
+        "tokens": null,
+        "context_growth_bytes": null,
+        "retrieval_precision": null,
+        "retrieval_recall": null,
+        "memory_write_volume": null,
+        "memory_usefulness": null,
+        "stale_memory_usage": null,
+        "human_intervention_requirement": null
+      },
+      "null_reason": "No model episode; experiment-specific measured metrics follow. Contract assertions are not agent success.",
+      "limitation": "Fixed typed hook; exactly equivalent to ordinary predicates. No evidence justifying a general executable skill runtime."
+    },
+    {
+      "experiment": "H",
+      "checks": 5,
+      "passed": 5,
+      "contract_pass": true,
+      "wall_clock_ms": 0.9583229999998366,
+      "metrics": {
+        "task_success": null,
+        "verified_success": null,
+        "false_completion_rate": null,
+        "repeated_action_rate": null,
+        "repeated_failed_hypothesis_rate": null,
+        "replans": null,
+        "useful_replans": null,
+        "tool_calls": null,
+        "tokens": null,
+        "context_growth_bytes": null,
+        "retrieval_precision": null,
+        "retrieval_recall": null,
+        "memory_write_volume": null,
+        "memory_usefulness": null,
+        "stale_memory_usage": null,
+        "human_intervention_requirement": null
+      },
+      "null_reason": "No model episode; experiment-specific measured metrics follow. Contract assertions are not agent success.",
+      "rendered_bytes": {
+        "none": 0,
+        "top_k": 400,
+        "dynamic": 100,
+        "ordered": 280
+      },
+      "limitation": "Hand-authored dependency metadata and selected IDs; no learned selection or measured downstream task success."
+    },
+    {
+      "experiment": "I",
+      "checks": 9,
+      "passed": 9,
+      "contract_pass": true,
+      "wall_clock_ms": 0.09600899999986723,
+      "metrics": {
+        "task_success": null,
+        "verified_success": null,
+        "false_completion_rate": null,
+        "repeated_action_rate": null,
+        "repeated_failed_hypothesis_rate": null,
+        "replans": null,
+        "useful_replans": null,
+        "tool_calls": null,
+        "tokens": null,
+        "context_growth_bytes": null,
+        "retrieval_precision": null,
+        "retrieval_recall": null,
+        "memory_write_volume": null,
+        "memory_usefulness": null,
+        "stale_memory_usage": null,
+        "human_intervention_requirement": null
+      },
+      "null_reason": "No model episode; experiment-specific measured metrics follow. Contract assertions are not agent success.",
+      "scripted_cases": 9,
+      "required_clarifications": 2,
+      "limitation": "Uncertainty labels supplied by fixture. No calibration, trajectory estimator or advantage over simple evidence checks established."
+    },
+    {
+      "experiment": "J",
+      "checks": 8,
+      "passed": 8,
+      "contract_pass": true,
+      "wall_clock_ms": 591.4175569999998,
+      "metrics": {
+        "task_success": null,
+        "verified_success": null,
+        "false_completion_rate": null,
+        "repeated_action_rate": null,
+        "repeated_failed_hypothesis_rate": null,
+        "replans": null,
+        "useful_replans": null,
+        "tool_calls": null,
+        "tokens": null,
+        "context_growth_bytes": null,
+        "retrieval_precision": null,
+        "retrieval_recall": null,
+        "memory_write_volume": null,
+        "memory_usefulness": null,
+        "stale_memory_usage": null,
+        "human_intervention_requirement": null
+      },
+      "null_reason": "No model episode; experiment-specific measured metrics follow. Contract assertions are not agent success.",
+      "verdicts": [
+        {
+          "name": "absent",
+          "claimed_complete": true,
+          "focused_pass": false,
+          "integration_pass": false,
+          "fresh": true,
+          "unexpected": false,
+          "verified": false,
+          "expected": false
+        },
+        {
+          "name": "partial",
+          "claimed_complete": true,
+          "focused_pass": true,
+          "integration_pass": false,
+          "fresh": true,
+          "unexpected": false,
+          "verified": false,
+          "expected": false
+        },
+        {
+          "name": "focused-only",
+          "claimed_complete": true,
+          "focused_pass": true,
+          "integration_pass": false,
+          "fresh": true,
+          "unexpected": false,
+          "verified": false,
+          "expected": false
+        },
+        {
+          "name": "stale",
+          "claimed_complete": true,
+          "focused_pass": true,
+          "integration_pass": true,
+          "fresh": false,
+          "unexpected": false,
+          "verified": false,
+          "expected": false
+        },
+        {
+          "name": "dirty",
+          "claimed_complete": true,
+          "focused_pass": true,
+          "integration_pass": true,
+          "fresh": true,
+          "unexpected": true,
+          "verified": false,
+          "expected": false
+        },
+        {
+          "name": "complete",
+          "claimed_complete": true,
+          "focused_pass": true,
+          "integration_pass": true,
+          "fresh": true,
+          "unexpected": false,
+          "verified": true,
+          "expected": true
+        }
+      ],
+      "claim_only_false_completions": 5,
+      "independent_false_completions": 0,
+      "total_claims": 6,
+      "baseline_proposal_only_status": "executed",
+      "limitation": "Real subprocess checks in generated fixture repositories. Does not fix GateService or establish general verifier completeness."
+    }
+  ],
+  "passed": true
+}

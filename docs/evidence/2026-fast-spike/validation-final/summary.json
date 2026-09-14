@@ -1,0 +1,45 @@
+[
+  {
+    "name": "types-boundaries",
+    "command": [
+      "bun",
+      "run",
+      "check"
+    ],
+    "exit": 0,
+    "seconds": 5.707458421122283
+  },
+  {
+    "name": "research-types",
+    "command": [
+      "bunx",
+      "tsc",
+      "--noEmit",
+      "-p",
+      "experiments/2026-fast-spike/tsconfig.json"
+    ],
+    "exit": 0,
+    "seconds": 2.6035967520438135
+  },
+  {
+    "name": "tests",
+    "command": [
+      "bun",
+      "test"
+    ],
+    "exit": 0,
+    "seconds": 16.95199688896537
+  },
+  {
+    "name": "benchmark",
+    "command": [
+      "bun",
+      "run",
+      "experiments/2026-fast-spike/run.ts",
+      "--out",
+      "docs/evidence/2026-fast-spike/run-final"
+    ],
+    "exit": 0,
+    "seconds": 4.816350939916447
+  }
+]

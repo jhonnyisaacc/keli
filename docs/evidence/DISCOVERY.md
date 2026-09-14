@@ -47,19 +47,19 @@ Explicit scoped instructions persist; clarify material ambiguity. Inference rema
 
 | Area | Observed state | Significance |
 |---|---|---|
-| Host | Linux host `vmi3366806`, home `/home/david`; direct shell available | Local Grok export README explicitly identifies this host as Nancy's VPS [L11] |
-| Active personal agent | `nanobot-gateway.service`, active/running; Python 3.12; working directory `/home/david/.nanobot/workspace`; sampled `NRestarts=0` since service activation Sep 10 | Current Nancy service, not the older Hermes gateway |
+| Host | Linux host `vmi3366806`, home `$HOME`; direct shell available | Local Grok export README explicitly identifies this host as Nancy's VPS [L11] |
+| Active personal agent | `nanobot-gateway.service`, active/running; Python 3.12; working directory `$HOME/.nanobot/workspace`; sampled `NRestarts=0` since service activation Sep 10 | Current Nancy service, not the older Hermes gateway |
 | Hermes gateway | `hermes-gateway.service` inactive at inspection | Historical “live Hermes” reports must not be read as current service status |
 | Other active user services | Finance statement processor and Hermes finance intake worker | Hermes-adjacent workloads remain even while its gateway is inactive |
 | Timers | Nancy health watchdog, crypto scan, crypto delivery retry, Hermes daily update, Abi compatibility check | More than one scheduling mechanism exists; timer presence does not prove workload success |
-| Agent deployment repository | `/home/david/agent`, HEAD `e4dba85fa3587bc54722983a2acadd1a024d5756` | Profiles, schemas, policies, adapters, deployment tooling, patches, tests, domain skills |
-| Hermes checkout | `/home/david/.hermes/hermes-agent`, HEAD `93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544` | Local delivery fixes beyond the upstream baseline; source remains relevant |
-| Nanobot source | `/home/david/.nanobot/src/nanobot`, HEAD `f49965445152361b779b465e8a5111549ac934c4` | Source checkout is not byte-identical to all installed modules |
-| Nanobot release | `/home/david/.nanobot/releases/82a5cb72`; release manifest identifies `82a5cb72277469586aca4bc2d83f8e15a458be95`, Python 3.12, Honcho SDK 2.4.0 | The installed release and source must be distinguished [L3] |
-| Local overlays | `/home/david/.nanobot/extensions`, Agent deployment scripts, release-specific repairs | Thread routing/search behavior is partly supplied outside a supported native API [L5, L6] |
-| Domain systems | `/home/david/rocket`, `/home/david/nave`, finance repositories, `/home/david/quant-portfolio-manager` | Domain logic should remain separate from a personal-agent core |
-| Comparison lab | `/home/david/runtime-lab/bakeoff` | Historical same-task artifacts for Hermes, Nanobot, OpenClaw; limited comparability [L7] |
-| Grok environment | `/home/david/grok-bot-parallel` | Specification/export for a separate Grok Agent Computer, not evidence Grok is running here [L11] |
+| Agent deployment repository | `$HOME/agent`, HEAD `e4dba85fa3587bc54722983a2acadd1a024d5756` | Profiles, schemas, policies, adapters, deployment tooling, patches, tests, domain skills |
+| Hermes checkout | `$HOME/.hermes/hermes-agent`, HEAD `93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544` | Local delivery fixes beyond the upstream baseline; source remains relevant |
+| Nanobot source | `$HOME/.nanobot/src/nanobot`, HEAD `f49965445152361b779b465e8a5111549ac934c4` | Source checkout is not byte-identical to all installed modules |
+| Nanobot release | `$HOME/.nanobot/releases/82a5cb72`; release manifest identifies `82a5cb72277469586aca4bc2d83f8e15a458be95`, Python 3.12, Honcho SDK 2.4.0 | The installed release and source must be distinguished [L3] |
+| Local overlays | `$HOME/.nanobot/extensions`, Agent deployment scripts, release-specific repairs | Thread routing/search behavior is partly supplied outside a supported native API [L5, L6] |
+| Domain systems | `$HOME/rocket`, `$HOME/nave`, finance repositories, `$HOME/quant-portfolio-manager` | Domain logic should remain separate from a personal-agent core |
+| Comparison lab | `$HOME/runtime-lab/bakeoff` | Historical same-task artifacts for Hermes, Nanobot, OpenClaw; limited comparability [L7] |
+| Grok environment | `$HOME/grok-bot-parallel` | Specification/export for a separate Grok Agent Computer, not evidence Grok is running here [L11] |
 
 Nanobot's configuration contains Discord and WebSocket channel entries enabled; Telegram was not observed enabled in that inspected config. No general conclusion about all archived Telegram experiments follows. Hermes root contains 147 `SKILL.md` files; Nancy's inspected workspace skill tree contains four. Counts exclude other profile/plugin stores and measure files, not quality or duplication.
 
@@ -586,7 +586,7 @@ E3 compares a narrow SQLite job ledger against DBOS; Temporal is a later alterna
 
 ### Observed cost shape
 
-Read-only aggregate from `/home/david/.nanobot/llm_usage.sqlite3`; sampled stored records span epoch milliseconds `1788894996379`–`1789086096818`. This is a short, changing production window, not a normalized comparison. [L10]
+Read-only aggregate from `$HOME/.nanobot/llm_usage.sqlite3`; sampled stored records span epoch milliseconds `1788894996379`–`1789086096818`. This is a short, changing production window, not a normalized comparison. [L10]
 
 | Source | Calls | Recorded input | Recorded output | Recorded cache-read |
 |---|---:|---:|---:|---:|
@@ -1181,7 +1181,7 @@ The recommended near-term shape is native Bun core/model slice plus OS confineme
 
 **Acceptance reconciliation:** all A01–A46 survive in PRD §13. A29's real Honcho variant gates its later adapter, while disabled/local operation gates v0.1.0; A05 can exercise any supported configured alternate rather than promise early Grok support. A36 follows the explicit pause/stop-all build semantics. A42 covers delegate/MCP/process ownership now and fan-out later. Earlier D-number questions remain historical evidence; PRD §12 is the current disposition, including explicit build defaults and unchanged owner decisions.
 
-**Evidence links:** [E1 report](../personal-agent-e1/REPORT.md); [B report](../personal-agent-b/REPORT.md); [native report](../personal-agent-native-spike/REPORT.md); [Rust report](../personal-agent-rust-spike/REPORT.md); [combined reports](../personal-agent-spikes/REPORT.md). Exact source files, hashes, sample data and evidence bundles are retained beside those reports. The native task verified all 15 B manifest files unchanged. Production was not modified.
+**Evidence links:** [E1 report](DISCOVERY.md#l19); [B report](DISCOVERY.md#l20); [native report](REPORT.md); [Rust report](REPORT.md); [combined reports](REPORT.md). Exact source files, hashes, sample data and evidence bundles are retained beside those reports. The native task verified all 15 B manifest files unchanged. Production was not modified.
 
 **PRD closure:** [PRD.md](PRD.md) is normative. [PRD_INPUT.md](PRD_INPUT.md) is updated. [PRODUCT_RESEARCH.md](PRODUCT_RESEARCH.md) is now created under the superseding addendum, explaining evidence/issue research and product rationale. [REPO_GOVERNANCE.md](REPO_GOVERNANCE.md) is the repository and automation plan. No new experiment or bot implementation was performed in this closure.
 
@@ -1191,19 +1191,19 @@ The recommended near-term shape is native Bun core/model slice plus OS confineme
 
 All local records accessed 2026-09-11. They remain on the host; private source documents are not public references. Where a commit is given, it is preferable to a mutable working-tree path. No secret values are included.
 
-- **L1 — DAVID / NANOBOT SOURCE / OBSERVED.** Host/service/file metadata; `/home/david/.nanobot/src/nanobot` at `f49965445152361b779b465e8a5111549ac934c4`; `nanobot/agent/{context,memory,skills,subagent}.py`, `nanobot/cron/service.py`, `nanobot/bus/queue.py`, `pyproject.toml`, `LICENSE`; compared with installed release modules in `/home/david/.nanobot/releases/82a5cb72/venv/lib/python3.12/site-packages/nanobot`.
-- **L2 — GIT HISTORY / HERMES SOURCE.** `/home/david/.hermes/hermes-agent` at `93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544`; commits `0676c4c8ba`, `e480de5946`, `b5a7062c0a`, `93e2525a0b`; `gateway/delivery.py` and delivery test changes. `/home/david/agent` history at `e4dba85fa3587bc54722983a2acadd1a024d5756`.
-- **L3 — DAVID / REPORTED.** [Nancy release manifest](/home/david/.nanobot/releases/82a5cb72/MANIFEST.md), dated Sep 8. Release provenance and historical Honcho/session migration verification; not a new remote Honcho health check.
-- **L4 — DAVID / REPORTED CONTRACT.** [Abi notification contract](/home/david/ABI_NOTIFICATION_CONTRACT.md), Sep 3. Explicit event/attention/delivery semantics and stated limitations.
-- **L5 — GIT HISTORY / SOURCE.** Agent commit `44210ff2343240b05ad2ae8d119da0331508b594`; [Nancy thread adapter](/home/david/agent/deployment/nanobot/nancy_discord_threads.py), corresponding tests and renderer/continuity changes.
-- **L6 — GIT HISTORY / SOURCE.** Agent commit `e2ab9fc44`; [bounded search guard](/home/david/agent/deployment/nanobot/nancy_search_guard.py); `scripts/install_nanobot_safety.py` and watchdog. Inspected, not executed.
-- **L7 — EXPERIMENT / REPORTED.** [Historical bakeoff quality notes](/home/david/runtime-lab/bakeoff/runs/QUALITY_NOTES.md), with adjacent fixtures/artifacts. Mixed harness/model and incomplete usage caveats apply.
-- **L8 — DAVID / REPORTED HISTORICAL AUDIT.** [Portability and upgrade audit](/home/david/ABI_PORTABILITY_UPGRADE_AUDIT.md), Sep 2. Historical live version and ahead/behind counts are not current deployment claims.
+- **L1 — DAVID / NANOBOT SOURCE / OBSERVED.** Host/service/file metadata; `$HOME/.nanobot/src/nanobot` at `f49965445152361b779b465e8a5111549ac934c4`; `nanobot/agent/{context,memory,skills,subagent}.py`, `nanobot/cron/service.py`, `nanobot/bus/queue.py`, `pyproject.toml`, `LICENSE`; compared with installed release modules in `$HOME/.nanobot/releases/82a5cb72/venv/lib/python3.12/site-packages/nanobot`.
+- **L2 — GIT HISTORY / HERMES SOURCE.** `$HOME/.hermes/hermes-agent` at `93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544`; commits `0676c4c8ba`, `e480de5946`, `b5a7062c0a`, `93e2525a0b`; `gateway/delivery.py` and delivery test changes. `$HOME/agent` history at `e4dba85fa3587bc54722983a2acadd1a024d5756`.
+- **L3 — DAVID / REPORTED.** Nancy release manifest (private source; evidence ID retained in surrounding notes), dated Sep 8. Release provenance and historical Honcho/session migration verification; not a new remote Honcho health check.
+- **L4 — DAVID / REPORTED CONTRACT.** Abi notification contract (private source; evidence ID retained in surrounding notes), Sep 3. Explicit event/attention/delivery semantics and stated limitations.
+- **L5 — GIT HISTORY / SOURCE.** Agent commit `44210ff2343240b05ad2ae8d119da0331508b594`; Nancy thread adapter (private source; evidence ID retained in surrounding notes), corresponding tests and renderer/continuity changes.
+- **L6 — GIT HISTORY / SOURCE.** Agent commit `e2ab9fc44`; bounded search guard (private source; evidence ID retained in surrounding notes); `scripts/install_nanobot_safety.py` and watchdog. Inspected, not executed.
+- **L7 — EXPERIMENT / REPORTED.** Historical bakeoff quality notes (private source; evidence ID retained in surrounding notes), with adjacent fixtures/artifacts. Mixed harness/model and incomplete usage caveats apply.
+- **L8 — DAVID / REPORTED HISTORICAL AUDIT.** Portability and upgrade audit (private source; evidence ID retained in surrounding notes), Sep 2. Historical live version and ahead/behind counts are not current deployment claims.
 - **L9 — HERMES SOURCE / DOCUMENTATION.** Inspected Hermes revision above: `AGENTS.md`, `hermes_cli/setup.py`; `website/docs/user-guide/features/memory.md`; `website/docs/developer-guide/{context-compression-and-caching,context-engine-plugin,secret-source-plugin}.md`; `LICENSE`.
-- **L10 — DAVID / LOGS / OBSERVED.** Read-only SQLite aggregates/schema from `/home/david/.nanobot/llm_usage.sqlite3`, `/home/david/.hermes/state.db`, `/home/david/.hermes/kanban.db`; bounded journal lexical analysis; systemd status/timer metadata. No conversation bodies or credentials copied.
-- **L11 — DAVID / REPORTED.** [Grok parallel environment README](/home/david/grok-bot-parallel/README.md): identifies Nancy VPS hostname and separate Agent Computer export/ownership boundary.
-- **L12 — DAVID / REPORTED.** [Nancy repair review](/home/david/.nanobot/releases/nancy-native-repair-20260910/REVIEW.md), Sep 10. Used only for staged/live/recovery distinctions, not reproduced test claims or private domain facts.
-- **L13 — DAVID / SOURCE-CONTRACT.** [State ownership](/home/david/agent/docs/state_ownership.md): scoped objective CAS, canonical ownership and explicitly advisory budget guard. Historical phase labels not assumed to represent every current path.
+- **L10 — DAVID / LOGS / OBSERVED.** Read-only SQLite aggregates/schema from `$HOME/.nanobot/llm_usage.sqlite3`, `$HOME/.hermes/state.db`, `$HOME/.hermes/kanban.db`; bounded journal lexical analysis; systemd status/timer metadata. No conversation bodies or credentials copied.
+- **L11 — DAVID / REPORTED.** Grok parallel environment README (private source; evidence ID retained in surrounding notes): identifies Nancy VPS hostname and separate Agent Computer export/ownership boundary.
+- **L12 — DAVID / REPORTED.** Nancy repair review (private source; evidence ID retained in surrounding notes), Sep 10. Used only for staged/live/recovery distinctions, not reproduced test claims or private domain facts.
+- **L13 — DAVID / SOURCE-CONTRACT.** State ownership (private source; evidence ID retained in surrounding notes): scoped objective CAS, canonical ownership and explicitly advisory budget guard. Historical phase labels not assumed to represent every current path.
 
 ### External primary sources
 
@@ -1249,9 +1249,9 @@ Source dates are access dates unless a publication date is explicitly stated. Re
 
 ### Continuation evidence — 2026-09-11
 
-- **L14 — Deeper local source inspection.** `/home/david/.nanobot/src/nanobot` at `f49965445152361b779b465e8a5111549ac934c4`: `docs/python-sdk.md`, `docs/deployment.md`, `nanobot/sdk/clients.py`, `agent/hook.py`, `agent/turn_hooks.py`, `agent/tools/execution.py`, `agent/tools/registry.py`, `agent/tools/loader.py`, `agent/tools/sandbox.py`, `agent/tools/shell.py`, `agent/plugins.py`, `cron/service.py`, context/skills/provider modules. Local overlays under `/home/david/.nanobot/extensions`; Hermes delegation docs/ACP sources in the pinned L9 checkout. Source read only; new seam claims are not installed-release verification.
-- **L15 — Fixed-window latency aggregation.** Read-only SQLite `/home/david/.nanobot/llm_usage.sqlite3`, `llm_calls`, `started_at_ms` 1788894996379–1789086096818 inclusive; grouped by source, per-call `duration_ms` sorted median and floor-rank p95. Same 448 calls as L10; no positive TTFT/generation observations. No task-latency or monetary ranking inferred.
-- **L16 — Confirmed owner continuation.** [Supplied request](/home/david/.codex/attachments/90a369ae-5118-4499-b3d9-3eb59db100d1/pasted-text.txt), read in full. Authority for revised decisions, not experimental evidence.
+- **L14 — Deeper local source inspection.** `$HOME/.nanobot/src/nanobot` at `f49965445152361b779b465e8a5111549ac934c4`: `docs/python-sdk.md`, `docs/deployment.md`, `nanobot/sdk/clients.py`, `agent/hook.py`, `agent/turn_hooks.py`, `agent/tools/execution.py`, `agent/tools/registry.py`, `agent/tools/loader.py`, `agent/tools/sandbox.py`, `agent/tools/shell.py`, `agent/plugins.py`, `cron/service.py`, context/skills/provider modules. Local overlays under `$HOME/.nanobot/extensions`; Hermes delegation docs/ACP sources in the pinned L9 checkout. Source read only; new seam claims are not installed-release verification.
+- **L15 — Fixed-window latency aggregation.** Read-only SQLite `$HOME/.nanobot/llm_usage.sqlite3`, `llm_calls`, `started_at_ms` 1788894996379–1789086096818 inclusive; grouped by source, per-call `duration_ms` sorted median and floor-rank p95. Same 448 calls as L10; no positive TTFT/generation observations. No task-latency or monetary ranking inferred.
+- **L16 — Confirmed owner continuation.** Supplied request (private source; evidence ID retained in surrounding notes), read in full. Authority for revised decisions, not experimental evidence.
 - **S38 — ACP maintainers.** [Registry documentation](https://agentclientprotocol.com/get-started/registry) and [registry source](https://github.com/agentclientprotocol/registry). Discovery/distribution of existing agents; each adapter's conformance/license still reviewed separately.
 - **S39 — ACP maintainers.** [Claude ACP bridge](https://github.com/agentclientprotocol/claude-agent-acp). Existing Claude Agent SDK bridge.
 - **S40 — Zed.** [Codex ACP bridge](https://github.com/zed-industries/codex-acp). Existing integration candidate, not tested here.
@@ -1263,17 +1263,17 @@ Source dates are access dates unless a publication date is explicitly stated. Re
 
 ### Final bounded issue-pass evidence
 
-- **L17 — Owner architecture/issue-mining clarification.** [Supplied request](/home/david/.codex/attachments/2fe0192e-4a2f-4979-a42f-29d8e8e2b4b1/pasted-text.txt). Authority for A/B/C/D comparison and small-core/rich-capability distinction.
+- **L17 — Owner architecture/issue-mining clarification.** Supplied request (private source; evidence ID retained in surrounding notes). Authority for A/B/C/D comparison and small-core/rich-capability distinction.
 - **L18 — Targeted source corroboration.** Pinned Nanobot `nanobot/session/manager.py` uses external runtime sessions; pinned Hermes `tools/tool_search.py` exposes progressive bridges and `website/docs/developer-guide/model-provider-plugin.md` documents external-process provider seam. Read-only; not installed-release conformance testing.
 - **Issue register:** section 9 links all 39 individually fetched OPEN GitHub issues, with last-update dates, evidence classification, interpretation and reuse consequences. Status snapshot approximately 2026-09-11 02:15–02:25 UTC. Linked comment/PR checks distinguish merged #5279/#95091, open #5379/#5627/#5257 (Nanobot)/#91293/#48622, and closed-unmerged Hermes #68222. A merged PR is not proof of a particular deployed release or all related guarantees.
 - **S46 — SQLite.** [Atomic Commit](https://sqlite.org/atomiccommit.html). Crash-atomic transactions and storage assumptions; used to challenge an issue's unsupported blanket corruption claim, not certify a deployment.
 
 ### Architecture closure evidence
 
-- **L19:** E1 unmodified-upstream SDK/fake-delegate report and raw assertions, `/home/david/personal-agent-e1`.
-- **L20:** Bun authority/Nanobot child spike, `/home/david/personal-agent-b`.
-- **L21:** Native Bun/shared-fixture comparison, `/home/david/personal-agent-native-spike`.
-- **L22:** OS-first Landlock/Rust broker experiment, `/home/david/personal-agent-rust-spike`.
+- **L19:** E1 unmodified-upstream SDK/fake-delegate report and raw assertions, private spike checkout `$HOME/personal-agent-e1`. In-repo summary: [PRODUCT_RESEARCH.md](PRODUCT_RESEARCH.md).
+- **L20:** Bun authority/Nanobot child spike, `$HOME/personal-agent-b`. In-repo summary: [PRODUCT_RESEARCH.md](PRODUCT_RESEARCH.md).
+- **L21:** Native Bun/shared-fixture comparison, `$HOME/personal-agent-native-spike`. Sanitized in-repo excerpt: [REPORT.md](REPORT.md).
+- **L22:** OS-first Landlock/Rust broker experiment, `$HOME/personal-agent-rust-spike`. Sanitized in-repo excerpt: [REPORT.md](REPORT.md).
 - **L23:** Latest owner direction in this task: close architecture discovery, native Bun primary, references-only Nanobot/Hermes, broad capability contract, SemVer v0.1.0 and durable upgrades; create final PRD, no implementation.
 
 

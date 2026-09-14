@@ -1,0 +1,56 @@
+{
+  "out": "docs/evidence/2026-fast-spike/run-final",
+  "passed": true,
+  "experiments": [
+    {
+      "id": "A",
+      "checks": 7,
+      "passed": 7
+    },
+    {
+      "id": "B",
+      "checks": 10,
+      "passed": 10
+    },
+    {
+      "id": "C",
+      "checks": 4,
+      "passed": 4
+    },
+    {
+      "id": "D",
+      "checks": 5,
+      "passed": 5
+    },
+    {
+      "id": "E",
+      "checks": 5,
+      "passed": 5
+    },
+    {
+      "id": "F",
+      "checks": 4,
+      "passed": 4
+    },
+    {
+      "id": "G",
+      "checks": 6,
+      "passed": 6
+    },
+    {
+      "id": "H",
+      "checks": 5,
+      "passed": 5
+    },
+    {
+      "id": "I",
+      "checks": 9,
+      "passed": 9
+    },
+    {
+      "id": "J",
+      "checks": 8,
+      "passed": 8
+    }
+  ]
+}

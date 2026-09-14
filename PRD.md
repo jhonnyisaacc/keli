@@ -28,7 +28,7 @@ Nanobot and Hermes are reference implementations and sources of proven capabilit
 | Native cold/dependencies | Three readiness samples/arm; native median 38.19 ms vs 1,883.59 ms | One Bun process and zero extra native-adapter packages; comparison environment had 89 distributions, not all necessarily required |
 | OS-first/Rust | Independent Landlock probe, then 176 LOC broker/controller/probe; 14 assertions; IPC median 0.212 ms | Kernel filesystem confinement worked independently of Rust; no network, macOS or compromised-controller protection established |
 
-Native common-tokenizer estimates were 131 vs 5,017 tokens of serialized whole requests; these are not billed prompt tokens. All model performance figures use scripted providers, not live intelligence, caching or production throughput. Experiment code is disposable evidence: implement reviewed product contracts, do not promote the spikes into production. Detailed reports: [E1](../personal-agent-e1/REPORT.md), [B](../personal-agent-b/REPORT.md), [parallel spikes](../personal-agent-spikes/REPORT.md).
+Native common-tokenizer estimates were 131 vs 5,017 tokens of serialized whole requests; these are not billed prompt tokens. All model performance figures use scripted providers, not live intelligence, caching or production throughput. Experiment code is disposable evidence: implement reviewed product contracts, do not promote the spikes into production. Detailed reports: [E1](docs/evidence/DISCOVERY.md#l19), [B](docs/evidence/DISCOVERY.md#l20), [parallel spikes](docs/evidence/REPORT.md).
 
 ## 3. Architectural invariants
 

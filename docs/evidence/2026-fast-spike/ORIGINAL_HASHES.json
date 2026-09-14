@@ -1,0 +1,200 @@
+{
+  "kind": "sanitized-import-manifest",
+  "note": "Hashes are of the original research-branch bytes before portable sanitization. Changed files below are derivatives, not original evidence.",
+  "source_branch": "research/2026-fast-spike",
+  "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7",
+  "files": [
+    {
+      "path": "docs/architecture/keli-agent-architecture-proposal.md",
+      "sha256": "56e895ceba4f6c49a4fbc1753370100ce97d7ca0c062331fac5d04b19ed90183",
+      "bytes": 10646,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/architecture/keli-autonomy-implementation-prompt.md",
+      "sha256": "0583ac923b9114fa1117881fb62376c404539ac5ea3fdb4647a218a2d4563420",
+      "bytes": 3486,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "plans/evidence-driven-autonomy.md",
+      "sha256": "84672628ecdc2b22c3fceb035d7c95098dcea64e6fb533d9db516e75371a4bf1",
+      "bytes": 16391,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/research/2026-agent-architecture-matrix.md",
+      "sha256": "4229999518b80313eb492da4169ac343a20c4e79767663672aedb998d7e5f526",
+      "bytes": 11494,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/research/hermes-nanobot-keli-gap-analysis.md",
+      "sha256": "4bba80ba03e08836f1d6fb5fefa1940d83c0cb5492be0f0a1f7ffe7bdf5791ca",
+      "bytes": 17248,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/research/hermes-nanobot-reference-findings.md",
+      "sha256": "fc4b6513ab539a29e28a0c33cf191e07382df2427d24b7b99403b8c2e1b09a1d",
+      "bytes": 7741,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/research/keli-experiment-plan.md",
+      "sha256": "6e001103b10b2ee35a1508bd258d70be36d497def4e7a36e633f5f9604e612b3",
+      "bytes": 6646,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/research/keli-experiment-results.md",
+      "sha256": "6b5c76ea4afe513b400c26471879502658c9d76ca716d18b5bc5a8492973ac88",
+      "bytes": 10841,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/evidence/2026-fast-spike/README.md",
+      "sha256": "4e5e528c45617b9a95d9432b06aa6cb511cecc81e3de07169896194a3449647c",
+      "bytes": 2259,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/evidence/2026-fast-spike/artifact-audit.json",
+      "sha256": "c797fba7de875b79400cf38b036fff12cba5baa39087f6636643b8cdea412cd9",
+      "bytes": 499,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/evidence/2026-fast-spike/recon.json",
+      "sha256": "c604ae7ca8e9baf659938142a367e4dd2831deef312c123e4906d4ca4fe58132",
+      "bytes": 4496,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/evidence/2026-fast-spike/reference-index.json",
+      "sha256": "3c0947bf74f5fea2088babd557f89d2eabcbe6209de5ec23ae10f977d4ef6744",
+      "bytes": 198683,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/evidence/2026-fast-spike/reference-probes/summary.json",
+      "sha256": "75a4b848b1c18d96a70551e4ff1f1f1a0ad7cd876975cf5070c967f4745d7efb",
+      "bytes": 13790,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/evidence/2026-fast-spike/reference-probes/trace.jsonl",
+      "sha256": "af217387c9b5cb471c61b6c4f74df065109e550559d01d30630fa7bc0615b8e1",
+      "bytes": 8220,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/evidence/2026-fast-spike/run-001/summary.json",
+      "sha256": "b4568faf420c0236f844d083df402a2e1b4fa613838c814a610da85f0bf02ea8",
+      "bytes": 14059,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/evidence/2026-fast-spike/run-001/trace.jsonl",
+      "sha256": "fcc30d8ea7503af0dd8d7fd708afc1cf86c773190b4bd024405871c5504b95d9",
+      "bytes": 141624,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/evidence/2026-fast-spike/run-final/summary.json",
+      "sha256": "25fcb0cf94b373d553a2520cca92bb424fdf95e61618ee44ce05d167460b40ce",
+      "bytes": 14051,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/evidence/2026-fast-spike/run-final/trace.jsonl",
+      "sha256": "68ac3f9a2a7f5228385e678337a90524da5615a58734ebeab076c42c7c26a11c",
+      "bytes": 141624,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/evidence/2026-fast-spike/validation-final/benchmark.log",
+      "sha256": "0e8f13016ebb8e8439b563d50e85dcbb6f5d9805cc6cff59b488fbd22d9b4685",
+      "bytes": 768,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/evidence/2026-fast-spike/validation-final/summary.json",
+      "sha256": "9cb781c842e5dc92339b9363142591b8069f4288d8d8ad8bec2f29eee0565e9d",
+      "bytes": 742,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/evidence/2026-fast-spike/validation-final/tests.log",
+      "sha256": "fc3f92cce8924670b529750008b0faa01f743439bfe2fe53cf4e848796e5dc0b",
+      "bytes": 13048,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/evidence/2026-fast-spike/validation-final/types-boundaries.log",
+      "sha256": "3a60b662ccbf1a4cda60557a6b8d12c9cf40c7a7ade306331f8d71f033a447dc",
+      "bytes": 58,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/evidence/2026-fast-spike/validation-initial/summary.json",
+      "sha256": "52b46206b628d6bfcf95215a1339d3902c6b580a239b9ef9561c61a60ced017f",
+      "bytes": 503,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/evidence/2026-fast-spike/validation-initial/tests.log",
+      "sha256": "1f50ec8a9081c3eda48fbf270573def6bc037866238b912bffeeae3073613723",
+      "bytes": 13053,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "docs/evidence/2026-fast-spike/validation-initial/types-boundaries.log",
+      "sha256": "3a60b662ccbf1a4cda60557a6b8d12c9cf40c7a7ade306331f8d71f033a447dc",
+      "bytes": 58,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "experiments/2026-fast-spike/README.md",
+      "sha256": "2ecdd5fccbaea4bd2802a2e2306a54e4366f48900fc41a93aff9846e9d8f3a99",
+      "bytes": 1316,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "experiments/2026-fast-spike/contracts.test.ts",
+      "sha256": "b7ffeb3ba01c437ceb85033923167d9852d753070c83fef99616f5eea4def466",
+      "bytes": 3720,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "experiments/2026-fast-spike/mechanisms.ts",
+      "sha256": "23dfa712d0d549d2861d4e2fa005eee2e8779c835d98228425ab5cab9813a187",
+      "bytes": 7363,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "experiments/2026-fast-spike/reference-index.py",
+      "sha256": "bb086e40567a1d46f620358b47d4f7032922006fb43d50fa7229852e2fd4f7e3",
+      "bytes": 3115,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "experiments/2026-fast-spike/reference-probes/run.py",
+      "sha256": "1aa466c37d59ef418153c88b2a7c8b836bef405b26b42cc4b9d1c08ad78473ab",
+      "bytes": 13142,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "experiments/2026-fast-spike/run.ts",
+      "sha256": "dbddc1a8eceb821bd501c56d1b82c068e364ed85911fea603f349edfe1cdcad4",
+      "bytes": 20894,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    },
+    {
+      "path": "experiments/2026-fast-spike/tsconfig.json",
+      "sha256": "7822fb2eefd36af2218cabb11893a00d70d6fd98d6a8ba03f100d6e5fe438ed9",
+      "bytes": 81,
+      "source_commit": "a4adf90fafa176df9aa259967d9ff78053de3cf7"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+[
+  {
+    "name": "types-boundaries",
+    "command": [
+      "bun",
+      "run",
+      "check"
+    ],
+    "exit": 0,
+    "seconds": 5.608715292997658
+  },
+  {
+    "name": "research-types",
+    "command": [
+      "bunx",
+      "tsc",
+      "--noEmit",
+      "-p",
+      "experiments/2026-fast-spike/tsconfig.json"
+    ],
+    "exit": 0,
+    "seconds": 2.214319641003385
+  },
+  {
+    "name": "tests",
+    "command": [
+      "bun",
+      "test"
+    ],
+    "exit": 0,
+    "seconds": 13.776168959913775
+  }
+]
