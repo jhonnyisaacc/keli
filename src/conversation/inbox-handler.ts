@@ -10,6 +10,7 @@ import type { TelegramBackend } from "../transports/telegram-backend.ts";
 import type { InboxRecord } from "../transports/inbox.ts";
 import { processTransportInbox, type InboxHandler, type InboxProcessResult, type InboxReplier } from "../transports/inbox-processor.ts";
 import type { TransportRoute } from "../transports/routes.ts";
+import { consumePairing, pairingAccepts, type PairingChallenge } from "../transports/pairing.ts";
 import type { ConversationLoop } from "./loop.ts";
 import type { TurnContext, TurnOrigin } from "./types.ts";
 
@@ -51,6 +52,7 @@ export function turnContextFor(
     scope: route.scope,
     conversationId: conversation.id,
     origin: originFor(message, route),
+    mode: "ordinary",
   };
 }
 
@@ -59,9 +61,24 @@ export function turnContextFor(
  * reference is the transport message id, so re-processing the same inbound message after a
  * restart returns the stored reply instead of running the model again.
  */
-export function conversationInboxHandler(db: Database, ownerId: string, loop: ConversationLoop, ownerUserId?: string): InboxHandler {
+export function conversationInboxHandler(
+  db: Database,
+  ownerId: string,
+  loop: ConversationLoop,
+  ownerUserId?: string,
+  pairing?: { challenge?: PairingChallenge; onVerified?: (next: PairingChallenge) => void | Promise<void> },
+): InboxHandler {
   return async (message, route, conversation) => {
     const text = String(message.payload.text ?? message.payload.content ?? message.payload.message ?? "");
+    const actorId = String(message.payload.authorId ?? message.payload.author_id ?? "");
+    if (
+      pairing?.challenge &&
+      pairingAccepts(pairing.challenge, text, { transport: message.transport, externalId: route.externalId })
+    ) {
+      const next = consumePairing(pairing.challenge, actorId || ownerId);
+      await pairing.onVerified?.(next);
+      return { reply: "Pairing confirmed. This identity can approve personal actions on this route." };
+    }
     const supplied = /^\/watch-input\s+(watch-[a-f0-9]+)\s+([\s\S]+)$/.exec(text);
     if (supplied) {
       const watch = getWatch(db, supplied[1]!);
@@ -107,12 +124,19 @@ export type DiscordCycleResult = { poll: DiscordPollResult; inbox: InboxProcessR
 /** One receive → converse → reply cycle for every bound Discord route. Safe to run repeatedly. */
 export async function runDiscordCycle(
   db: Database,
-  input: { ownerId: string; backend: DiscordBackend; loop: ConversationLoop; ownerUserId?: string; limit?: number },
+  input: {
+    ownerId: string;
+    backend: DiscordBackend;
+    loop: ConversationLoop;
+    ownerUserId?: string;
+    limit?: number;
+    pairing?: { challenge?: PairingChallenge; onVerified?: (next: PairingChallenge) => void | Promise<void> };
+  },
 ): Promise<DiscordCycleResult> {
   const poll = await pollDiscordRoutes(db, input.backend, { limit: input.limit });
   const inbox = await processTransportInbox(db, {
     limit: input.limit,
-    handler: conversationInboxHandler(db, input.ownerId, input.loop, input.ownerUserId),
+    handler: conversationInboxHandler(db, input.ownerId, input.loop, input.ownerUserId, input.pairing),
     reply: discordReplier(db, input.backend),
   });
   return { poll, inbox };
@@ -140,12 +164,19 @@ export type TelegramCycleResult = { poll: TelegramPollResult; inbox: InboxProces
 
 export async function runTelegramCycle(
   db: Database,
-  input: { ownerId: string; backend: TelegramBackend; loop: ConversationLoop; ownerUserId?: string; limit?: number },
+  input: {
+    ownerId: string;
+    backend: TelegramBackend;
+    loop: ConversationLoop;
+    ownerUserId?: string;
+    limit?: number;
+    pairing?: { challenge?: PairingChallenge; onVerified?: (next: PairingChallenge) => void | Promise<void> };
+  },
 ): Promise<TelegramCycleResult> {
   const poll = await pollTelegramRoutes(db, input.backend, { limit: input.limit });
   const inbox = await processTransportInbox(db, {
     limit: input.limit,
-    handler: conversationInboxHandler(db, input.ownerId, input.loop, input.ownerUserId),
+    handler: conversationInboxHandler(db, input.ownerId, input.loop, input.ownerUserId, input.pairing),
     reply: telegramReplier(db, input.backend),
   });
   return { poll, inbox };

@@ -62,6 +62,22 @@ export function startIntegrationFixture(): IntegrationFixture & {
         });
       }
 
+      if (path === "/capture" && req.method === "POST") {
+        const body = (await req.json()) as { url: string; kind?: string };
+        const kind = body.kind === "download" ? "download" : "screenshot";
+        const payload = kind === "download" ? "fixture-download" : "fixture-png";
+        const bodyBase64 = Buffer.from(payload).toString("base64");
+        return Response.json({
+          url: body.url,
+          kind,
+          title: "Fixture Page",
+          contentType: kind === "download" ? "text/plain" : "image/png",
+          bytes: Buffer.byteLength(payload),
+          sha256: "fixture",
+          bodyBase64,
+        });
+      }
+
       if (path === "/mcp" && req.method === "POST") {
         const body = (await req.json()) as {
           op: string;

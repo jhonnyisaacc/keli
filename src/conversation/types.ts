@@ -1,4 +1,4 @@
-import type { Attribution, Citation, SourceEvidence } from "../core/evidence.ts";
+import type { Attribution, Citation, ConversationMode, SourceEvidence } from "../core/evidence.ts";
 
 export type TurnOrigin = {
   transport: "cli" | "discord" | "telegram" | "job" | "watch" | "test";
@@ -19,6 +19,8 @@ export type TurnContext = {
   origin: TurnOrigin;
   runId?: string;
   jobId?: string;
+  /** Default ordinary. Watches and explicit research turns set research. */
+  mode?: ConversationMode;
 };
 
 export type ModelDecision =

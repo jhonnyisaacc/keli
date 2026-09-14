@@ -23,8 +23,12 @@ export type AnswerDraft = {
   attributions: Attribution[];
 };
 
+export type ConversationMode = "ordinary" | "research";
+
 export type ResearchPolicy = {
   strict?: boolean;
+  /** Ordinary chat skips collection obligations unless the draft attributes a position. */
+  mode?: ConversationMode;
   requiredSubjects?: string[];
   requiredCollections: string[];
   citationsRequired: boolean;
@@ -105,7 +109,11 @@ export function checkEvidence(
     }
   }
 
-  const missingCollections = policy.requiredCollections.filter((c) => !citedCollections.has(c));
+  const attributed = draft.attributions.some((a) => a.stance !== "no-coverage");
+  const enforceCollections = policy.strict || policy.mode === "research" || attributed;
+  const missingCollections = enforceCollections
+    ? policy.requiredCollections.filter((c) => !citedCollections.has(c))
+    : [];
   if (missingCollections.length) {
     reasons.push(`required collections not cited: ${missingCollections.join(", ")}`);
   }

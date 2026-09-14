@@ -8,7 +8,7 @@ import type { CliGlobals } from "../context.ts";
 
 export function chatCommand(globals: CliGlobals) {
   return defineCommand({
-    meta: { description: "Interactive CLI chat: research turns with cited evidence, corrections, and coding delegation" },
+    meta: { description: "Interactive CLI chat: ordinary conversation, corrections, and evidence-bound research" },
     args: {
       message: { type: "string", description: "One-shot message (skip REPL)" },
       session: { type: "string", description: "Conversation id to continue (default: cli:<project>)" },

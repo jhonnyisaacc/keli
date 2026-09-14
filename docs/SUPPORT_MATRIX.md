@@ -11,9 +11,10 @@
 
 | Surface | Fixture (CI default) | Live (optional) |
 |---------|----------------------|-----------------|
-| Model provider | `KELI_FIXTURE_MODEL` / `KELI_FIXTURE_URL` | `keli auth add` + named custom endpoint |
-| Grok override (A05) | `KELI_FIXTURE_GROK` / `KELI_GROK_FIXTURE_URL` | Configured OpenAI-compatible Grok profile |
-| Honcho memory | `KELI_FIXTURE_HONCHO` + `KELI_HONCHO_ENABLED=1` | `memory.provider=honcho` + credential ref |
+| Model provider | `KELI_FIXTURE_MODEL` / `KELI_FIXTURE_URL` | `keli setup provider` + live probe for the **selected** model only |
+| Grok override (A05) | `KELI_FIXTURE_GROK` / `KELI_GROK_FIXTURE_URL` | `grok` HTTP API-key path; `xai-oauth` is the subscription account path |
+| Catalog inference ids | Construction + protocol mocks | Not live-verified; `keli providers list` shows catalog/configured/live-checked |
+| Honcho memory | `KELI_FIXTURE_HONCHO` + `KELI_HONCHO_ENABLED=1` | `memory.provider=honcho` + credential ref (v0.2.0) |
 | Browser session | `KELI_FIXTURE_BROWSER_SESSION` | Playwright with credential ref |
 | Delegate | `KELI_FIXTURE_DELEGATE` | External-cli / ACP when pinned |
 | Discord/Telegram | `KELI_FIXTURE_DISCORD` / `KELI_FIXTURE_TELEGRAM` | Token via `keli auth add` |
@@ -26,7 +27,8 @@ What "configured" means per surface, and what has actually been exercised:
 
 | Surface | Verified in CI (fixture/replay) | Live behavior | Not yet done |
 |---------|--------------------------------|---------------|--------------|
-| Model provider (OpenAI-compatible chat) | Config + credential resolution, budgets per attempt, retry/no-progress, scripted-model research loop | `HttpModelProvider.complete` with API key from keychain/env; `/models` round trip in `bun run scripts/live-probe.ts` | Anthropic/Gemini native protocols (named-later, refused accurately) |
+| Model provider (OpenAI-compatible chat, ChatGPT, Anthropic/Gemini via pi-ai) | Config + credential resolution, budgets, retries, catalog construction, selected-model setup probe | ChatGPT gpt-5.5 live; other ids live only after that account's probe | Catalog row count is not entitlement; cloud SDK chains not live-tested |
+| Search | Fixture POST + Brave/generic request shape; `missing_access` when unset | `keli setup search` + owner key | Extra search backends deferred |
 | Research corrections | Scoped rule commit/undo, quoted-text rejection, leak test across projects | Same code path | — |
 | Source collections | Index, FTS search, read, fingerprint; Augustine/Shaul and Cava fixture corpora | Point `keli sources add` at the real Shaul index / transcript folders | Transcript ingestion from YouTube itself is outside Keli (bounded adapter feeds a folder) |
 | Discord | Fixture receiver + sender: thread binding, dedupe, cursor, stored replies on restart | `RestDiscordBackend` polling (REST v10, bot token) via `keli discord poll --loop 10` | First live run against a **separate Keli bot identity**; Nancy's receiver is not taken over |

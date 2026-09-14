@@ -5,10 +5,10 @@ import lockfile from "proper-lockfile";
 import { getOAuthProvider, type OAuthCredentials, type OAuthLoginCallbacks, type OAuthProviderInterface } from "@mariozechner/pi-ai/oauth";
 import { defaultCredentialSource, type CredentialRef, type CredentialSource } from "../credentials/source.ts";
 import { KeliError } from "../core/errors.ts";
-import { hermesOAuthProvider } from "./hermes-oauth.ts";
+import { providerDeviceOAuthProvider } from "./provider-device-oauth.ts";
 
 function oauthProvider(id: string): OAuthProviderInterface {
-  const provider = getOAuthProvider(id === "copilot" ? "github-copilot" : id) ?? hermesOAuthProvider(id);
+  const provider = getOAuthProvider(id === "copilot" ? "github-copilot" : id) ?? providerDeviceOAuthProvider(id);
   if (!provider) throw new KeliError(`No account login for ${id}`, "invalid_request");
   return provider;
 }

@@ -1,9 +1,9 @@
 import { registerIntegration } from "../../registry.ts";
 import { statusOf } from "../../status.ts";
-import { hermesCatalog, HERMES_PIN, catalogModels, catalogEnvironment, catalogEndpoint, createCatalogProvider } from "../../catalog-provider.ts";
+import { providerCatalog, HERMES_PIN, catalogModels, catalogEnvironment, catalogEndpoint, createCatalogProvider } from "../../catalog-provider.ts";
 import type { IntegrationProfile } from "../../types.ts";
 
-for (const row of hermesCatalog) {
+for (const row of providerCatalog) {
   // These existing names retain their Keli meaning. ACP is an agent, not an inference API.
   if (["openai-codex", "grok", "copilot-acp", "moa"].includes(row.name)) continue;
   const id = row.name;
@@ -25,7 +25,9 @@ for (const row of hermesCatalog) {
       const connected = Boolean(ctx.credentialRef || catalogEnvironment(id) || keyless || cloud);
       return statusOf({ id, kind: "model-provider", displayName: profile.displayName,
         configured: connected && Boolean(catalogEndpoint(id, ctx.settings)), credentialState: ctx.needsReauth ? "needs-reauth" : cloud || keyless ? "n/a" : connected ? "resolvable" : "missing",
-        reason: "Connection configuration only; live inference not yet verified", howToConfigure: `keli setup provider (${id})` });
+        reason: connected
+          ? "Configured. Catalog membership is not live inference; setup records a probe per selected model."
+          : "Catalog entry only. Run keli setup provider.", howToConfigure: `keli setup provider (${id})` });
     },
     async roundTrip(ctx) {
       const start = performance.now();

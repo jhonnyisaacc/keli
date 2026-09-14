@@ -52,7 +52,7 @@ function credentials(data: Record<string, unknown>, flow: Flow, refresh?: string
   }
   return { access: data.access_token, refresh: String(data.refresh_token || refresh), expires: expiry };
 }
-export function hermesOAuthProvider(id: string): OAuthProviderInterface | undefined {
+export function providerDeviceOAuthProvider(id: string): OAuthProviderInterface | undefined {
   const flow = FLOWS[id];
   if (!flow) return undefined;
   return {

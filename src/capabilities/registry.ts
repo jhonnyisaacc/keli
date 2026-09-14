@@ -142,6 +142,30 @@ const BUILTIN: CapabilityDescriptor[] = [
     },
   },
   {
+    id: "browser.screenshot",
+    version: "0.1.0",
+    summary: "Capture a public-page screenshot artifact in an isolated browser session",
+    actionClass: "read",
+    resources: ["url"],
+    schema: {
+      type: "object",
+      properties: { url: { type: "string" } },
+      required: ["url"],
+    },
+  },
+  {
+    id: "browser.download",
+    version: "0.1.0",
+    summary: "Download a public URL as an artifact in an isolated browser session",
+    actionClass: "read",
+    resources: ["url"],
+    schema: {
+      type: "object",
+      properties: { url: { type: "string" } },
+      required: ["url"],
+    },
+  },
+  {
     id: "mcp.tools/list",
     version: "0.1.0",
     summary: "List tools from a configured MCP server",

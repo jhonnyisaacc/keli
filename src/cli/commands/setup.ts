@@ -9,7 +9,7 @@ export function setupCommand(globals: CliGlobals) {
     args: {
       section: {
         type: "positional",
-        description: "provider | transport | delegate | memory | mcp",
+        description: "provider | transport | search | mcp | delegate | memory",
         required: false,
       },
       "non-interactive": {
@@ -30,6 +30,11 @@ export function setupCommand(globals: CliGlobals) {
       project: { type: "string", description: "Default project name (neutral default: personal)" },
       "skip-calibration": { type: "boolean", default: false },
       "skip-transport-test": { type: "boolean", default: false },
+      "search-endpoint": { type: "string", description: "Brave or generic JSON search endpoint" },
+      "mcp-url": { type: "string", description: "MCP HTTP URL" },
+      "mcp-command": { type: "string", description: "MCP stdio command" },
+      "pairing-code": { type: "string", description: "KELI-PAIR code from the bound chat" },
+      "pairing-actor": { type: "string", description: "Transport actor id that sent the pairing code" },
       quick: { type: "boolean", default: false, description: "Only prompt for unset items" },
       minimal: { type: "boolean", default: false, description: "Provider + CLI only; no transport" },
     },
@@ -49,6 +54,11 @@ export function setupCommand(globals: CliGlobals) {
           fallbackModel: args["fallback-model"],
           skipCalibration: args["skip-calibration"],
           skipTransportTest: args["skip-transport-test"],
+          searchEndpoint: args["search-endpoint"],
+          mcpUrl: args["mcp-url"],
+          mcpCommand: args["mcp-command"],
+          pairingCode: args["pairing-code"],
+          pairingActorId: args["pairing-actor"],
           section: args.section as SetupSection | undefined,
           quick: args.quick,
           minimal: args.minimal,

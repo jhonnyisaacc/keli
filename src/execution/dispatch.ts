@@ -6,7 +6,7 @@ import { shellExec } from "../adapters/shell.ts";
 import { httpFetch } from "../adapters/http.ts";
 import { webFetch } from "../adapters/web.ts";
 import { searchQuery } from "../adapters/search.ts";
-import { browserNavigate } from "../adapters/browser.ts";
+import { browserNavigate, browserCapture } from "../adapters/browser.ts";
 import { mcpCallTool, mcpListTools } from "../adapters/mcp.ts";
 import { delegateRun } from "../adapters/delegate.ts";
 import { jobsObserve } from "../adapters/jobs.ts";
@@ -153,6 +153,20 @@ export async function dispatchCapability(
         ...ctx.browser,
         fixtureUrl: ctx.browser?.fixtureUrl ?? fixtures.browser,
       });
+      break;
+    case "browser.screenshot":
+      result = await browserCapture(
+        { url: String(proposal.input.url), kind: "screenshot" },
+        ctx.network,
+        { ...ctx.browser, fixtureUrl: ctx.browser?.fixtureUrl ?? fixtures.browser },
+      );
+      break;
+    case "browser.download":
+      result = await browserCapture(
+        { url: String(proposal.input.url), kind: "download" },
+        ctx.network,
+        { ...ctx.browser, fixtureUrl: ctx.browser?.fixtureUrl ?? fixtures.browser },
+      );
       break;
     case "browser.session":
       result = await browserSessionConnect(

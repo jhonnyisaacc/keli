@@ -225,9 +225,11 @@ export class ConversationLoop {
   ): Promise<TurnOutcome> {
     const { db, behavior } = this.deps;
     const scoped = policyFromRules(behavior.listRulesByPrefix(ctx.scope, "research."));
+    const mode = control ? "research" : (ctx.mode ?? "ordinary");
     // Callers (watches) may tighten the scope policy, never loosen it.
     const policy: ResearchPolicy = {
       strict: override?.strict,
+      mode,
       requiredSubjects: override?.requiredSubjects,
       requiredCollections: [...new Set([...scoped.requiredCollections, ...(override?.requiredCollections ?? [])])],
       citationsRequired: scoped.citationsRequired || override?.citationsRequired === true,
@@ -337,6 +339,7 @@ export class ConversationLoop {
       const currentPolicy = policyFromRules(behavior.listRulesByPrefix(ctx.scope, "research."));
       policy.requiredCollections = [...new Set([...currentPolicy.requiredCollections, ...(override?.requiredCollections ?? [])])];
       policy.citationsRequired = currentPolicy.citationsRequired || override?.citationsRequired === true;
+      policy.mode = mode;
       if (control) messages[0] = { role: "system", content: buildSystemPrompt({ ctx, policy, language: behavior.getRule(ctx.scope, "conversation.language")?.value, registry: this.deps.registry, sources: this.deps.sources, db, prompt, allowedCapabilities: control.allowedCapabilities, commitments: control.commitments }) };
       steps += 1;
       const run = getRun(db, runId);

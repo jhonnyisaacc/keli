@@ -96,6 +96,29 @@ describe("0.1-C capability integrations", () => {
     );
     expect(mcpList.result.ok).toBe(true);
 
+    const shot = await gate.run(
+      { capabilityId: "browser.screenshot", input: { url: `${fixture.endpoint}/page` }, resources: [] },
+      policy,
+      scope,
+      undefined,
+      opts,
+    );
+    expect(shot.result.ok).toBe(true);
+    expect((shot.result.output as { kind: string; bodyBase64?: string }).kind).toBe("screenshot");
+    expect((shot.result.output as { bodyBase64?: string }).bodyBase64).toBe(Buffer.from("fixture-png").toString("base64"));
+    expect(shot.result.artifacts?.[0]?.hash).toBeTruthy();
+
+    const download = await gate.run(
+      { capabilityId: "browser.download", input: { url: `${fixture.endpoint}/page` }, resources: [] },
+      policy,
+      scope,
+      undefined,
+      opts,
+    );
+    expect(download.result.ok).toBe(true);
+    expect((download.result.output as { kind: string; bodyBase64?: string }).kind).toBe("download");
+    expect((download.result.output as { bodyBase64?: string }).bodyBase64).toBe(Buffer.from("fixture-download").toString("base64"));
+
     const mcpCall = await gate.run(
       {
         capabilityId: "mcp.tools/call",

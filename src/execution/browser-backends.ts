@@ -26,6 +26,19 @@ export type BrowserNavigateOutput = {
   backend: BrowserBackendKind;
 };
 
+export type BrowserCaptureKind = "screenshot" | "download";
+
+export type BrowserCaptureOutput = {
+  url: string;
+  kind: BrowserCaptureKind;
+  contentType: string;
+  bytes: number;
+  sha256: string;
+  bodyBase64: string;
+  backend: BrowserBackendKind;
+  title?: string;
+};
+
 export type BrowserBackendConfig = {
   primary?: BrowserBackendKind;
   fallback?: BrowserBackendKind;
@@ -146,6 +159,73 @@ export async function navigateWithBrowser(
     case "mcp":
       return { ...await navigateViaMcp(url, merged.mcpUrl!), backend };
   }
+}
+
+async function selectedBackend(config: BrowserBackendConfig): Promise<{ backend: BrowserBackendKind; merged: BrowserBackendConfig }> {
+  const merged = { ...browserConfigFromEnv(), ...config };
+  const statuses = await probeBrowserBackends(merged);
+  const backend = selectBrowserBackend(statuses, merged);
+  if (!backend) {
+    const hints = statuses.map((s) => `${s.kind}: ${s.reason ?? "unavailable"}`).join("; ");
+    throw new KeliError(
+      `No browser backend available (${hints}). For static pages use web.fetch; configure browser.primary in config.`,
+      "capability_unavailable",
+    );
+  }
+  return { backend, merged };
+}
+
+export async function captureWithBrowser(
+  url: string,
+  kind: BrowserCaptureKind,
+  policy: NetworkPolicy,
+  config: BrowserBackendConfig = {},
+): Promise<BrowserCaptureOutput> {
+  const { backend, merged } = await selectedBackend(config);
+  assertAllowedHost(policy, url);
+  if (backend === "fixture") {
+    return { ...await captureViaFixture(url, kind, merged.fixtureUrl!), backend };
+  }
+  if (backend === "playwright") {
+    return { ...await captureViaPlaywright(url, kind), backend };
+  }
+  throw new KeliError(
+    `Browser ${kind} is available for fixture and Playwright backends; ${backend} is navigation-only.`,
+    "capability_unavailable",
+  );
+}
+
+async function captureViaFixture(
+  url: string,
+  kind: BrowserCaptureKind,
+  fixtureUrl: string,
+): Promise<Omit<BrowserCaptureOutput, "backend">> {
+  const response = await fetch(`${fixtureUrl.replace(/\/$/, "")}/capture`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ url, kind }),
+  });
+  if (!response.ok) {
+    throw new KeliError(`Browser fixture HTTP ${response.status}`, "engine_error");
+  }
+  return (await response.json()) as Omit<BrowserCaptureOutput, "backend">;
+}
+
+async function captureViaPlaywright(
+  url: string,
+  kind: BrowserCaptureKind,
+): Promise<Omit<BrowserCaptureOutput, "backend">> {
+  const proc = Bun.spawn(["bun", PLAYWRIGHT_SCRIPT, url, kind], {
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+  const code = await proc.exited;
+  const stdout = await new Response(proc.stdout).text();
+  const stderr = await new Response(proc.stderr).text();
+  if (code !== 0) {
+    throw new KeliError(stderr.trim() || `Playwright ${kind} failed (${code})`, "capability_unavailable");
+  }
+  return JSON.parse(stdout) as Omit<BrowserCaptureOutput, "backend">;
 }
 
 async function navigateViaFixture(

@@ -41,6 +41,7 @@ export function requiredIntegrationIds(config: KeliConfig | null | undefined, ex
   if (primary && primary !== "fixture") ids.add(resolveProfileId(primary) ?? primary);
   if (config?.setup?.transport && config.setup.transport !== "none") ids.add(config.setup.transport);
   if (config?.memory?.provider) ids.add(config.memory.provider);
+  if (config?.integrations?.search?.enabled || config?.integrations?.search?.settings?.baseUrl) ids.add("search");
   return [...ids];
 }
 

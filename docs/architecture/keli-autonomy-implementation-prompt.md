@@ -12,7 +12,7 @@ decoding) are superseded. Domain engines stay in Rocket and other tools.
 Implement the remaining work in [plans/general-purpose-autonomy.md](../../plans/general-purpose-autonomy.md).
 Deliver running code and cross-domain demonstrations, not another research report.
 
-Start from `feat/v0.1.0` at `e32b2ad` or its reviewed successor. Inspect `AGENTS.md`, the
+Start from `feat/v0.1.0` at `ce51b3a` or its reviewed successor. Inspect `AGENTS.md`, the
 current plan, and the implementation before editing. Preserve subsequent work and other
 agents’ uncommitted trees. If you do not own the primary working tree, create a dedicated
 worktree. Do not merge older research-branch runtime files, reset/stash another agent’s
@@ -37,21 +37,23 @@ example, not the product definition.
 
 ## Already implemented on this branch
 
-Structured CLI tools (`tools.rocket`) and the general responsibility controller
-(`kind: responsibility`, scheduled review slots, `capabilities.lookup`, investigation
-receipts, no-finding waits) are fixture-verified. Do not re-implement them.
+The responsibility controller, structured tools, ChatGPT live path, and first-use slices
+(ordinary conversation, readiness layers, search/MCP missing-access, one-transport pairing,
+browser capture, generated service units) are fixture-verified. Do not re-implement them
+or the catalog importer. Do not treat catalog rows as live connections.
 
 ## Remaining work (this completion pass)
 
 See [plans/general-purpose-autonomy.md](../../plans/general-purpose-autonomy.md) and
 [docs/evidence/COMPLETION_LEDGER.md](../evidence/COMPLETION_LEDGER.md).
 
-Start from `feat/v0.1.0` at `d9e51d2` or its reviewed successor. Do not rewrite the
-responsibility controller. ADOPT protocols (Telegram Bot API, MCP JSON-RPC, Codex
-app-server as **delegate only**). ChatGPT-account is not a conversation model —
+Owner-only leftovers (L13): dual-transport live pairing, native four-target, five-user,
+live ≥95%, notarization, live Rocket/search/MCP/Codex. Cursor must not loop on those.
+Do not rewrite the responsibility controller. ChatGPT-account **is** a conversation model
+via pi-ai; Codex App Server remains delegate-only —
 [CODEX_APP_SERVER.md](../evidence/CODEX_APP_SERVER.md).
 
-Historical implementation notes for the finished slices remain below.
+Historical implementation notes for earlier slices remain below.
 
 ### 1. Generic structured-tool integration (Rocket first) — done
 

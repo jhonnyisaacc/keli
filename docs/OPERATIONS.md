@@ -65,11 +65,11 @@ Full operating path: [responsibilities](responsibilities.md). Scenario evidence:
 
 ## Known limits (current increments)
 
-- **0.1-A–E shipped:** packaging, backup/restore, global pause, fixture-backed transports in CI
-- **0.1-F–I remaining** before `v0.1.0` tag: Honcho adapter, broader providers/delegates, routing/budgets/skills, helper fan-out, release evidence
-- Discord/Telegram live tokens optional until the operator pairs a bot. Fixture and REST backends are both wired to inbox/outbox; `keli discord poll` / `keli telegram poll` use reconnect backoff.
-- ChatGPT-account is **not** a conversation provider. See [CODEX_APP_SERVER.md](evidence/CODEX_APP_SERVER.md). Use `keli auth add openai-compatible` for chat; optional Codex app-server is a gated coding delegate.
-- Held-out correction eval, five-user usability check, and macOS notarization are **0.1-I** human gates
+- ChatGPT-account conversation is implemented (pi-ai). Catalog ids are optional; live-checked means the selected model passed a probe, not that every listed provider works.
+- Discord/Telegram live tokens are optional. Pair with `KELI-PAIR` from the bound chat, or stay on CLI (`keli setup --transport none`). Fixture and REST backends stay on inbox/outbox.
+- Search, MCP, Rocket, and browser captures are optional connections. Missing ones return `missing_access` or `integration_gap` instead of invented results.
+- Honcho, OCR, speech, and extra search backends are not v0.1.0 requirements.
+- Held-out correction eval, five-user usability check, dual-transport proof, and macOS notarization are owner/hardware gates (ledger L13)
 
 ## User service (Linux systemd / macOS launchd)
 
@@ -83,6 +83,7 @@ keli service run          # one jobs + watches + transport cycle
 keli service run --loop 30
 ```
 
-Templates: `install/keli.service`, `install/io.keli.plist`. Install writes to
-`~/.config/systemd/user` or `~/Library/LaunchAgents` unless `KELI_SERVICE_DIR` is set.
-This does not enable lingering or pre-login macOS execution.
+Units are **generated** by `keli service install` from `src/ops/service.ts` (systemd user
+unit or launchd plist). There are no committed `install/keli.service` templates. Install
+writes to `~/.config/systemd/user` or `~/Library/LaunchAgents` unless `KELI_SERVICE_DIR`
+is set. This does not enable lingering or pre-login macOS execution.

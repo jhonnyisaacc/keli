@@ -11,6 +11,7 @@ import { runDiscordCycle, runTelegramCycle } from "../../conversation/inbox-hand
 import { freshReconnectState, notePollFailure, notePollProgress, sleepBackoff } from "../../transports/reconnect.ts";
 import { openApp } from "../context.ts";
 import { isExecutionBlocked, readControl } from "../../ops/control.ts";
+import { writeConfig } from "../../state/config.ts";
 
 export function serviceCommand(globals: CliGlobals) {
   return defineCommand({
@@ -87,6 +88,22 @@ export function serviceCommand(globals: CliGlobals) {
               });
               let discordErrors = 0;
               let telegramErrors = 0;
+              const pairing =
+                app.config.setup?.pairing && !app.config.setup.pairing.verifiedAt
+                  ? {
+                      challenge: app.config.setup.pairing,
+                      onVerified: async (next: typeof app.config.setup.pairing) => {
+                        app.config.setup = { ...app.config.setup, pairing: next };
+                        if (next?.transport === "discord" && next.pairedActorId) {
+                          app.config.transports = {
+                            ...app.config.transports,
+                            discord: { ...app.config.transports?.discord, ownerUserId: next.pairedActorId },
+                          };
+                        }
+                        await writeConfig(app.config, app.stateDir);
+                      },
+                    }
+                  : undefined;
               try {
                 const backend = await resolveDiscordBackend(app.config);
                 const cycle = await runDiscordCycle(app.db, {
@@ -94,6 +111,7 @@ export function serviceCommand(globals: CliGlobals) {
                   backend,
                   loop: app.conversation.loop,
                   ownerUserId: app.config.transports?.discord?.ownerUserId,
+                  pairing,
                 });
                 discordErrors = cycle.poll.errors.length;
               } catch {
@@ -105,6 +123,7 @@ export function serviceCommand(globals: CliGlobals) {
                   ownerId: app.owner.id,
                   backend,
                   loop: app.conversation.loop,
+                  pairing,
                 });
                 telegramErrors = cycle.poll.errors.length;
               } catch {

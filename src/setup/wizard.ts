@@ -12,9 +12,11 @@ import { resolveTelegramBackend } from "../transports/telegram-resolve.ts";
 import { getIntegration, listIntegrations, probeIntegration } from "../integrations/registry.ts";
 import { fixtureUrlFor } from "../integrations/env.ts";
 import { runLiveProbe } from "../integrations/live-probe.ts";
+import { FIRST_USE_PROVIDERS, FIRST_USE_STATUS_IDS } from "../integrations/first-use.ts";
+import { confirmPairing, issuePairingCode, pairingAccepts, pairingExpiresAt, pairingPhrase } from "../transports/pairing.ts";
 import "../integrations/load.ts";
 
-export type SetupSection = "provider" | "transport" | "delegate" | "memory" | "mcp";
+export type SetupSection = "provider" | "transport" | "delegate" | "memory" | "mcp" | "search";
 
 export type SetupOptions = {
   stateDir?: string;
@@ -29,6 +31,11 @@ export type SetupOptions = {
   fallbackModel?: string;
   skipCalibration?: boolean;
   skipTransportTest?: boolean;
+  searchEndpoint?: string;
+  mcpUrl?: string;
+  mcpCommand?: string;
+  pairingCode?: string;
+  pairingActorId?: string;
   section?: SetupSection;
   quick?: boolean;
   minimal?: boolean;
@@ -42,6 +49,9 @@ export type SetupResult = {
   transportTested: boolean;
   calibrationSkipped: boolean;
   providerConnected: boolean;
+  searchConnected: boolean;
+  pairingVerified: boolean;
+  pairingPending: boolean;
   projectName: string;
 };
 
@@ -76,8 +86,9 @@ export async function runSetup(options: SetupOptions = {}): Promise<SetupResult>
   const minimal = options.minimal ?? existing.setup?.mode === "minimal";
 
   if (!options.nonInteractive) {
+    const interesting = listIntegrations().filter((p) => (FIRST_USE_STATUS_IDS as readonly string[]).includes(p.id));
     const statuses = await Promise.all(
-      listIntegrations().map((p) =>
+      interesting.map((p) =>
         probeIntegration(p.id, {
           settings: existing.integrations?.[p.id]?.settings ?? {},
           credentialRef: existing.integrations?.[p.id]?.credentialRef,
@@ -88,9 +99,10 @@ export async function runSetup(options: SetupOptions = {}): Promise<SetupResult>
       "Keli setup — personal agent with durable scoped corrections.",
       "Registration is not authorization. Grants stay in the gate.",
       "Secrets go to the OS keychain as refs; config never stores plaintext.",
+      "Catalog providers are optional; first-use needs one model, not every listed id.",
       returning ? "Returning-user mode: press Enter to keep current values." : "First-run wizard.",
       "",
-      ...statuses.slice(0, 8).map((s) => `  ${s.id}: ${s.configured ? "configured" : "unset"} (${s.howToConfigure})`),
+      ...statuses.map((s) => `  ${s.id}: ${s.configured ? "configured" : "unset"} (${s.howToConfigure})`),
       "",
     ]);
   }
@@ -112,14 +124,12 @@ export async function runSetup(options: SetupOptions = {}): Promise<SetupResult>
     minimal ||
     (quick && returning && Boolean(existing.setup?.transport && existing.setup.transport !== "none"));
 
-  if (!options.nonInteractive && section !== "transport" && section !== "delegate" && section !== "memory" && section !== "mcp") {
+  if (!options.nonInteractive && section !== "transport" && section !== "delegate" && section !== "memory" && section !== "mcp" && section !== "search") {
     if (!skipProvider) {
       const rl = readline.createInterface({ input, output });
       try {
-        const providers = listIntegrations("model-provider")
-          .map((p) => p.id)
-          .join(", ");
-        const primaryAnswer = await rl.question(`Primary provider [${primaryModel}] (${providers}, or custom): `);
+        const shortlist = FIRST_USE_PROVIDERS.join(", ");
+        const primaryAnswer = await rl.question(`Primary provider [${primaryModel}] (${shortlist}, or other catalog id): `);
         if (primaryAnswer.trim()) primaryModel = primaryAnswer.trim();
         const fallbackAnswer = await rl.question(`Fallback provider [${fallbackModel}] (optional): `);
         if (fallbackAnswer.trim()) fallbackModel = fallbackAnswer.trim();
@@ -186,7 +196,7 @@ export async function runSetup(options: SetupOptions = {}): Promise<SetupResult>
     }
   }
 
-  if (!options.nonInteractive && !minimal && section !== "provider" && section !== "delegate" && section !== "memory" && section !== "mcp") {
+  if (!options.nonInteractive && !minimal && section !== "provider" && section !== "delegate" && section !== "memory" && section !== "mcp" && section !== "search") {
     if (!skipTransport) {
       const rl = readline.createInterface({ input, output });
       try {
@@ -214,13 +224,93 @@ export async function runSetup(options: SetupOptions = {}): Promise<SetupResult>
   }
 
   if (minimal && !transport) transport = "none";
+  if (section === "search" || section === "mcp" || section === "provider" || section === "memory") {
+    transport = transport ?? existing.setup?.transport ?? "none";
+  }
   transport = transport ?? (minimal ? "none" : "discord");
 
-  if (transport === "discord" && !discordChannel && section !== "provider") {
+  if (transport === "discord" && !discordChannel && section !== "provider" && section !== "search" && section !== "mcp" && section !== "memory") {
     throw new Error("Discord setup requires --discord-channel or an interactive channel id");
   }
-  if (transport === "telegram" && !telegramChat && section !== "provider") {
+  if (transport === "telegram" && !telegramChat && section !== "provider" && section !== "search" && section !== "mcp" && section !== "memory") {
     throw new Error("Telegram setup requires --telegram-chat or an interactive chat id");
+  }
+
+  let searchEndpoint = options.searchEndpoint ?? existing.integrations?.search?.settings.baseUrl;
+  let searchTouched = section === "search" || options.searchEndpoint !== undefined;
+  if (!options.nonInteractive && !minimal && (section === "search" || !section)) {
+    const rl = readline.createInterface({ input, output });
+    try {
+      const current = searchEndpoint ?? "";
+      const answer = await rl.question(`Search endpoint (Brave or generic JSON, empty to skip) [${current}]: `);
+      if (answer.trim()) {
+        searchEndpoint = answer.trim();
+        searchTouched = true;
+      }
+    } finally {
+      rl.close();
+    }
+  }
+
+  let mcpUrl = options.mcpUrl ?? existing.integrations?.mcp?.settings.url ?? existing.mcp?.servers?.[0]?.url;
+  let mcpCommand = options.mcpCommand ?? existing.integrations?.mcp?.settings.command ?? existing.mcp?.servers?.[0]?.command;
+  const mcpTouched = section === "mcp" || options.mcpUrl !== undefined || options.mcpCommand !== undefined;
+  if (!options.nonInteractive && section === "mcp") {
+    const rl = readline.createInterface({ input, output });
+    try {
+      const urlAnswer = await rl.question(`MCP HTTP URL [${mcpUrl ?? ""}]: `);
+      if (urlAnswer.trim()) mcpUrl = urlAnswer.trim();
+      const cmdAnswer = await rl.question(`MCP stdio command [${mcpCommand ?? ""}]: `);
+      if (cmdAnswer.trim()) mcpCommand = cmdAnswer.trim();
+    } finally {
+      rl.close();
+    }
+  }
+
+  if (searchTouched && searchEndpoint) {
+    const previous = existing.integrations?.search;
+    existing.integrations = {
+      ...existing.integrations,
+      search: {
+        enabled: true,
+        settings: { ...previous?.settings, baseUrl: searchEndpoint },
+        credentialRef: previous?.credentialRef,
+        status: previous?.status,
+      },
+    };
+  }
+  if (mcpTouched && (mcpUrl || mcpCommand)) {
+    const previousServers = existing.mcp?.servers ?? [];
+    const previousEntry = existing.integrations?.mcp;
+    const nextServer = mcpCommand
+      ? {
+          id: previousServers.find((s) => s.command === mcpCommand)?.id ?? previousServers[0]?.id ?? "mcp",
+          transport: "stdio" as const,
+          command: mcpCommand,
+          args: previousServers.find((s) => s.command === mcpCommand)?.args ?? previousServers[0]?.args,
+          envRefs: previousServers.find((s) => s.command === mcpCommand)?.envRefs ?? previousServers[0]?.envRefs,
+        }
+      : {
+          id: previousServers.find((s) => s.url === mcpUrl)?.id ?? previousServers[0]?.id ?? "mcp",
+          transport: "http" as const,
+          url: mcpUrl!,
+          envRefs: previousServers.find((s) => s.url === mcpUrl)?.envRefs ?? previousServers[0]?.envRefs,
+        };
+    const remaining = previousServers.filter((s) => s.id !== nextServer.id);
+    existing.mcp = { ...existing.mcp, servers: [nextServer, ...remaining] };
+    existing.integrations = {
+      ...existing.integrations,
+      mcp: {
+        enabled: true,
+        credentialRef: previousEntry?.credentialRef,
+        status: previousEntry?.status,
+        settings: {
+          ...previousEntry?.settings,
+          ...(mcpUrl ? { url: mcpUrl, transport: "http" } : {}),
+          ...(mcpCommand ? { command: mcpCommand, transport: "stdio" } : {}),
+        },
+      },
+    };
   }
 
   const { requireInitialized } = await import("../state/init.ts");
@@ -251,7 +341,16 @@ export async function runSetup(options: SetupOptions = {}): Promise<SetupResult>
   }
 
   let transportTested = false;
-  if (!options.skipTransportTest && transport !== "none") {
+  let pairingVerified = Boolean(existing.setup?.pairing?.verifiedAt);
+  let pairingPending = Boolean(existing.setup?.pairing && !existing.setup.pairing.verifiedAt);
+  let pairing = existing.setup?.pairing;
+  const skipThisTransport =
+    options.skipTransportTest ||
+    section === "search" ||
+    section === "mcp" ||
+    section === "provider" ||
+    section === "memory";
+  if (!skipThisTransport && transport !== "none") {
     if (transport === "discord") {
       try {
         const backend = fixtureUrlFor("discord")
@@ -295,6 +394,66 @@ export async function runSetup(options: SetupOptions = {}): Promise<SetupResult>
         }
       }
     }
+
+    const externalId =
+      transport === "discord"
+        ? discordThread
+          ? `${discordChannel}:${discordThread}`
+          : discordChannel!
+        : telegramTopic
+          ? `${telegramChat}:${telegramTopic}`
+          : telegramChat!;
+    const pending = existing.setup?.pairing;
+    const reusePending =
+      pending &&
+      !pending.verifiedAt &&
+      pending.transport === transport &&
+      pending.externalId === externalId &&
+      Date.parse(pending.expiresAt) > Date.now();
+    pairing = reusePending
+      ? pending
+      : {
+          transport,
+          externalId,
+          code: issuePairingCode(),
+          expiresAt: pairingExpiresAt(),
+        };
+    const phrase = pairingPhrase(pairing.code);
+    try {
+      if (transport === "discord") {
+        const backend = fixtureUrlFor("discord") ? undefined : await resolveDiscordBackend(existing);
+        await sendDiscordMessage(
+          db,
+          {
+            channelId: discordChannel!,
+            threadId: discordThread,
+            message: `Reply with ${phrase} from this chat to finish pairing. Notifications stay local until pairing succeeds.`,
+            scope,
+          },
+          backend,
+        );
+      } else if (transport === "telegram") {
+        const backend = fixtureUrlFor("telegram") ? undefined : await resolveTelegramBackend(existing);
+        await sendTelegramMessage(
+          db,
+          {
+            chatId: telegramChat!,
+            topicId: telegramTopic,
+            message: `Reply with ${phrase} from this chat to finish pairing. Notifications stay local until pairing succeeds.`,
+            scope,
+          },
+          backend,
+        );
+      }
+    } catch {
+      /* pairing message is best-effort; the challenge is still stored */
+    }
+    pairingPending = true;
+    if (options.pairingCode && pairingAccepts(pairing, options.pairingCode)) {
+      pairing = confirmPairing(pairing, options.pairingActorId ?? owner.id);
+      pairingVerified = true;
+      pairingPending = false;
+    }
   }
 
   db.close();
@@ -337,23 +496,26 @@ export async function runSetup(options: SetupOptions = {}): Promise<SetupResult>
     transports: {
       ...existing.transports,
       discord: transport === "discord"
-        ? { channelId: discordChannel, threadId: discordThread }
+        ? { channelId: discordChannel, threadId: discordThread, ownerUserId: pairing?.pairedActorId ?? existing.transports?.discord?.ownerUserId }
         : existing.transports?.discord,
       telegram: transport === "telegram"
         ? { chatId: telegramChat, topicId: telegramTopic }
         : existing.transports?.telegram,
     },
     setup: {
+      ...existing.setup,
       completedAt: new Date().toISOString(),
       transport,
       calibrationSkipped: skipCalibration,
-      mode: minimal ? "minimal" : "full",
+      mode: minimal ? "minimal" : existing.setup?.mode ?? "full",
+      pairing,
     },
   };
 
-  let providerConnected = false;
-  let providerDetail = "";
-  {
+  let providerConnected = Boolean(existing.setup?.providerConnected);
+  let providerDetail = existing.setup?.providerDetail ?? "";
+  const shouldProbeProvider = !section || section === "provider";
+  if (shouldProbeProvider) {
     try {
       const probe = await runLiveProbe({
         config: next,
@@ -369,9 +531,19 @@ export async function runSetup(options: SetupOptions = {}): Promise<SetupResult>
         (providerConnected ? "fixture or configured endpoint reachable" : "provider round-trip not verified");
     } catch (e) {
       providerDetail = String(e);
+      providerConnected = false;
+    }
+    next.setup = { ...next.setup, providerConnected, providerDetail };
+    if (providerConnected) {
+      next.setup.liveChecked = {
+        ...next.setup.liveChecked,
+        [primaryModel]: {
+          at: new Date().toISOString(),
+          model: next.providers?.primary?.model ?? (primaryModel === "chatgpt" ? "gpt-5.5" : undefined),
+        },
+      };
     }
   }
-  next.setup = { ...next.setup, providerConnected, providerDetail };
   await writeConfig(next, stateDir);
 
   if (!options.nonInteractive) {
@@ -379,8 +551,16 @@ export async function runSetup(options: SetupOptions = {}): Promise<SetupResult>
       "",
       `Setup complete. Project: ${projectName}. Transport: ${transport}. Route ${routeBound ? `bound to project ${project.name}` : "not bound (CLI recovery still works)"}.`,
       providerConnected
-        ? `Primary provider connected (${providerDetail}).`
+        ? `Primary provider live-checked for this model (${providerDetail}). Catalog membership is not entitlement.`
         : `Primary provider not yet connected: ${providerDetail || "run keli auth add <provider> then keli doctor"}.`,
+      searchEndpoint ? `Search connected (${searchEndpoint}).` : "Search not connected — web investigation will explain the missing access.",
+      pairingVerified
+        ? "Transport pairing verified."
+        : pairingPending
+          ? "Transport pairing pending — reply with the KELI-PAIR code from that chat."
+          : transport === "none"
+            ? "CLI-only: notifications stay local."
+            : "",
       skipCalibration
         ? "Optional calibration skipped — you can run a real task anytime."
         : "Run a real conversation when ready.",
@@ -395,6 +575,9 @@ export async function runSetup(options: SetupOptions = {}): Promise<SetupResult>
     transportTested,
     calibrationSkipped: skipCalibration,
     providerConnected,
+    searchConnected: Boolean(searchEndpoint || fixtureUrlFor("search")),
+    pairingVerified,
+    pairingPending,
     projectName,
   };
 }

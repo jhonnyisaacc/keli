@@ -56,6 +56,16 @@ export type KeliConfig = {
     mode?: "full" | "minimal";
     providerConnected?: boolean;
     providerDetail?: string;
+    /** Successful inference probes. Catalog membership never writes here. */
+    liveChecked?: Record<string, { at: string; model?: string }>;
+    pairing?: {
+      transport: "discord" | "telegram";
+      externalId: string;
+      code: string;
+      expiresAt: string;
+      pairedActorId?: string;
+      verifiedAt?: string;
+    };
   };
   /** Provider role routing (0.1-G). */
   routing?: ProviderRouting;

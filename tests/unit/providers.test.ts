@@ -1,17 +1,19 @@
 import { expect, test } from "bun:test";
-import { catalogDescriptor, catalogEntry, createCatalogProvider, hermesCatalog } from "../../src/integrations/catalog-provider.ts";
+import { catalogDescriptor, catalogEntry, createCatalogProvider, providerCatalog } from "../../src/integrations/catalog-provider.ts";
 import { getIntegration } from "../../src/integrations/registry.ts";
 import { createModelProvider } from "../../src/model/provider-factory.ts";
+import { listProviders } from "../../src/model/provider-registry.ts";
+import { HttpModelProvider } from "../../src/model/http-provider.ts";
 import { SdkModelProvider, type ModelCompletion } from "../../src/model/sdk-provider.ts";
 import { defaultConfig } from "../../src/state/config.ts";
-import { hermesOAuthProvider } from "../../src/integrations/hermes-oauth.ts";
+import { providerDeviceOAuthProvider } from "../../src/integrations/provider-device-oauth.ts";
 import "../../src/integrations/load.ts";
 
 const credentials = { name: "test", available: true, get: async () => "test-key" };
 
 test("every bundled inference profile constructs through the shared factory; delegate identities stay distinct", async () => {
-  for (const row of hermesCatalog) {
-    if (["openai-codex", "moa", "copilot-acp"].includes(row.name)) continue;
+  for (const row of providerCatalog) {
+    if (["openai-codex", "grok", "moa", "copilot-acp"].includes(row.name)) continue;
     const id = row.name;
     const config = { ...defaultConfig(), providers: { primary: { id, model: "account-model" } }, integrations: { [id]: { enabled: true, settings: { baseUrl: "http://127.0.0.1:1/v1" }, credentialRef: { service: `keli/${id}`, id: "api-key" } } } };
     const result = await createModelProvider({ config, credentials });
@@ -24,6 +26,29 @@ test("every bundled inference profile constructs through the shared factory; del
   expect(getIntegration("openai-codex")?.id).toBe("chatgpt");
   expect(getIntegration("anthropic")?.id).toBe("anthropic");
   expect(getIntegration("openai")?.id).toBe("openai-compatible");
+  expect(catalogEntry("grok")).toBeUndefined();
+  expect(catalogEntry("xai-oauth")?.name).toBe("xai-oauth");
+});
+
+test("grok remains the A05 HTTP override; xAI subscription uses xai-oauth", async () => {
+  const grok = await createModelProvider({
+    config: {
+      ...defaultConfig(),
+      providers: { primary: { id: "grok", model: "grok-4" } },
+      integrations: { grok: { enabled: true, settings: { baseUrl: "http://127.0.0.1:1/v1" }, credentialRef: { service: "keli/grok", id: "api-key" } } },
+    },
+    credentials,
+  });
+  expect(grok.provider).toBeInstanceOf(HttpModelProvider);
+  const subscription = await createModelProvider({
+    config: {
+      ...defaultConfig(),
+      providers: { primary: { id: "xai-oauth", model: "account-model" } },
+      integrations: { "xai-oauth": { enabled: true, settings: { baseUrl: "http://127.0.0.1:1/v1" }, credentialRef: { service: "keli/xai-oauth", id: "api-key" } } },
+    },
+    credentials,
+  });
+  expect(subscription.provider).toBeInstanceOf(SdkModelProvider);
 });
 
 test("native protocols are selected instead of sending everything to chat/completions", () => {
@@ -79,7 +104,7 @@ test("role routing does not borrow the primary provider's model", async () => {
 test("MiniMax account flow validates state before polling", async () => {
   const original = globalThis.fetch;
   globalThis.fetch = (async () => Response.json({ user_code: "123", verification_uri: "https://api.minimax.io/login", expired_in: 100, state: "wrong" })) as unknown as typeof fetch;
-  try { await expect(hermesOAuthProvider("minimax-oauth")!.login({ onAuth() { throw new Error("must not display mismatched login"); }, onPrompt: async () => "" })).rejects.toThrow("authorization failed"); }
+  try { await expect(providerDeviceOAuthProvider("minimax-oauth")!.login({ onAuth() { throw new Error("must not display mismatched login"); }, onPrompt: async () => "" })).rejects.toThrow("authorization failed"); }
   finally { globalThis.fetch = original; }
 });
 
@@ -133,7 +158,7 @@ test("Nous and MiniMax account exchanges use scoped device grants and refresh on
       return Response.json({ access_token: isNous ? jwt : "access", refresh_token: "owned-refresh", expires_in: 3600, expired_in: 3600, status: "success" });
     }) as unknown as typeof fetch;
     try {
-      const provider = hermesOAuthProvider(id)!;
+      const provider = providerDeviceOAuthProvider(id)!;
       const session = await provider.login({ onAuth: () => {}, onPrompt: async () => "" });
       expect(session.expires).toBeGreaterThan(Date.now());
       expect((await provider.refreshToken(session)).refresh).toBe("owned-refresh");
@@ -144,6 +169,21 @@ test("Nous and MiniMax account exchanges use scoped device grants and refresh on
 test("xAI discovery cannot redirect an OAuth exchange to another host", async () => {
   const original = globalThis.fetch; let calls = 0;
   globalThis.fetch = (async () => { calls++; return Response.json({ token_endpoint: "https://attacker.example/token" }); }) as unknown as typeof fetch;
-  try { await expect(hermesOAuthProvider("xai-oauth")!.refreshToken({ access: "old", refresh: "private", expires: 1 })).rejects.toThrow(); expect(calls).toBe(1); }
+  try { await expect(providerDeviceOAuthProvider("xai-oauth")!.refreshToken({ access: "old", refresh: "private", expires: 1 })).rejects.toThrow(); expect(calls).toBe(1); }
   finally { globalThis.fetch = original; }
+});
+
+test("live-checked applies only to the probed model, not a later replacement", () => {
+  const base = {
+    ...defaultConfig(),
+    providers: { primary: { id: "chatgpt" as const, model: "gpt-5.4" } },
+    integrations: { chatgpt: { enabled: true, settings: {}, credentialRef: { service: "keli/chatgpt", id: "oauth" } } },
+    setup: { liveChecked: { chatgpt: { at: "2026-01-01T00:00:00.000Z", model: "gpt-5.5" } } },
+  };
+  expect(listProviders(base).find((p) => p.id === "chatgpt")?.readiness).toBe("configured");
+  const same = {
+    ...base,
+    providers: { primary: { id: "chatgpt" as const, model: "gpt-5.5" } },
+  };
+  expect(listProviders(same).find((p) => p.id === "chatgpt")?.readiness).toBe("live-checked");
 });

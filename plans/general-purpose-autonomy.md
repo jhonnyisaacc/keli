@@ -1,23 +1,30 @@
-# Plan: finish Keli through reuse and focused autonomy improvements
+# Plan: finish Keli through first-use, not catalog breadth
 
 Status: current development plan on `feat/v0.1.0`. Continues the general-purpose
 autonomy work; does not start another architecture proposal. The PRD remains the
 product completion contract. Compact ledger:
 [docs/evidence/COMPLETION_LEDGER.md](../docs/evidence/COMPLETION_LEDGER.md).
+[plans/evidence-driven-autonomy.md](evidence-driven-autonomy.md) is historical.
+[plans/integration-readiness.md](integration-readiness.md) is superseded; do not extend it.
 
-Implementation baseline: `d9e51d2` on `feat/v0.1.0` (clean primary worktree). That
-commit already contains structured CLI tools, the general responsibility controller,
-and three scripted cross-domain scenarios. This plan completes ordinary capabilities
-by **ADOPT → ADAPT → BUILD**, then evaluates usefulness on the same controller.
+Implementation baseline: `ce51b3a` on `feat/v0.1.0`. That commit already contains the
+responsibility controller, ChatGPT live path, and a Hermes-derived inference **catalog**.
+Catalog rows are not live connections. This pass completes one honest first-use path, then
+the remaining PRD-required connections, by **ADOPT → ADAPT → BUILD**.
 
-Validation at `d9e51d2`: `bun test` is the regression baseline (temporary
-`KELI_STATE_DIR`). Those checks do not certify live providers, transports, or Rocket.
+`ce51b3a` catalog size: 54 JSON rows; 50 registered catalog inference profiles plus 6
+Keli-owned (`fixture`, `openai-compatible`, `grok`, `chatgpt`, `claude-code`,
+`antigravity`). `moa` and `copilot-acp` stay excluded. Construction tests are not
+account entitlement. Live inference remains ChatGPT gpt-5.5 unless the owner probes
+another model. See [providers](../docs/providers.md) and
+[catalog evidence](../docs/evidence/HERMES_PROVIDERS.md).
 
-Provider expansion is implemented in the shared setup/auth/factory path. See the
-[connection guide](../docs/providers.md) and
-[provider evidence](../docs/evidence/HERMES_PROVIDERS.md). Continue with real user
-onboarding and observed failures; no additional provider architecture or portfolio
-implementation is required by this slice.
+Readiness layers (keep distinct in CLI, ledger, and tests): catalog entry · usable
+config/auth · runtime connection · fixture verification · live verification.
+
+Keep authority in `src/core/gate.ts`, `src/core/capability-gate.ts`, and
+`ResearchResponsibilityService` in `src/core/behavior.ts`. Providers and tools remain
+proposals. Rocket stays an optional CLI profile. No portfolio engine.
 
 ## Product direction
 
@@ -56,6 +63,14 @@ The following is current runtime truth. Historical spike documents remain dated 
 | Cross-domain portfolio / Augustine / maintenance scenarios | fixture-verified (scripted) | `tests/integration/responsibility-scenarios.test.ts`; live use deferred |
 | Operating guide | implemented | [docs/responsibilities.md](../docs/responsibilities.md) |
 | Live provider / live Rocket evaluation | deferred onboarding milestone | section 3 |
+| Ordinary vs research conversation | implemented, fixture-verified | `ConversationLoop` mode ordinary/research; watches stay evidence-bound |
+| Honest provider readiness | implemented, fixture-verified | `keli providers list` catalog/configured/live-checked; grok A05 HTTP vs `xai-oauth` |
+| First-use wizard shortlist | implemented, fixture-verified | ChatGPT, OpenAI-compatible, Anthropic, Grok, plus explicit catalog ids |
+| Search as optional setup connection | implemented, fixture-verified | `keli setup search`; `missing_access` when unset |
+| One-transport pairing challenge | implemented, fixture-verified | `KELI-PAIR`; live token remains owner-gated |
+| Browser screenshot/download artifacts | implemented, fixture-verified | approved responsibilities only; Playwright optional |
+| MCP/Rocket missing access | implemented, fixture-verified | `missing_access` / `integration_gap`; no ambient MCP in casual chat |
+| Generated user-service units | implemented, fixture-verified | `keli service install` writes units; no committed `install/keli.service` |
 | Learned memory policies, RL controllers, general world models | deferred | research matrix M06–M08, M12 |
 
 `verified` still means the declared evidence/coverage contract passed. It is not semantic
@@ -63,25 +78,23 @@ truth.
 
 ## 2. Completion stages (this work)
 
-Follow ADOPT → ADAPT → BUILD per [ledger](../docs/evidence/COMPLETION_LEDGER.md) row.
-Preserve working Keli implementations. Do not import Hermes/Nanobot as a second runtime.
+First-use slices on this pass (fixture-verified). Dual-transport identity proof, four-target
+native, five-user, and live ≥95% remain owner/hardware gates (ledger L13). Do not add catalog
+providers, papers, OCR/speech, Honcho, or portfolio engines to close this pass.
 
-1. **Ledger and product defaults.** Neutral project name (`personal`) unless supplied;
-   preserve existing names; Rocket stays an optional tool profile.
-2. **Transports.** Telegram Bot API receiver/sender/reconnect connected to existing
-   inbox, pairing, and outbox. Discord poll uses the same reconnect helper.
-3. **Model onboarding.** Successful OpenAI-compatible / Grok round-trip is an ordinary
-   setup outcome. ChatGPT-account via Codex App Server is assessed in
-   [CODEX_APP_SERVER.md](../docs/evidence/CODEX_APP_SERVER.md): **not** a conversation
-   provider; optional gated coding delegate only.
-4. **Tools, search, MCP, delegates.** Replace fixture-only dispatch with resolved
-   integrations; keep fixture paths. MCP JSON-RPC (HTTP + stdio); search HTTP/Brave;
-   Codex app-server JSON-RPC behind `delegate.run`.
-5. **Operational lifecycle.** systemd user unit and launchd agent; `keli service run`
-   composes existing job/watch/transport ticks.
-6. **Evaluation.** One bounded round of the three scenarios (scripted always; live when
-   binaries/keys exist). Open a paper only if a listed failure appears.
-7. **Release report.** Implemented/fixture-verified vs live vs awaiting owner/hardware.
+1. **First-use honesty and ordinary conversation.** Shortlist, readiness layers, grok vs
+   xai-oauth, greetings after research corrections.
+2. **Search as an optional first-class connection.** Typed missing-access when skipped.
+3. **One transport pairing + delivery.** CLI-only remains valid; notifications stay local
+   until pairing succeeds.
+4. **Browser artifacts.** Screenshot/download on approved responsibilities.
+5. **MCP/Rocket missing-access** in product language; lifecycle unchanged.
+6. **Background service docs and generated unit tests.**
+7. **Stop.** Record remaining PRD §14 leftovers as owner-only.
+
+Minimal first-use connections: one conversation model; local notes/sources; ordinary CLI
+chat. Optional: search, one transport, `keli service install`. Later: remaining catalog
+ids after a real probe, MCP, Codex, Rocket, dual-transport pairing, Honcho, OCR/speech.
 
 ## 2b. Already implemented: responsibilities that use tools intelligently
 
@@ -279,16 +292,20 @@ separately in [docs/evidence/PORTABILITY.md](../docs/evidence/PORTABILITY.md).
 
 ## 5. Delivery sequence
 
-Fixture-verified slices 1–4 (research consolidation, structured tools, responsibility
-controller, scripted scenarios) are on `feat/v0.1.0` through `d9e51d2`.
+Fixture-verified research, tools, and controller work is on `feat/v0.1.0` through
+`d9e51d2`. Provider catalog import is `ce51b3a`. This first-use pass is the current
+completion work.
 
-This completion pass:
+Onboarding path: `keli init` → `keli setup` (one model from the shortlist) → optional
+search and one transport → `keli chat` (ordinary) → import/approve a responsibility →
+`keli watches tick` or `keli service run` → verified result or typed missing access /
+insufficient evidence. Delivery retries never rerun research.
 
-1. Completion ledger, Codex App Server assessment, updated plan.
-2. Neutral project default (preserve existing names).
-3. Telegram Bot API + shared reconnect; Discord poll backoff.
-4. Search/MCP real integration paths; Codex app-server as gated delegate.
-5. Setup round-trip; systemd/launchd; operating docs and release report.
+Slices 1–6 are fixture-verified on this branch. Remaining PRD leftovers (dual-transport
+live pairing, four-target native, five-user, live ≥95%, notarization, live Rocket/search/
+MCP/Codex) are owner/hardware gates (ledger L13). Do not wait on more catalog providers,
+Hermes search failover, session_search, papers, portfolio math, OCR/speech, or another
+research loop.
 
 Run existing checks and targeted regressions for authority, cancellation, process
 ownership, migration, restart, budgets, and outbox. Extra review for `src/state/`,

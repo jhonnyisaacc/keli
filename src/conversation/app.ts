@@ -81,6 +81,7 @@ export function createConversationApp(input: ConversationAppInput) {
     scope: `project:${input.project.id}`,
     conversationId,
     origin: { transport: "cli" },
+    mode: "ordinary",
   });
   return { loop, capabilityGate, policy, sources, cliContext };
 }

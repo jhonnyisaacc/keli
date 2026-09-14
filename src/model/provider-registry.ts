@@ -11,12 +11,16 @@ import "../integrations/load.ts";
 
 export type ProviderKind = "fixture" | "openai-compatible" | "claude-code" | "grok-build" | "antigravity";
 
+export type ProviderReadiness = "catalog" | "configured" | "live-checked";
+
 export type ProviderDescriptor = {
   id: string;
   kind: ProviderKind;
   available: boolean;
   /** Where availability comes from: saved config, fixture env, or nowhere. */
   source?: "config" | "fixture-env";
+  /** Catalog membership, usable config/auth, or a recorded live probe — never entitlement. */
+  readiness?: ProviderReadiness;
   model?: string;
   reason?: string;
 };
@@ -30,15 +34,64 @@ const KIND_BY_ID: Record<string, ProviderKind> = {
 };
 
 /** Availability considers saved config first, then explicit fixture env. */
+function currentProviderModel(config: KeliConfig | null | undefined, id: string): string | undefined {
+  if (config?.providers?.primary?.id === id) return config.providers.primary.model;
+  const fallback = config?.providers?.fallback?.find((p) => p.id === id);
+  if (fallback?.model) return fallback.model;
+  return config?.integrations?.[id]?.settings?.model;
+}
+
+function liveCheckedAt(
+  config: KeliConfig | null | undefined,
+  id: string,
+  model?: string,
+): string | undefined {
+  const rec = config?.setup?.liveChecked?.[id];
+  if (!rec?.at) return undefined;
+  if ((rec.model ?? "") !== (model ?? "")) return undefined;
+  return rec.at;
+}
+
+function readinessOf(
+  config: KeliConfig | null | undefined,
+  id: string,
+  configured: boolean,
+  model?: string,
+): { readiness: ProviderReadiness; reason: string } | undefined {
+  const at = liveCheckedAt(config, id, model);
+  if (at) return { readiness: "live-checked", reason: `Live-checked ${at} for ${model ?? "the selected model"}; not account-wide entitlement` };
+  if (configured) return { readiness: "configured", reason: "Configured; live inference not yet verified for this model" };
+  return { readiness: "catalog", reason: `Catalog entry only. Run keli setup provider (${id})` };
+}
+
 export function listProviders(config?: KeliConfig | null): ProviderDescriptor[] {
   const out: ProviderDescriptor[] = listIntegrations("model-provider").map((profile) => {
-    if (profile.id === "chatgpt") return { id: profile.id, kind: "openai-compatible" as const, available: Boolean(config?.integrations?.chatgpt?.credentialRef), source: "config" as const, model: config?.providers?.primary?.id === "chatgpt" ? config.providers.primary.model ?? "gpt-5.5" : "gpt-5.5", reason: config?.integrations?.chatgpt?.credentialRef ? "Account linked; use live probe to verify access" : "Run keli auth add chatgpt" };
+    if (profile.id === "chatgpt") {
+      const linked = Boolean(config?.integrations?.chatgpt?.credentialRef);
+      const model = currentProviderModel(config, "chatgpt") ?? "gpt-5.5";
+      const live = liveCheckedAt(config, "chatgpt", model);
+      return {
+        id: profile.id,
+        kind: "openai-compatible" as const,
+        available: linked,
+        source: "config" as const,
+        readiness: live ? "live-checked" : linked ? "configured" : "catalog",
+        model,
+        reason: live
+          ? `Live-checked ${live} for ${model}; not account-wide entitlement`
+          : linked
+            ? "Account linked; live inference not yet verified for this model"
+            : "Run keli auth add chatgpt",
+      };
+    }
     if (catalogEntry(profile.id) && !(profile.fixtureKey && fixtureUrlFor(profile.fixtureKey as "grok"))) {
       const resolved = tryResolveIntegration("model-provider", { explicitId: profile.id, config });
       const configured = Boolean(resolved && catalogEndpoint(profile.id, resolved.settings) && selectModel(resolved));
       const authenticated = Boolean(resolved?.credentialRef || catalogEnvironment(profile.id) || ["none", "external-cli"].includes(profile.auth.type));
+      const model = resolved ? selectModel(resolved) : currentProviderModel(config, profile.id);
+      const ready = readinessOf(config, profile.id, configured && authenticated, model);
       return { id: profile.id, kind: "openai-compatible" as const, available: configured && authenticated, source: "config" as const,
-        model: resolved ? selectModel(resolved) : undefined, reason: configured && authenticated ? "Configured; live inference not yet verified" : `Run keli setup provider (${profile.id})` };
+        readiness: ready?.readiness, model, reason: ready?.reason };
     }
     const unsupported = unsupportedApiModeReason(profile.apiMode);
     if (unsupported || profile.availability === "named-later") {
@@ -58,14 +111,17 @@ export function listProviders(config?: KeliConfig | null): ProviderDescriptor[] 
       ? fixtureUrlFor(profile.fixtureKey as "model" | "provider" | "grok")
       : undefined;
     const available = Boolean(endpoint);
+    const model = resolved ? selectModel(resolved) : currentProviderModel(config, profile.id);
+    const ready = readinessOf(config, profile.id, available, model);
     return {
       id: profile.id,
       kind: KIND_BY_ID[profile.id] ?? "openai-compatible",
       available,
       source: available ? (fromConfig ? "config" : fixtureUrl ? "fixture-env" : "config") : undefined,
-      model: resolved ? selectModel(resolved) : undefined,
+      readiness: ready?.readiness,
+      model,
       reason: available
-        ? undefined
+        ? ready?.reason
         : profile.id === "fixture"
           ? "set KELI_FIXTURE_URL"
           : `run: keli auth add ${profile.id}; keli config set integrations.${profile.id}.settings.baseUrl <url>`,

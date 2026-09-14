@@ -32,8 +32,8 @@ export async function searchQuery(
       capabilityId: "search.query",
       ok: false,
       error: {
-        code: "capability_unavailable",
-        message: "Search requires a resolved search integration or KELI_FIXTURE_SEARCH",
+        code: "missing_access",
+        message: "Search is not connected. Run keli setup search to add Brave or a generic JSON endpoint, then retry. Conversation still works without web search.",
       },
     };
   }

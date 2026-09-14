@@ -69,10 +69,16 @@ export async function runStructuredTool(
   ctx: DispatchContext,
 ): Promise<CapabilityResult> {
   if (!profile.executable) {
-    return integrationGap(profile.id, `${profile.id} executable is not configured in its tool profile`);
+    const hint = profile.id === "tools.rocket"
+      ? "Set ROCKET_BIN or tools.rocket.bin to a real executable"
+      : `Configure the ${profile.id} executable`;
+    return integrationGap(profile.id, `${profile.id} is not available. ${hint}, or omit ${profile.id} from this responsibility.`);
   }
   if (!existsSync(profile.executable)) {
-    return integrationGap(profile.id, `${profile.id} executable is missing: ${profile.executable}`);
+    return integrationGap(
+      profile.id,
+      `${profile.id} is not available. Executable is missing: ${profile.executable}. ${profile.id === "tools.rocket" ? "Set ROCKET_BIN or tools.rocket.bin" : "Fix the configured path"}, or omit ${profile.id} from this responsibility.`,
+    );
   }
 
   let args: string[];

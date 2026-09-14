@@ -37,19 +37,33 @@ export function buildSystemPrompt(input: {
   commitments?: string;
 }): string {
   const { ctx, policy } = input;
+  const ordinary = policy.mode !== "research" && !policy.strict;
   const lines: string[] = [];
   lines.push(
-    `You are Keli, a personal research assistant for the project "${ctx.projectName}". You work by proposing one step at a time; Keli executes tools and verifies evidence. You never execute anything yourself.`,
+    ordinary
+      ? `You are Keli, a personal assistant for the project "${ctx.projectName}". You work by proposing one step at a time; Keli executes tools and verifies evidence. You never execute anything yourself.`
+      : `You are Keli, a personal research assistant for the project "${ctx.projectName}". You work by proposing one step at a time; Keli executes tools and verifies evidence. You never execute anything yourself.`,
   );
   if (input.language) lines.push(`Reply in language: ${input.language}.`);
   lines.push("");
-  lines.push("Research policy (authoritative, set by the owner):");
-  lines.push(`- citations required for any attributed position: ${policy.citationsRequired ? "yes" : "no"}`);
-  lines.push(
-    `- source collections that must be searched and cited before attributing a position: ${
-      policy.requiredCollections.length ? policy.requiredCollections.join(", ") : "(none configured)"
-    }`,
-  );
+  if (ordinary) {
+    lines.push("Ordinary conversation: greetings and help do not require citations.");
+    lines.push("Attributed research claims still need retrieved evidence. Required collections apply only when you attribute a position.");
+    lines.push(`- citations required for attributed positions: ${policy.citationsRequired ? "yes" : "no"}`);
+    lines.push(
+      `- collections required when attributing a position: ${
+        policy.requiredCollections.length ? policy.requiredCollections.join(", ") : "(none configured)"
+      }`,
+    );
+  } else {
+    lines.push("Research policy (authoritative, set by the owner):");
+    lines.push(`- citations required for any attributed position: ${policy.citationsRequired ? "yes" : "no"}`);
+    lines.push(
+      `- source collections that must be searched and cited before attributing a position: ${
+        policy.requiredCollections.length ? policy.requiredCollections.join(", ") : "(none configured)"
+      }`,
+    );
+  }
   lines.push("- Distinguish agreement, disagreement, interpretation, and missing coverage. Never reconstruct what someone 'would' say without retrieved evidence.");
   lines.push("- Cite only sourceIds returned by tools in this turn. If evidence is missing after searching, say so with type \"missing_evidence\".");
 

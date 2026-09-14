@@ -15,6 +15,7 @@ export const grokProfile: IntegrationProfile = {
   ],
   fixtureKey: "grok",
   apiMode: "chat-completions",
+  baseUrl: "https://api.x.ai/v1",
   defaultModels: ["grok-4"],
   reuse: {
     upstream: "NousResearch/hermes-agent xAI profile",

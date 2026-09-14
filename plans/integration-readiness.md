@@ -1,8 +1,9 @@
 # Keli: from pre-tag scaffolding to useful integration tests
 
-Status: in progress. Continues the "Close PRD gaps pre-tag" plan. Preserves the native Bun
-core, the integration registry, and the authority boundary (`src/core/gate.ts`,
-`src/core/behavior.ts`).
+Status: **superseded** by [general-purpose-autonomy.md](general-purpose-autonomy.md).
+Keep this file as the historical integration-readiness sequence. Do not extend it.
+
+The following preamble is historical.
 
 ## Quick review of the pre-tag implementation
 

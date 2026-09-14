@@ -57,6 +57,7 @@ describe("structured CLI tools", () => {
     );
     expect(result.ok).toBe(false);
     expect(result.error?.code).toBe("integration_gap");
+    expect(result.error?.message).toContain("ROCKET_BIN");
   });
 
   test("model cannot supply argv beyond the declared workflow", () => {

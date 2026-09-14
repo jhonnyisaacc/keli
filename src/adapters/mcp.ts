@@ -156,8 +156,8 @@ function unavailable(capabilityId: string): CapabilityResult {
     capabilityId,
     ok: false,
     error: {
-      code: "capability_unavailable",
-      message: "MCP requires a resolved mcp-server integration or KELI_FIXTURE_MCP",
+      code: "missing_access",
+      message: "MCP is not connected. Run keli setup mcp to add a stdio or HTTP server, or omit mcp.tools/* from this responsibility.",
     },
   };
 }

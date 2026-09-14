@@ -1,16 +1,21 @@
 # Connecting a model
 
-Run `keli setup provider`. Choose a provider, a model, and its connection method.
+Run `keli setup provider`. First-use ids are `chatgpt`, `openai-compatible`, `anthropic`,
+and `grok`. Other catalog ids are valid when typed explicitly; they are not a completeness
+claim. Choose a provider, a model, and its connection method.
 API-key input is hidden and saved in the OS credential store. Config contains a
 reference, never the key. Provider environment variables also work on headless
 hosts; they are read only for the selected provider. No Hermes installation is
 needed to run Keli.
 
-`keli providers list` shows configuration readiness, not proof of account access.
-`keli providers models <provider>` lists bundled model suggestions; you may enter
-another model ID supported by your account. Setup tests the selected model with
-one bounded inference request. Model availability and billing remain with the
-provider.
+`keli providers list` reports **catalog**, **configured**, or **live-checked** for the
+selected model. Live-checked is not account-wide entitlement. Model suggestions are not
+proof of access. Setup tests the selected model with one bounded inference request.
+`grok` is the A05 HTTP API-key path; `xai-oauth` is the Grok subscription login.
+
+Optional: `keli setup search` (Brave or generic JSON). `keli setup --transport none`
+keeps notifications on the CLI. Pair Discord or Telegram with a `KELI-PAIR` code from
+that chat.
 
 | Connection | Provider IDs / setup |
 | --- | --- |

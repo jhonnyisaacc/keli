@@ -28,8 +28,8 @@ export const mcpFixtureProfile: IntegrationProfile = {
       displayName: "MCP",
       configured: Boolean(url || ctx.settings.command),
       reachable: Boolean(url),
-      reason: url || ctx.settings.command ? "MCP server configured" : "add via keli config set mcp.servers",
-      howToConfigure: "keli config set mcp.servers  or set KELI_MCP_FIXTURE_URL",
+      reason: url || ctx.settings.command ? "MCP server configured" : "Run keli setup mcp",
+      howToConfigure: "keli setup mcp  or set KELI_MCP_FIXTURE_URL",
     });
   },
 };

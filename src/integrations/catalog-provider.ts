@@ -7,8 +7,11 @@ import type { ResolvedIntegration } from "./types.ts";
 
 export const HERMES_PIN = "93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544";
 export type CatalogEntry = { name: string; display_name?: string; aliases?: string[]; base_url?: string; env_vars?: string[]; auth_type?: string; api_mode?: string; default_aux_model?: string | null; fallback_models?: string[] };
-export const hermesCatalog: CatalogEntry[] = data;
-export const catalogEntry = (id: string) => hermesCatalog.find((r) => r.name === id);
+/** Pinned Hermes import data. Keli-owned identities (grok, chatgpt/openai-codex) are not catalog runtime providers. */
+export const providerCatalog: CatalogEntry[] = data;
+const CATALOG_RUNTIME_SKIP = new Set(["openai-codex", "grok", "copilot-acp", "moa"]);
+export const catalogEntry = (id: string) =>
+  CATALOG_RUNTIME_SKIP.has(id) ? undefined : providerCatalog.find((r) => r.name === id);
 const SDK_IDS: Record<string, KnownProvider> = { "openai-api": "openai", grok: "xai", gemini: "google", vertex: "google-vertex", bedrock: "amazon-bedrock", copilot: "github-copilot", "ai-gateway": "vercel-ai-gateway", "opencode-zen": "opencode", "kimi-coding": "moonshotai", "kimi-coding-cn": "moonshotai-cn" };
 export function catalogModels(id: string): string[] {
   const row = catalogEntry(id);

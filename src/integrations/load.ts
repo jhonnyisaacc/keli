@@ -13,4 +13,4 @@ import "./profiles/search/fixture.ts";
 import "./profiles/mcp-server/fixture.ts";
 import "./profiles/browser-backend/index.ts";
 
-import "./profiles/model-provider/hermes.ts";
+import "./profiles/model-provider/catalog-providers.ts";
