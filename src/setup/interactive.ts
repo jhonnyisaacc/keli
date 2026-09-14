@@ -39,6 +39,10 @@ async function configureModelProvider(io: WizardIo, config: KeliConfig, id: stri
   const currentModel = entry.settings.model ?? profile.defaultModels?.[0] ?? "";
   const chosen = (await io.question(`Model for ${profile.displayName} [${currentModel}]: `)) || currentModel;
   if (!chosen) throw new Error(`A model is required for ${id}`);
+  if (chosen !== currentModel || entry.settings.baseUrl) {
+    const { clearLiveCheck } = await import("../integrations/live-probe.ts");
+    clearLiveCheck(config, id);
+  }
   entry.settings = { ...entry.settings, model: chosen };
   for (const setting of profile.settings.filter((p) => !p.secret && p.key !== "model")) {
     const current = entry.settings[setting.key] ?? (setting.key === "baseUrl" ? profile.baseUrl : setting.default) ?? "";

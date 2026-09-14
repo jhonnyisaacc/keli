@@ -6,6 +6,7 @@ import type { KeliConfig } from "../state/config.ts";
 import type { ChatModelProvider } from "./chat-provider.ts";
 import { HttpModelProvider, unsupportedApiModeReason } from "./http-provider.ts";
 import { FixtureModelProvider, type ModelProvider } from "./provider.ts";
+import { classifyProviderError } from "./retry.ts";
 import "../integrations/load.ts";
 
 export type CreateProviderOptions = {
@@ -24,6 +25,8 @@ export type CreatedProvider = {
   resolved: ResolvedIntegration;
   /** Pricing is configured for this provider id; otherwise cost stays visibly unknown. */
   costKnown: boolean;
+  fallbackFrom?: string;
+  fallbackReason?: string;
 };
 
 export function selectModel(resolved: ResolvedIntegration, requested?: string): string | undefined {
@@ -41,6 +44,43 @@ export function selectModel(resolved: ResolvedIntegration, requested?: string): 
  * env selection stays explicit through the resolver's `source`.
  */
 export async function createModelProvider(options: CreateProviderOptions = {}): Promise<CreatedProvider> {
+  try {
+    return await createModelProviderOnce(options);
+  } catch (error) {
+    const primaryId = options.config?.providers?.primary?.id;
+    const allowFallback = !options.explicitId || options.explicitId === primaryId;
+    if (!allowFallback) throw error;
+    const reason = fallbackReason(error);
+    if (!reason) throw error;
+    const fallbacks = options.config?.providers?.fallback ?? [];
+    for (const candidate of fallbacks) {
+      if (!candidate.id || candidate.id === "fixture") continue;
+      try {
+        const created = await createModelProviderOnce({ ...options, explicitId: candidate.id, model: candidate.model ?? options.model });
+        return { ...created, fallbackFrom: options.config?.providers?.primary?.id, fallbackReason: reason };
+      } catch {
+        continue;
+      }
+    }
+    throw error;
+  }
+}
+
+function fallbackReason(error: unknown): string | undefined {
+  if (error instanceof KeliError) {
+    if (error.code === "secret_unavailable" || error.code === "invalid_request") return undefined;
+    if (error.code === "engine_error" || error.retryable) return `${error.code}: ${error.message}`;
+  }
+  const classified = classifyProviderError(String(error));
+  if (classified.class === "transport" || classified.class === "timeout") return classified.message;
+  return undefined;
+}
+
+export function isProviderFallbackEligible(error: unknown): boolean {
+  return Boolean(fallbackReason(error));
+}
+
+async function createModelProviderOnce(options: CreateProviderOptions = {}): Promise<CreatedProvider> {
   const resolved = resolveIntegration("model-provider", {
     explicitId: options.explicitId,
     role: options.role,

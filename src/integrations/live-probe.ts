@@ -163,3 +163,11 @@ export function renderLiveProbe(report: LiveProbeReport): string {
   out.push("Skipped or unverifiable required integrations count as failures; optional skips are reported, never counted as passes.");
   return out.join("\n") + "\n";
 }
+
+/** Changing a model or endpoint invalidates the previous live-verified row. */
+export function clearLiveCheck(config: KeliConfig, id: string): void {
+  if (!config.setup?.liveChecked?.[id]) return;
+  const next = { ...config.setup.liveChecked };
+  delete next[id];
+  config.setup = { ...config.setup, liveChecked: next };
+}

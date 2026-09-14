@@ -267,5 +267,5 @@ function safeNotes(db: import("bun:sqlite").Database, scope: string, prompt: str
 
 function providerIdForConfig(config: KeliConfig | null | undefined, runOverride?: string): string {
   if (runOverride === "Grok") return "grok";
-  return config?.providers?.primary?.id ?? config?.primaryModel ?? "fixture";
+  return config?.providers?.primary?.id ?? config?.primaryModel ?? process.env.KELI_PROVIDER_ID ?? "unconfigured";
 }

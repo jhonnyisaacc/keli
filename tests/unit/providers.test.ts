@@ -1,12 +1,14 @@
 import { expect, test } from "bun:test";
 import { catalogDescriptor, catalogEntry, createCatalogProvider, providerCatalog } from "../../src/integrations/catalog-provider.ts";
 import { getIntegration } from "../../src/integrations/registry.ts";
-import { createModelProvider } from "../../src/model/provider-factory.ts";
+import { createModelProvider, isProviderFallbackEligible } from "../../src/model/provider-factory.ts";
 import { listProviders } from "../../src/model/provider-registry.ts";
 import { HttpModelProvider } from "../../src/model/http-provider.ts";
 import { SdkModelProvider, type ModelCompletion } from "../../src/model/sdk-provider.ts";
 import { defaultConfig } from "../../src/state/config.ts";
 import { providerDeviceOAuthProvider } from "../../src/integrations/provider-device-oauth.ts";
+import { clearLiveCheck } from "../../src/integrations/live-probe.ts";
+import { KeliError } from "../../src/core/errors.ts";
 import "../../src/integrations/load.ts";
 
 const credentials = { name: "test", available: true, get: async () => "test-key" };
@@ -186,4 +188,23 @@ test("live-verified applies only to the probed model, not a later replacement", 
     providers: { primary: { id: "chatgpt" as const, model: "gpt-5.5" } },
   };
   expect(listProviders(same).find((p) => p.id === "chatgpt")?.readiness).toBe("live-verified");
+});
+
+test("fallback is eligible only for typed transport failures, never missing secrets", () => {
+  expect(isProviderFallbackEligible(new KeliError("down", "engine_error", true))).toBe(true);
+  expect(isProviderFallbackEligible(new KeliError("missing key", "secret_unavailable"))).toBe(false);
+  expect(isProviderFallbackEligible(new KeliError("bad json", "invalid_request"))).toBe(false);
+  expect(isProviderFallbackEligible("timeout: Model request cancelled or timed out")).toBe(true);
+});
+
+test("changing the selected model clears live-verified state", () => {
+  const config = {
+    ...defaultConfig(),
+    providers: { primary: { id: "chatgpt" as const, model: "gpt-5.5" } },
+    integrations: { chatgpt: { enabled: true, settings: { model: "gpt-5.5" }, credentialRef: { service: "keli/chatgpt", id: "oauth" } } },
+    setup: { liveChecked: { chatgpt: { at: "2026-01-01T00:00:00.000Z", model: "gpt-5.5" } } },
+  };
+  expect(listProviders(config).find((p) => p.id === "chatgpt")?.readiness).toBe("live-verified");
+  clearLiveCheck(config, "chatgpt");
+  expect(listProviders({ ...config, providers: { primary: { id: "chatgpt", model: "gpt-5.4" } } }).find((p) => p.id === "chatgpt")?.readiness).toBe("configured");
 });
