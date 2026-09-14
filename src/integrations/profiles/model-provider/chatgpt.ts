@@ -1,48 +1,30 @@
 import { registerIntegration } from "../../registry.ts";
-import { notConfigured } from "../../round-trip.ts";
 import { statusOf } from "../../status.ts";
-import { chatgptConversationIncompatibility } from "../../chatgpt-boundary.ts";
+import { chatGptAccessToken } from "../../chatgpt-auth.ts";
+import { ChatGptModelProvider, CHATGPT_DEFAULT_MODEL } from "../../../model/chatgpt-provider.ts";
 import type { IntegrationProfile } from "../../types.ts";
 
-/**
- * Named so setup can discover ChatGPT. Not a conversation provider — see
- * docs/evidence/CODEX_APP_SERVER.md. Availability is explicit incompatibility,
- * not a silent API-key substitute.
- */
 export const chatgptProfile: IntegrationProfile = {
-  id: "chatgpt",
-  kind: "model-provider",
-  displayName: "ChatGPT account (Codex App Server)",
-  aliases: ["chatgpt-account", "chatgpt-oauth"],
+  id: "chatgpt", kind: "model-provider", displayName: "ChatGPT account",
+  aliases: ["chatgpt-account", "chatgpt-oauth", "openai-codex"],
   auth: { type: "oauth-device" },
-  settings: [{ key: "command", label: "codex binary", default: "codex" }],
-  apiMode: "acp",
-  availability: "named-later",
-  reuse: {
-    upstream: "openai/codex app-server",
-    pin: "docs/evidence/CODEX_APP_SERVER.md",
-    license: "Apache-2.0",
-    prdIds: ["A25", "A35"],
+  settings: [{ key: "model", label: "Model", default: CHATGPT_DEFAULT_MODEL }],
+  defaultModels: [CHATGPT_DEFAULT_MODEL], availability: "bundled",
+  baseUrl: "https://chatgpt.com/backend-api/codex",
+  reuse: { upstream: "@mariozechner/pi-ai", pin: "0.73.1", license: "MIT", prdIds: ["I8", "A25", "A35"] },
+  async probe(ctx) {
+    return statusOf({ id: "chatgpt", kind: "model-provider", displayName: "ChatGPT account",
+      configured: Boolean(ctx.credentialRef), credentialState: ctx.needsReauth ? "needs-reauth" : ctx.credentialRef ? "resolvable" : "missing",
+      reason: "Account connection; run a live probe to verify model access",
+      howToConfigure: "keli auth add chatgpt (new login), or keli auth add chatgpt --type external-cli (existing Codex login)" });
   },
-  async probe() {
-    return statusOf({
-      id: "chatgpt",
-      kind: "model-provider",
-      displayName: "ChatGPT account (Codex App Server)",
-      configured: false,
-      credentialState: "missing",
-      reachable: false,
-      reason: chatgptConversationIncompatibility(),
-      howToConfigure: "keli auth add openai-compatible  (conversation). Optional coding delegate: keli auth add codex --type oauth-device",
-    });
-  },
-  async roundTrip() {
-    return {
-      ...notConfigured("chatgpt is not a Keli conversation provider"),
-      failure: "unsupported",
-      detail: chatgptConversationIncompatibility(),
-    };
+  async roundTrip(ctx) {
+    const start = performance.now();
+    const provider = new ChatGptModelProvider(ctx.settings.model ?? CHATGPT_DEFAULT_MODEL, () => chatGptAccessToken(ctx.credentialRef));
+    const result = await provider.complete([{ role: "user", content: 'Reply with exactly: {"connected":true}' }], { responseFormat: "json_object", maxTokens: 128, timeoutMs: ctx.timeoutMs ?? 30_000 });
+    let ok = false;
+    try { ok = !result.error && JSON.parse(result.content!).connected === true; } catch { /* invalid response */ }
+    return { ok, detail: ok ? "ChatGPT account completed a real inference request" : result.error ?? "Unexpected response", failure: ok ? undefined : "auth", latencyMs: Math.round(performance.now() - start) };
   },
 };
-
 registerIntegration(chatgptProfile);

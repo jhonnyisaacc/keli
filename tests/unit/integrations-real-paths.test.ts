@@ -4,7 +4,6 @@ import { mcpListTools, mcpCallTool } from "../../src/adapters/mcp.ts";
 import { searchQuery } from "../../src/adapters/search.ts";
 import { runCodexAppServerTurn } from "../../src/adapters/codex-app-server.ts";
 import { addCredential } from "../../src/integrations/auth.ts";
-import { chatgptConversationIncompatibility } from "../../src/integrations/chatgpt-boundary.ts";
 import { startIntegrationFixture } from "../fixtures/integration-server.ts";
 import "../../src/integrations/load.ts";
 
@@ -71,11 +70,10 @@ describe("configured search and MCP (not fixture-env)", () => {
 });
 
 describe("ChatGPT / Codex App Server boundary", () => {
-  test("chatgpt oauth-device reports incompatibility instead of storing a key", async () => {
+  test("chatgpt rejects pasted keys instead of storing them", async () => {
     await expect(addCredential("chatgpt", { type: "oauth-device", value: "sk-secret" })).rejects.toThrow(
-      /Codex App Server/,
+      /account login/,
     );
-    expect(chatgptConversationIncompatibility()).toContain("proposal-only");
   });
 
   test("codex app-server fixture completes a gated delegate turn", async () => {

@@ -12,7 +12,6 @@ import { resolveTelegramBackend } from "../transports/telegram-resolve.ts";
 import { listIntegrations, probeIntegration } from "../integrations/registry.ts";
 import { fixtureUrlFor } from "../integrations/env.ts";
 import { runLiveProbe } from "../integrations/live-probe.ts";
-import { chatgptConversationIncompatibility } from "../integrations/chatgpt-boundary.ts";
 import "../integrations/load.ts";
 
 export type SetupSection = "provider" | "transport" | "delegate" | "memory" | "mcp";
@@ -125,7 +124,21 @@ export async function runSetup(options: SetupOptions = {}): Promise<SetupResult>
         const fallbackAnswer = await rl.question(`Fallback provider [${fallbackModel}] (optional): `);
         if (fallbackAnswer.trim()) fallbackModel = fallbackAnswer.trim();
         if (primaryModel === "chatgpt" || fallbackModel === "chatgpt") {
-          explain(["", chatgptConversationIncompatibility(), ""]);
+          if (!existing.integrations?.chatgpt?.credentialRef) {
+            const { addCredential } = await import("../integrations/auth.ts");
+            const { codexAccessToken } = await import("../integrations/chatgpt-auth.ts");
+            let linked = false;
+            try { await codexAccessToken(); linked = true; } catch { /* independent login below */ }
+            const useExisting = linked && !(await rl.question("Use your existing Codex ChatGPT login? [Y/n]: ")).trim().toLowerCase().startsWith("n");
+            await addCredential("chatgpt", {
+              stateDir, type: useExisting ? "external-cli" : "oauth-device",
+              oauthCallbacks: {
+                onAuth: ({ url, instructions }) => explain([`Sign in in your browser: ${url}`, instructions ?? ""]),
+                onPrompt: ({ message }) => rl.question(`${message} `),
+              },
+            });
+            existing.integrations = (await readConfig(stateDir))?.integrations;
+          }
         }
       } finally {
         rl.close();
@@ -300,14 +313,12 @@ export async function runSetup(options: SetupOptions = {}): Promise<SetupResult>
 
   let providerConnected = false;
   let providerDetail = "";
-  if (primaryModel === "chatgpt") {
-    providerDetail = chatgptConversationIncompatibility();
-  } else {
+  {
     try {
       const probe = await runLiveProbe({
         config: next,
         only: [primaryModel],
-        timeoutMs: 8000,
+        timeoutMs: primaryModel === "chatgpt" ? 30_000 : 8000,
       });
       const line = probe.lines.find((l) => l.id === primaryModel);
       providerConnected =

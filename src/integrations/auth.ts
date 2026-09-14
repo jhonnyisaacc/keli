@@ -17,6 +17,7 @@ export type AuthAddOptions = {
   value?: string;
   settingKey?: string;
   source?: CredentialSource;
+  oauthCallbacks?: import("@mariozechner/pi-ai/oauth").OAuthLoginCallbacks;
 };
 
 export async function addCredential(integrationId: string, options: AuthAddOptions = {}): Promise<CredentialRef> {
@@ -28,11 +29,20 @@ export async function addCredential(integrationId: string, options: AuthAddOptio
     );
   }
   const type = options.type ?? (profile.auth.type === "none" ? "api-key" : profile.auth.type);
-  if (type === "oauth-device" || profile.id === "chatgpt") {
-    if (profile.id === "chatgpt") {
-      const { chatgptConversationIncompatibility } = await import("./chatgpt-boundary.ts");
-      throw new KeliError(chatgptConversationIncompatibility(), "invalid_request");
+  if (profile.id === "chatgpt") {
+    const { codexAccessToken, loginChatGpt, CHATGPT_CODEX_REF } = await import("./chatgpt-auth.ts");
+    if (options.value || (type !== "oauth-device" && type !== "external-cli")) throw new KeliError("ChatGPT uses account login, not an API key", "invalid_request");
+    let ref: CredentialRef;
+    if (type === "external-cli") { await codexAccessToken(); ref = CHATGPT_CODEX_REF; }
+    else {
+      if (!options.oauthCallbacks) throw new KeliError("Run keli auth add chatgpt interactively, or --type external-cli to link your existing Codex login", "invalid_request");
+      ref = await loginChatGpt(options.oauthCallbacks, options.source);
     }
+    const config = await readConfig(options.stateDir);
+    if (config?.ownerId) await upsertIntegration(profile.id, { enabled: true, settings: config.integrations?.chatgpt?.settings ?? {}, credentialRef: ref, status: { needsReauth: false } }, options.stateDir);
+    return ref;
+  }
+  if (type === "oauth-device") {
     if (profile.id === "codex") {
       return { id: "external-cli", service: credentialService(profile.id) };
     }
@@ -83,7 +93,7 @@ export async function removeCredential(
   const config = await readConfig(options.stateDir);
   const ref = config?.integrations?.[profile.id]?.credentialRef;
   const source = options.source ?? defaultCredentialSource();
-  if (ref && source.delete) {
+  if (ref && source.delete && !(profile.id === "chatgpt" && ref.id === "codex-cli")) {
     try {
       await source.delete(ref);
     } catch {
@@ -117,6 +127,10 @@ export async function credentialStatus(
   if (config?.integrations?.[profile.id]?.status?.needsReauth) return "needs-reauth";
   const ref = config?.integrations?.[profile.id]?.credentialRef;
   if (!ref) return "missing";
+  if (profile.id === "chatgpt") {
+    try { const { chatGptAccessToken } = await import("./chatgpt-auth.ts"); await chatGptAccessToken(ref, options.source); return "resolvable"; }
+    catch { return "needs-reauth"; }
+  }
 
   const source = options.source ?? defaultCredentialSource();
   if (!source.available) return "locked";

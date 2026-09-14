@@ -48,6 +48,7 @@ export type StructuredToolEvidence = {
 };
 
 export type StructuredToolOutput = StructuredToolEvidence & {
+  sourceId: string;
   workflow: string;
   profileId: string;
   testedRevision?: string;

@@ -274,3 +274,41 @@ describe("cross-domain responsibility scenarios (scripted, fixture-verified)", (
     expect(run.model.calls.length).toBe(5);
   });
 });
+
+describe("responsibility budget exhaustion (live regression)", () => {
+  test("terminalizes exhausted work; same slot stays idle and next slot gets its own budget", async () => {
+    const w = activate({ name: "bounded-review", kind: "responsibility",
+      trigger: { schedule: "daily:09:00", target: "bounded-review" },
+      budget: { requestsMax: 1, toolCallsMax: 1 },
+      evidence: { question: "Investigate with approved tools", autonomy: true, capabilities: ["tools.rocket"], review: "scheduled" },
+      notify: { policy: "daily-brief" },
+    });
+    const step: ScriptedStep = { type: "tool_call", capability: "capabilities.lookup", input: { query: "rocket" } };
+    const first = await tick("2026-09-15T09:00:00.000Z", [step]);
+    const initial = listResearchOccurrences(db, w.id)[0]!;
+    expect(initial.status).toBe("failed");
+    expect(getRun(db, initial.run_id)?.status).toBe("failed");
+    expect(first.model.calls.length).toBe(1);
+    expect((await tick("2026-09-15T09:00:00.000Z", [])).model.calls.length).toBe(0);
+    const next = await tick("2026-09-16T09:00:00.000Z", [step]);
+    expect(next.model.calls.length).toBe(1);
+    const rows = listResearchOccurrences(db, w.id);
+    expect(rows).toHaveLength(2);
+    expect(rows.every(row => row.status === "failed")).toBe(true);
+    expect(rows[0]!.run_id).not.toBe(rows[1]!.run_id);
+  });
+});
+
+test("configured external tools are discoverable only within their app and approval list", async () => {
+  const { createConversationApp } = await import("../../src/conversation/app.ts");
+  const cfg = { ...config(), tools: { external: [{ id: "tools.example-read", bin: process.execPath, args: [fixture, "{workflow}", "--json"], workflows: ["research"], summary: "Example read-only investigation" }] } };
+  const app = createConversationApp({ db, behavior, config: cfg, stateDir: dir, ownerId: "owner", project: { id: "p", name: "research", resourceRoots: [dir] } });
+  const lookup = async (allowedCapabilities: string[]) => app.capabilityGate.run({ capabilityId: "capabilities.lookup", input: { query: "example-read" }, resources: [] }, app.policy, scope, undefined, { config: cfg, allowedCapabilities });
+  const approved = await lookup(["tools.example-read"]);
+  expect((approved.result.output as { capabilities: Array<{ id: string }> }).capabilities.map(c => c.id)).toEqual(["tools.example-read"]);
+  const descriptor = (approved.result.output as { capabilities: Array<{ schema: { properties: { workflow: { enum: string[] } } } }> }).capabilities[0]!;
+  expect(descriptor.schema.properties.workflow.enum).toEqual(["research"]);
+  const unapproved = await lookup([]);
+  expect((unapproved.result.output as { capabilities: unknown[] }).capabilities).toEqual([]);
+  expect(defaultRegistry.get("tools.example-read")).toBeUndefined();
+});

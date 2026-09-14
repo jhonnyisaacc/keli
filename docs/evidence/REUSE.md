@@ -64,3 +64,12 @@ Hermes pin `93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544` MIT. Nanobot pin
 ## Evidence-driven research autonomy
 
 ADOPT existing Keli watches, run budgets, scoped capability dispatch, source index, turns and outbox; ADAPT addressed evidence and phase-memory/verification principles; BUILD the missing resumable watch-occurrence connection. Reference pins, MIT licenses, I1–I7/I9–I10 and acceptance trace IDs are recorded in the [integration evidence note](research-autonomy/README.md#reuse-and-review). No upstream implementation was copied. Paired demonstrations use baseline `4bd3b9e` and scripted providers through actual Keli runtime paths.
+
+## Live ChatGPT account connection
+
+ADOPT `@mariozechner/pi-ai@0.73.1` (MIT) model transport and OAuth implementation,
+plus `proper-lockfile@4.1.2` (MIT) for credential refresh serialization. ADAPT
+Hermes's separation of provider catalog, account credentials, and inference transport
+at `93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544` (MIT). BUILD only Keli's provider and
+credential-reference glue. No Hermes agent runtime was imported or rewritten.
+See [account boundary and traces](CODEX_APP_SERVER.md).

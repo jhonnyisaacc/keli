@@ -1,5 +1,7 @@
 # Release report (feat/v0.1.0 completion pass)
 
+Historical report for the earlier pass. ChatGPT incompatibility and no-live-model statements below are superseded by [live account results](LIVE_ACCOUNT_RESULTS.md).
+
 Baseline: `d9e51d2`. Plan: [general-purpose-autonomy.md](../../plans/general-purpose-autonomy.md).
 Ledger: [COMPLETION_LEDGER.md](COMPLETION_LEDGER.md).
 

@@ -54,7 +54,10 @@ export function buildSystemPrompt(input: {
   lines.push("- Cite only sourceIds returned by tools in this turn. If evidence is missing after searching, say so with type \"missing_evidence\".");
 
   if (policy.strict) {
-    lines.push(`Evidence contract: read current passages with sources.read before answering; cite exact quotes. Provide explicit attributions for supported findings, including assumptions/invalidation in the claim when relevant. Required subjects: ${(policy.requiredSubjects ?? []).join(", ")}. Search identifiers alone do not establish support. Missing coverage must remain missing_evidence. Reuse addressed recovered observations; change an unsuccessful retrieval strategy.`);
+    const sourceContract = policy.requiredCollections.length
+      ? "Read current passages with sources.read before answering; cite exact quotes."
+      : "For approved structured tools, cite the returned sourceId and quote the projection only when evidence.sufficiency is sufficient and finding is present. Do not request sources.read unless it is approved. If a tool reports insufficient or unknown evidence, return missing_evidence explaining its actual coverage, warnings, or integration gap; do not invent missing passage IDs.";
+    lines.push(`Evidence contract: ${sourceContract} Provide explicit attributions for supported findings, including assumptions/invalidation in the claim when relevant. Required subjects: ${(policy.requiredSubjects ?? []).join(", ")}. Search identifiers alone do not establish support. Missing coverage must remain missing_evidence. Reuse addressed recovered observations; change an unsuccessful retrieval strategy.`);
   }
   const collections = (input.sources?.collections() ?? []).filter(c => !policy.strict || policy.requiredCollections.includes(c.id));
   lines.push("");

@@ -1,64 +1,69 @@
-# Codex App Server behind Keli’s provider boundary
+# ChatGPT account connection: corrected boundary
 
-Inspected: [Codex App Server](https://learn.chatgpt.com/docs/app-server) (2026-09-14).
-Implementation: `openai/codex` `codex-rs/app-server`, Apache-2.0. Transport:
-JSON-RPC 2.0 over stdio (default), experimental WebSocket, or Unix socket.
+The earlier conclusion that ChatGPT accounts cannot power Keli conversation was too
+broad. A live request and the actual Keli CLI conversation now work with a ChatGPT
+account. App Server and inference transport are different integration choices.
 
-## What the protocol is
+## Adopted implementation
 
-App-server is the interface Codex uses to power rich clients. After `initialize` /
-`initialized`, clients start **threads** and **turns**. The server streams agent
-events, runs tools, hosts approvals, MCP servers, and conversation history.
+- ADOPT `@mariozechner/pi-ai` **0.73.1**, MIT, for Codex Responses inference and
+  independent ChatGPT OAuth login/refresh. This is the model library only: no Pi
+  coding-agent runtime, tool executor, or canonical state store.
+- ADOPT `proper-lockfile` **4.1.2**, MIT, to serialize refresh of Keli-owned sessions
+  across processes. Refresh credentials stay in Keli's OS credential store.
+- ADAPT the separation between account authentication and model transport observed
+  in Hermes **93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544**, MIT:
+  `hermes_cli/auth_codex.py`, `agent/transports/codex.py`, and
+  `hermes_cli/provider_catalog.py`. Hermes also offers a distinct App Server runtime;
+  importing that runtime is not required to obtain a model response.
+- BUILD the small adapter to Keli's existing `ChatModelProvider` / `ModelProvider`,
+  configuration, usage accounting, and credential-reference interfaces.
+- Traces: I8, A01–A02, A25, A35. No gate ownership or database schema change.
 
-ChatGPT authentication is first-class:
+The adopted provider uses the Codex backend protocol implemented by pi-ai. This is
+third-party account compatibility, not a claim that ChatGPT subscriptions include
+OpenAI Platform API credits or a public chat-completions API. Account/model support
+can change; a live inference probe is the evidence of compatibility.
 
-- `account/login/start` with `type: "chatgpt"` (browser) or `"chatgptDeviceCode"`
-- Codex **owns** the OAuth flow, persists tokens, and refreshes them
-- `chatgptAuthTokens` is experimental and requires the **host** to already possess
-  ChatGPT tokens (`capabilities.experimentalApi = true`)
+## Connection modes
 
-## Required Keli constraint
+`keli auth add chatgpt` uses pi-ai's browser OAuth flow and stores an independent
+session in the OS credential store. Unlock that store before login. Refresh is
+serialized and persisted before the new access token is used. Browser/manual
+callback completion requires the owner's participation; it was not newly exercised
+in this session.
 
-Keli’s provider boundary: a model returns **proposals**. `CapabilityGate` /
-`GateService` authorize every consequential dispatch. Adapters must not execute
-ambient host effects or write canonical state.
+`keli auth add chatgpt --type external-cli` explicitly links an existing Codex login.
+Keli reads its unexpired access token without copying or rotating the refresh token
+or changing Codex's files. When that session expires, renew it with Codex or choose
+an independent Keli login. Removing Keli's link does not log Codex out.
 
-## Precise incompatibility (conversation model)
+Then select the conversation provider:
 
-Codex App Server ChatGPT login authenticates a **Codex agent process** that owns
-tool execution, approvals, and thread history. There is no documented
-inference-only or proposal-only method that yields ChatGPT-authenticated chat
-completions for Keli’s `HttpModelProvider`.
+```sh
+keli config set providers.primary.id chatgpt
+keli config set providers.primary.model gpt-5.5
+keli chat --message 'Hello Keli'
+```
 
-Using `thread/start` + `turn/start` as ordinary conversation would let Codex
-execute tools outside Keli’s gate. Extracting ChatGPT tokens from Codex’s store
-to call OpenAI chat completions is not a documented app-server API.
-`chatgptAuthTokens` is the reverse direction (host → Codex).
+Interactive setup also offers account login when ChatGPT is selected. The provider
+probe makes a real bounded inference request; finding credentials alone is not a
+successful connection. Explicit model IDs are retained, never silently substituted.
+The pinned library catalog is not an account entitlement list.
 
-Therefore **ChatGPT-account cannot be claimed as a Keli conversation-model
-onboarding path** without either substituting API-key setup (forbidden) or
-surrendering authorization to Codex (forbidden).
+## Authority
 
-`keli auth add chatgpt --type oauth-device` must report this incompatibility. It
-must not silently store an API key.
+Every inference request supplies an empty native tool list. Keli receives text or
+JSON proposals and sends any requested action through its existing conversation
+validation and capability gate. Unexpected native tool calls and incomplete answers
+are rejected. No Codex/Pi agent process is spawned for ordinary conversation.
 
-## What is adopted (coding delegate only)
+Codex App Server remains a separate coding delegate integration. Its child claiming
+completion still does not prove verification. The earlier App Server delegate
+implementation has not been live-validated by this account-connection work.
 
-Codex App Server **is** usable as the Codex **coding delegate** (`delegate.run`)
-after the capability gate authorizes the handoff:
+## Evidence
 
-1. Keli prepares/authorizes `delegate.run` with workspace, goal, budget, cancel epoch.
-2. Spawn `codex app-server` (stdio) with that workspace as cwd; owned process.
-3. `initialize` / `initialized`, then `thread/start` + `turn/start` with the goal.
-4. Map `turn/completed` / errors to a delegate receipt. Artifacts/tests still
-   required before `verified` (A24). A child saying complete is not success.
-5. ChatGPT device-code login, if used, authenticates **that Codex process**, not
-   Keli conversation.
-
-Ordinary chat remains OpenAI-compatible or Grok API-key (or fixture). Codex
-ChatGPT login is optional delegate setup, not the conversation provider.
-
-## Tests
-
-See `tests/unit/codex-app-server.test.ts`: fixture stdio JSON-RPC; unauthorized
-spawn is not performed; conversation profile reports `unsupported`.
+See [live account results](LIVE_ACCOUNT_RESULTS.md) for the executed conversation,
+retrieval, correction, restart, and responsibility checks. Account tokens, wallet
+identifiers, holdings, and personal paths are excluded from repository evidence.

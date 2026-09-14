@@ -1,3 +1,5 @@
+import { KeliError } from "../core/errors.ts";
+import { getRun } from "../core/run-control.ts";
 import type { Database } from "bun:sqlite";
 import { createHash } from "node:crypto";
 import { ResearchResponsibilityService } from "../core/behavior.ts";
@@ -120,6 +122,20 @@ export async function tickResearchWatch(db: Database, deps: HeartbeatDeps, watch
       if ((getWatch(db, watch.id)?.attempts ?? 0) >= (watch.budget.maxConsecutiveFailures ?? 3)) setWatchStatus(db, watch.id, "paused");
     } else db.run("UPDATE watches SET attempts=0 WHERE id=?", [watch.id]);
     return { ...base, result: outcome.replayed ? "already-researched" : "researched", outcomeKind: finished.status === "waiting_for_evidence" ? "missing_evidence" : outcome.kind, fingerprint, notified: false };
+  } catch (error) {
+    if (!(error instanceof KeliError) || error.code !== "quota_exceeded") throw error;
+    // Exhaustion is terminal for this occurrence, not a crash to resume on every later slot.
+    // Completion truth still goes through the core owner and its current approval checks.
+    const run = getRun(db, occurrence.run_id);
+    const modelCalls = db.query("SELECT COUNT(*) AS n FROM request_usage WHERE run_id=?").get(occurrence.run_id) as { n: number };
+    service.finish(occurrence, {
+      kind: "blocked", text: error.message, conversationId: conversation.id, turnIds: [],
+      steps: modelCalls.n, toolCalls: run?.tool_calls_used ?? 0, runId: occurrence.run_id, costUnknown: true,
+    }, researchPolicy(watch, deps));
+    recordWatchFailure(db, watch.id, now.toISOString(), error.message);
+    appendWatchEvent(db, watch.id, "researched", { occurrenceId: occurrence.id, status: "failed", reason: "budget_exhausted" });
+    if ((getWatch(db, watch.id)?.attempts ?? 0) >= (watch.budget.maxConsecutiveFailures ?? 3)) setWatchStatus(db, watch.id, "paused");
+    return { ...base, result: "researched", outcomeKind: "blocked", fingerprint, notified: false };
   } finally {
     service.release(occurrence);
   }

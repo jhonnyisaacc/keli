@@ -80,10 +80,12 @@ export function structuredToolDescriptors(config?: KeliConfig | null): Capabilit
       resources: ["workflow"],
       schema: {
         type: "object",
-        properties: { workflow: { type: "string" } },
+        properties: { workflow: { type: "string", enum: tool.workflows ?? [] } },
         required: ["workflow"],
       },
     };
   });
-  return [rocketDescriptor(), ...extras];
+  const rocket = rocketDescriptor();
+  rocket.schema = { ...rocket.schema, properties: { workflow: { type: "string", enum: resolveRocketProfile(config).workflows } } };
+  return [rocket, ...extras];
 }

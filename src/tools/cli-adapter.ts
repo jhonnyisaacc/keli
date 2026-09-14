@@ -69,7 +69,7 @@ export async function runStructuredTool(
   ctx: DispatchContext,
 ): Promise<CapabilityResult> {
   if (!profile.executable) {
-    return integrationGap(profile.id, `${profile.id} executable is not configured (set ROCKET_BIN or tools.rocket.bin)`);
+    return integrationGap(profile.id, `${profile.id} executable is not configured in its tool profile`);
   }
   if (!existsSync(profile.executable)) {
     return integrationGap(profile.id, `${profile.id} executable is missing: ${profile.executable}`);
@@ -150,6 +150,7 @@ export async function runStructuredTool(
     if (!profile.executable) evidence.integrationGap = `${profile.id} executable is not configured`;
     const output: StructuredToolOutput = {
       ...evidence,
+      sourceId: `tool:${profile.id}:${String(input.workflow)}`,
       workflow: String(input.workflow),
       profileId: profile.id,
       testedRevision: profile.testedRevision,

@@ -1,18 +1,18 @@
 import { describe, expect, test } from "bun:test";
 import { addCredential } from "../../src/integrations/auth.ts";
-import { chatgptConversationIncompatibility } from "../../src/integrations/chatgpt-boundary.ts";
+
 import { createModelProvider } from "../../src/model/provider-factory.ts";
 import "../../src/integrations/load.ts";
 
 describe("ChatGPT / Codex App Server boundary", () => {
-  test("chatgpt oauth-device reports the documented incompatibility", async () => {
+  test("chatgpt login needs an interactive callback, never a pasted API key", async () => {
     await expect(addCredential("chatgpt", { type: "oauth-device" })).rejects.toThrow(
-      /Codex agent that executes tools/,
+      /interactively/,
     );
-    expect(chatgptConversationIncompatibility()).toContain("proposal-only");
+
   });
 
-  test("chatgpt cannot be constructed as a conversation provider", async () => {
+  test("chatgpt cannot be constructed without an explicitly linked account", async () => {
     await expect(createModelProvider({ explicitId: "chatgpt", config: { version: 2, ownerId: "o", defaultProjectId: "p" } })).rejects.toThrow();
   });
 });

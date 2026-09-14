@@ -48,6 +48,13 @@ export async function createModelProvider(options: CreateProviderOptions = {}): 
     model: options.model,
   });
   const profile = resolved.profile;
+  if (profile.id === "chatgpt") {
+    const { ChatGptModelProvider, CHATGPT_DEFAULT_MODEL } = await import("./chatgpt-provider.ts");
+    const { chatGptAccessToken } = await import("../integrations/chatgpt-auth.ts");
+    const model = selectModel(resolved, options.model) ?? CHATGPT_DEFAULT_MODEL;
+    await chatGptAccessToken(resolved.credentialRef, options.credentials);
+    return { provider: new ChatGptModelProvider(model, () => chatGptAccessToken(resolved.credentialRef, options.credentials)), providerId: profile.id, model, endpoint: "https://chatgpt.com/backend-api/codex", resolved, costKnown: false };
+  }
   const endpoint = integrationEndpoint(resolved);
   if (!endpoint) {
     throw new KeliError(

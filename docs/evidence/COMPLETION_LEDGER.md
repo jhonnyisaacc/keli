@@ -1,5 +1,7 @@
 # Completion ledger (v0.1.0 remaining work)
 
+The L05 incompatibility conclusion below is superseded by [live account results](LIVE_ACCOUNT_RESULTS.md) and the corrected [account boundary](CODEX_APP_SERVER.md). ChatGPT inference is now implemented through an adopted model library.
+
 Compact contract: requirement → existing implementation → missing behavior → reuse
 source → integration work → acceptance evidence. Working Keli paths stay in place.
 
@@ -21,7 +23,7 @@ awaiting owner sign-in, external access, or native hardware.
 | L02 | Discord receive/route/reconnect/delivery | REST v10 + fixture; inbox/outbox; `keli discord poll` | Shared reconnect backoff on poll errors | ADOPT Discord REST; ADAPT Nanobot poll backoff (`POLL_STALE_SECONDS=120`, 5–300s) | `src/transports/reconnect.ts`; Discord poll loop | F; L awaiting bot token |
 | L03 | Telegram receive/route/reconnect/delivery (A18) | Fixture send + inbox dedupe; `/getMe` probe | Bot API getUpdates/sendMessage; poll cycle; reconnect | ADOPT Telegram Bot API (same bounded choice as Discord REST, not grammY/PTB runtimes); ADAPT Nanobot offset + backoff | `TelegramBackend` fixture+REST; `keli telegram poll`; inbox/outbox unchanged | F; L awaiting bot token |
 | L04 | Ordinary real-model onboarding | Wizard stores provider id; fixture default | Successful round-trip as setup outcome | ADAPT Hermes setup/auth/doctor surfaces | Wizard probes `/models`; records `setup.providerConnected` | F; L awaiting API key |
-| L05 | ChatGPT-account onboarding | `oauth-device` throws “use api-key” | Honest ChatGPT path behind Keli provider boundary | Inspect Codex App Server auth | **Cannot claim as conversation model** — see [CODEX_APP_SERVER.md](CODEX_APP_SERVER.md). Codex ChatGPT login authenticates a Codex *agent*. Offer API-key OpenAI-compatible for chat; Codex app-server only as gated **delegate**. | F (incompatibility + delegate fixture) |
+| L05 | ChatGPT-account onboarding | `oauth-device` throws “use api-key” | Honest ChatGPT path behind Keli provider boundary | Inspect Codex App Server auth | **Implemented and live-checked** using pi-ai inference, not App Server execution; independent OAuth or explicit read-only Codex account link. See [CODEX_APP_SERVER.md](CODEX_APP_SERVER.md). | F + L (ChatGPT CLI, retrieval and scheduled reviews); independent browser login awaits owner |
 | L06 | Search without fixture-only path | Fixture HTTP `{results}` | Configured endpoint + key | ADOPT generic search HTTP + Brave `GET /res/v1/web/search` (Hermes web_search backend) | Adapter uses resolved search integration | F; L awaiting search key |
 | L07 | MCP stdio + HTTP (A41–A42) | Fixture `/mcp` POST | JSON-RPC initialize / tools/list / tools/call; owned stdio | ADOPT MCP JSON-RPC 2024-11-05 (protocol; same style as Discord REST). Official TS SDK not vendored: keep process ownership in Keli. | HTTP JSON-RPC + stdio client; fixture path preserved | F; L awaiting MCP server |
 | L08 | Coding delegates Codex/OpenCode (A23–A24, A37) | Fixture `/delegate` | Real Codex spawn under the gate | ADOPT Codex app-server JSON-RPC as **delegate only** | `delegate.run` may spawn `codex app-server`; completion stays unverified without artifacts | F; L awaiting `codex` + ChatGPT login |
@@ -31,7 +33,7 @@ awaiting owner sign-in, external access, or native hardware.
 | L12 | Rocket optional tool | `tools.rocket` profile | Live CLI pin | ADOPT Rocket `ResearchResult` | Env `ROCKET_BIN`; mismatch is integration defect | F; L awaiting Rocket binary |
 | L13 | Dual-transport pairing, native four-target, five-user, live ≥95% | Fixture A-gates | Owner accounts / hardware | — | Not claimed | A |
 
-## ADOPT / ADAPT / BUILD summary
+## Earlier pass: ADOPT / ADAPT / BUILD summary
 
 | Decision | What | Why not the other two |
 |---|---|---|

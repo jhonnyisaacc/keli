@@ -55,3 +55,11 @@ Live probe: `bun run scripts/live-probe.ts` performs real round trips; required 
 | Evidence verification | Current passage hashes, exact quotes, required coverage and scoped source access | Semantic entailment and factual truth are not established by structural checks |
 
 See [reproduction, evidence and scope](evidence/research-autonomy/README.md).
+
+## Live account milestone
+
+ChatGPT account conversation is now implemented with pi-ai 0.73.1 and live-tested
+with gpt-5.5. This is separate from the Codex App Server coding delegate. Existing
+Codex account linking was exercised; independent browser login remains owner-operated.
+See [account connection](evidence/CODEX_APP_SERVER.md) and
+[live results and limitations](evidence/LIVE_ACCOUNT_RESULTS.md).

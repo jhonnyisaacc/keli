@@ -349,6 +349,9 @@ export class ConversationLoop {
           return finish({ kind: "blocked", text: "Monetary budget exhausted or provider pricing unavailable." });
         }
       }
+      if (control && run.requests_max != null) {
+        messages[0]!.content += `\nRemaining request budget: ${Math.max(0, run.requests_max - (run.requests_used ?? 0))}. Model requests and tool dispatches both consume requests. Prefer the shortest investigation that meets the evidence contract; with only one request left, return a supported answer or an explicit missing_evidence result instead of requesting another tool.`;
+      }
       const call = await runBudgetedModelCall(
         {
           db,

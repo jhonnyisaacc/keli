@@ -1,5 +1,6 @@
+import { structuredToolDescriptors } from "../tools/profiles.ts";
 import type { Database } from "bun:sqlite";
-import { defaultRegistry } from "../capabilities/registry.ts";
+import { CapabilityRegistry } from "../capabilities/registry.ts";
 import type { BehaviorService } from "../core/behavior.ts";
 import { CapabilityGate } from "../core/capability-gate.ts";
 import { KeliError } from "../core/errors.ts";
@@ -45,7 +46,12 @@ export function policyFor(roots: string[], stateDir: string): ResourcePolicy {
 
 /** Assembles the conversation loop from app context; the only place CLI/transports build it. */
 export function createConversationApp(input: ConversationAppInput) {
-  const capabilityGate = new CapabilityGate(input.db, defaultRegistry, input.stateDir, input.ownerId);
+  // Per-app registration keeps configured tools discoverable without leaking into other projects.
+  const registry = new CapabilityRegistry();
+  for (const descriptor of structuredToolDescriptors(input.config)) {
+    if (!registry.get(descriptor.id) || descriptor.id === "tools.rocket") registry.register(descriptor);
+  }
+  const capabilityGate = new CapabilityGate(input.db, registry, input.stateDir, input.ownerId);
   const policy = policyFor(input.project.resourceRoots, input.stateDir);
   const sources = createSourceReader(input.db);
   const fixtures = {
@@ -58,7 +64,7 @@ export function createConversationApp(input: ConversationAppInput) {
     db: input.db,
     behavior: input.behavior,
     capabilityGate,
-    registry: defaultRegistry,
+    registry,
     policy,
     model: chatModelFactory(input.config),
     config: input.config,

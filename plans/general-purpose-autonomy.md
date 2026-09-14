@@ -334,3 +334,15 @@ is not copied; Bot API / REST protocols are adopted. Codex App Server is Apache-
 is used only as a gated coding delegate — see
 [CODEX_APP_SERVER.md](../docs/evidence/CODEX_APP_SERVER.md). Paper/source links remain in
 the [research matrix](../docs/research/2026-agent-architecture-matrix.md).
+
+## Live account milestone follow-up
+
+The account-backed Keli conversation has now been exercised, along with retrieval,
+a durable correction across restart, and bounded scheduled reviews. See
+[the live results](../docs/evidence/LIVE_ACCOUNT_RESULTS.md). The previous blanket
+ChatGPT incompatibility conclusion is superseded. Reuse is a pinned model/OAuth
+library, not an imported second agent runtime.
+
+Live tests exposed budget-terminalization and configured-tool discovery defects;
+these are fixed in Keli without changing the responsibility architecture. Rocket
+remains an optional external diagnostic scenario, not a product default.

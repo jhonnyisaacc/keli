@@ -7,7 +7,16 @@ This distribution includes or depends on:
 - TypeScript (Apache-2.0) — dev tooling
 - Playwright (Apache-2.0) — optional browser backend tests
 
-Keli source is intended to be Apache-2.0; see LICENSE when present.
+Keli source is MIT; see LICENSE.
 Upstream pins and integration notes are recorded per REPO_GOVERNANCE.md ADOPT → ADAPT → BUILD.
 
 No Honcho or marketplace skill runtime is bundled in 0.1.0.
+
+Live account integration dependencies:
+- @mariozechner/pi-ai 0.73.1 (MIT), Mario Zechner — adopted model transport and OAuth
+- proper-lockfile 4.1.2 (MIT), Made With MOXY Lda — credential refresh locking
+- @opentelemetry/api 1.9.0 (Apache-2.0), OpenTelemetry Authors — provider SDK peer required for bundling
+- @types/proper-lockfile 4.1.4 (MIT) — development types
+
+Dependency distributions retain their upstream license and notice files. Exact direct
+and transitive resolutions are recorded in bun.lock. Pi's agent runtime is not bundled.

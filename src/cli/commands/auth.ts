@@ -1,6 +1,6 @@
 import { defineCommand } from "citty";
 import { addCredential, credentialStatus, removeCredential } from "../../integrations/auth.ts";
-import { listIntegrations } from "../../integrations/registry.ts";
+import { getIntegration, listIntegrations } from "../../integrations/registry.ts";
 import { emit, emitError } from "../output.ts";
 import type { CliGlobals } from "../context.ts";
 import "../../integrations/load.ts";
@@ -23,14 +23,14 @@ function authAddCommand(globals: CliGlobals) {
     meta: { description: "Store a credential ref for an integration" },
     args: {
       integration: { type: "positional", required: true, description: "Integration id" },
-      type: { type: "string", description: "api-key | token | external-cli" },
+      type: { type: "string", description: "api-key | token | external-cli | oauth-device" },
       value: { type: "string", description: "Secret value (omit to be prompted)" },
     },
     async run({ args }) {
       try {
         let value = args.value as string | undefined;
-        const type = args.type as "api-key" | "token" | "external-cli" | undefined;
-        if (!value && type !== "external-cli" && process.stdin.isTTY) {
+        const type = args.type as "api-key" | "token" | "external-cli" | "oauth-device" | undefined;
+        if (!value && type !== "external-cli" && type !== "oauth-device" && getIntegration(String(args.integration))?.auth.type !== "oauth-device" && process.stdin.isTTY) {
           const readline = await import("node:readline/promises");
           const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
           value = await rl.question("Credential (input is recorded; prefer a TTY): ");
@@ -40,6 +40,14 @@ function authAddCommand(globals: CliGlobals) {
           stateDir: globals.stateDir,
           type,
           value,
+          oauthCallbacks: process.stdin.isTTY ? {
+            onAuth: ({ url, instructions }) => { console.log(`Open this sign-in link in your browser:\n${url}`); if (instructions) console.log(instructions); },
+            onPrompt: async ({ message }) => {
+              const { createInterface } = await import("node:readline/promises");
+              const rl = createInterface({ input: process.stdin, output: process.stdout });
+              try { return await rl.question(`${message} `); } finally { rl.close(); }
+            },
+          } : undefined,
         });
         emit({ ref }, globals.outputFormat, `Stored credential ref ${ref.service}/${ref.id}`);
       } catch (e) {
