@@ -20,5 +20,10 @@ inference snapshot first. The public file is always
 Do not commit personal paths or a second diverging catalog.
 
 Protocol families are assigned before a row is treated as implemented. Construction through
-pi-ai remains `catalogued` until a fixture contract for that family exists. MoA and
-Copilot ACP stay `excluded` as conversation providers.
+pi-ai remains `catalogued` until a fixture contract for that family exists. MoA stays
+`excluded` as a conversation provider. Copilot ACP is `excluded` as inference and
+`blocked` as `copilot-acp-delegate` until an ACP login exists.
+
+Bounded capability slices (manifest, setup, inference fallback, search/browser artifacts,
+local memory, optional modalities, MCP schema inspect) are fixture-verified. Live
+credentials remain owner checks.

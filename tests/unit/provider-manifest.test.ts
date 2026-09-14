@@ -68,4 +68,16 @@ describe("provider manifest", () => {
     expect(text).not.toMatch(/\/(?:home|Users)\//);
     expect(manifest.attribution.hermes.pin).toMatch(/^[0-9a-f]{40}$/);
   });
+
+  test("every inventory row has a status and a reason, and ids are unique", () => {
+    const statuses = new Set(["catalogued", "fixture-verified", "blocked", "excluded"]);
+    const ids = (manifest.providers as Array<{ id: string; status: string; protocolNote?: string; protocol?: string }>).map((row) => {
+      expect(statuses.has(row.status)).toBe(true);
+      if (row.status === "blocked" || row.status === "excluded") {
+        expect(row.protocolNote || row.protocol).toBeTruthy();
+      }
+      return row.id;
+    });
+    expect(new Set(ids).size).toBe(ids.length);
+  });
 });

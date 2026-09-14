@@ -1,9 +1,9 @@
 # Plan: complete Keli's capability integrations without diluting its autonomy core
 
-Status: implementation plan for `feat/v0.1.0`, baseline `021ca10`. This plan replaces the
-old "first-use only" stop and the unbounded provider-parity draft. It keeps the existing
-responsibility, evidence, and authority architecture and gives Cursor a finite sequence of
-vertical implementation slices.
+Status: slices 1–8 implemented on `feat/v0.1.0` from baseline `021ca10`. Engineering
+stop is fixture contracts plus required checks; remaining work is owner live checks.
+This plan replaced the old "first-use only" stop and the unbounded provider-parity draft.
+It keeps the existing responsibility, evidence, and authority architecture.
 
 The goal is a product that people can set up by selecting the connections they need and that
 can carry an approved responsibility across those connections. A provider means any

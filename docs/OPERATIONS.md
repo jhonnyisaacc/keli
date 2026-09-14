@@ -67,8 +67,8 @@ Full operating path: [responsibilities](responsibilities.md). Scenario evidence:
 
 - ChatGPT-account conversation is implemented (pi-ai). Catalog ids are optional; live-verified means the selected model passed a probe, not that every listed provider works.
 - Discord/Telegram live tokens are optional. Pair with `KELI-PAIR` from the bound chat, or stay on CLI (`keli setup --transport none`). Fixture and REST backends stay on inbox/outbox.
-- Search, MCP, Rocket, and browser captures are optional connections. Missing ones return `missing_access` or `integration_gap` instead of invented results.
-- Honcho, OCR, speech, and extra search backends are not v0.1.0 requirements.
+- Search, MCP, browser, documents, OCR, speech, and Rocket are optional connections. Missing ones return `missing_access`, `capability_unavailable`, or `integration_gap` instead of invented results.
+- Honcho stays fixture-only advisory memory until a documented HTTP contract is verified. Local notes remain authoritative.
 - Held-out correction eval, five-user usability check, dual-transport proof, and macOS notarization are owner/hardware gates (ledger L13)
 
 ## User service (Linux systemd / macOS launchd)

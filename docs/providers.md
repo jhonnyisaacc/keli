@@ -1,21 +1,23 @@
 # Connecting a model
 
-Run `keli setup provider`. First-use ids are `chatgpt`, `openai-compatible`, `anthropic`,
+Run `keli setup`. First-use chat ids are `chatgpt`, `openai-compatible`, `anthropic`,
 and `grok`. Other catalog ids are valid when typed explicitly; they are not a completeness
-claim. Choose a provider, a model, and its connection method.
-API-key input is hidden and saved in the OS credential store. Config contains a
-reference, never the key. Provider environment variables also work on headless
-hosts; they are read only for the selected provider. No Hermes installation is
-needed to run Keli.
+claim. Fixture providers are used only with `--fixture` or an explicit test flag.
 
-`keli providers list` reports **catalogued**, **configured**, **fixture-verified**, or
-**live-verified** for the selected model. Live-verified is not account-wide entitlement. Model suggestions are not
-proof of access. Setup tests the selected model with one bounded inference request.
-`grok` is the A05 HTTP API-key path; `xai-oauth` is the Grok subscription login.
+`keli providers list` reports **catalogued**, **configured**, **fixture-verified**,
+**live-verified**, **blocked**, or **excluded**. Live-verified is scoped to the selected
+model and is cleared when the model or endpoint changes.
 
-Optional: `keli setup search` (Brave or generic JSON). `keli setup --transport none`
-keeps notifications on the CLI. Pair Discord or Telegram with a `KELI-PAIR` code from
-that chat.
+Optional numbered categories: Search (Brave or generic JSON), Memory (local notes;
+Honcho is fixture-only), Browser, Documents/OCR, Speech, Messaging, External
+tools/delegates, Background service. `keli setup --transport none` keeps notifications
+on the CLI. Pair Discord or Telegram with a `KELI-PAIR` code from that chat.
+
+Documents extract uncompressed PDF text in-process. `pdftotext`, Tesseract, and
+OpenAI-compatible audio endpoints are optional and are not required by CI. Extraction
+never writes notes or authorizes actions. MCP `tools/call` is rejected until
+`tools/list` names the tool. `keli service install|status|run` is a scheduler lifecycle
+command, not a provider.
 
 | Connection | Provider IDs / setup |
 | --- | --- |
@@ -52,8 +54,8 @@ Hermes's credential file or copy another application's refresh token.
 endpoint; `openai-api` selects the OpenAI platform defaults. `codex` and `opencode`
 remain coding delegates. OpenCode's hosted inference provider is `opencode-zen`.
 Hermes's `copilot-acp` launches an agent process and `moa` composes agents/models;
-these are not imported as conversation providers. They would require a separate
-product decision about execution and orchestration.
+these are not imported as conversation providers. Copilot ACP is a separate blocked
+delegate identity (`copilot-acp-delegate`), not Chat Completions.
 
 All providers feed the same Keli conversation and responsibility controller.
 Their outputs remain proposals; the provider layer offers no executable native

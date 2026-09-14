@@ -170,7 +170,11 @@ export class ModelLoop {
     effectiveValue?: CodingDelegate | "Grok",
   ) {
     const routing = routingFromConfig(this.config ?? null);
-    const routedId = selectProviderForTurn(routing, "action", process.env.KELI_PROVIDER_ID ?? this.config?.providers?.primary?.id);
+    const fallback =
+      process.env.KELI_PROVIDER_ID ??
+      this.config?.providers?.primary?.id ??
+      (this.provider ? "fixture" : undefined);
+    const routedId = selectProviderForTurn(routing, "action", fallback);
     let provider: ModelProvider | undefined = this.provider;
     let providerId = "fixture";
     let model: string | undefined;

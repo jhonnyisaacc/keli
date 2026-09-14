@@ -160,11 +160,6 @@ async function configureCategory(
     draft.memoryProvider = row.id;
     config.memory = { ...config.memory, provider: row.id };
     await writeConfig(config, stateDir);
-    return;
-  }
-  if (category.manifestCategory === "mcp-server" || category.id === "delegates") {
-    draft.mcpUrl = (await io.question(`MCP HTTP URL [${draft.mcpUrl ?? ""}]: `)) || draft.mcpUrl;
-    draft.mcpCommand = (await io.question(`MCP stdio command [${draft.mcpCommand ?? ""}]: `)) || draft.mcpCommand;
   }
 }
 

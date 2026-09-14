@@ -57,9 +57,9 @@ async function extractFile(
     }
 
     if (mode === "ocr") {
-      return await tesseractExtract(capabilityId, resolved, sourceHash, bytes, options);
+      return await tesseractExtract("ocr.extract", resolved, sourceHash, bytes, options);
     }
-    return await pdfOrTextExtract(capabilityId, resolved, sourceHash, bytes, options);
+    return await pdfOrTextExtract("documents.extract", resolved, sourceHash, bytes, options);
   } catch (e) {
     return fail(capabilityId, e);
   }

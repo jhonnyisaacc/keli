@@ -11,6 +11,8 @@ Keli source is MIT; see LICENSE.
 Upstream pins and integration notes are recorded per REPO_GOVERNANCE.md ADOPT → ADAPT → BUILD.
 
 No Honcho or marketplace skill runtime is bundled in 0.1.0.
+Optional host binaries (pdftotext / poppler-utils, Tesseract OCR, local STT/TTS) are
+not shipped; missing installs are typed `capability_unavailable`.
 
 Live account integration dependencies:
 - @mariozechner/pi-ai 0.73.1 (MIT), Mario Zechner — adopted model transport and OAuth

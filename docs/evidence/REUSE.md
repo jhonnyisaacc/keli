@@ -61,6 +61,16 @@ Upstream records above are issue reports and proposals, not reproduced defects i
 Hermes pin `93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544` MIT. Nanobot pin
 `f49965445152361b779b465e8a5111549ac934c4` MIT. No Python channel runtime copied.
 
+## Bounded capability integrations
+
+| Area | ADOPT | ADAPT | BUILD |
+|------|-------|-------|-------|
+| Inventory | One `provider-manifest.json` | Hermes inference snapshot | Status from config/probe, never file existence |
+| Search | Brave GET + generic JSON POST | Hermes web_search backend choice | Shared dispatcher; hashed web/browser artifacts |
+| Memory | SQLite FTS notes | Honcho fixture HTTP only | Advisory evidence; cannot commit rules |
+| Modalities | Optional pdftotext/Tesseract; OpenAI audio HTTP | Owned bounded processes | No npm PDF parser until license/API verified |
+| MCP / delegates | JSON-RPC tools/list before call | Codex app-server as delegate | Copilot ACP identity blocked; service is lifecycle |
+
 ## Evidence-driven research autonomy
 
 ADOPT existing Keli watches, run budgets, scoped capability dispatch, source index, turns and outbox; ADAPT addressed evidence and phase-memory/verification principles; BUILD the missing resumable watch-occurrence connection. Reference pins, MIT licenses, I1–I7/I9–I10 and acceptance trace IDs are recorded in the [integration evidence note](research-autonomy/README.md#reuse-and-review). No upstream implementation was copied. Paired demonstrations use baseline `4bd3b9e` and scripted providers through actual Keli runtime paths.

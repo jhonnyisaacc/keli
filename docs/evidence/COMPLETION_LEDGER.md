@@ -28,17 +28,21 @@ awaiting owner sign-in, external access, or native hardware.
 | L03 | Telegram receive/route/reconnect/delivery (A18) | Bot API + fixture; pairing challenge | Live bot token | ADOPT Telegram Bot API; ADAPT Nanobot offset + backoff | same pairing helper | F; L awaiting bot token |
 | L04 | Ordinary real-model onboarding | Wizard shortlist + live probe; readiness layers | Owner keys for non-ChatGPT | ADAPT Hermes setup/auth; ADOPT pi-ai | `setup.liveChecked` per selected model | F; L ChatGPT; other ids catalog until probed |
 | L05 | ChatGPT-account onboarding | pi-ai inference + OAuth or Codex link | Independent browser login | ADOPT pi-ai; ADAPT Hermes auth/transport split | not App Server execution | F + L (CLI, retrieval, reviews); browser OAuth **A** |
-| L06 | Search without fixture-only path | Brave/generic HTTP; `keli setup search` | Owner search key | ADOPT Brave/generic HTTP | `missing_access` when unset | F; L awaiting search key |
-| L07 | MCP stdio + HTTP (A41–A42) | JSON-RPC HTTP + owned stdio | Live MCP server | ADOPT MCP JSON-RPC; Keli owns the child | `missing_access` / `keli setup mcp` | F; L awaiting MCP server |
-| L08 | Coding delegates Codex/OpenCode (A23–A24, A37) | Fixture + gated Codex app-server | Live `codex` login; OpenCode named-later | ADOPT app-server as **delegate only** | unverified without artifacts | F; L awaiting `codex` |
-| L09 | Browser/Playwright screenshots/downloads | Navigate + fixture/Playwright capture | Live Playwright install | ADOPT Playwright | not in default research allowlist | F; L awaiting browser install |
+| L06 | Search without fixture-only path | Brave/generic HTTP; hashed web/browser artifacts | Owner search key | ADOPT Brave/generic HTTP | credentials alone do not pass a probe | F; L awaiting search key |
+| L07 | MCP stdio + HTTP (A41–A42) | JSON-RPC HTTP + owned stdio; tools/call after tools/list | Live MCP server | ADOPT MCP JSON-RPC; Keli owns the child | unknown tools / missing args typed | F; L awaiting MCP server |
+| L08 | Coding delegates Codex/OpenCode (A23–A24, A37) | Fixture + gated Codex app-server; Copilot ACP identity blocked | Live `codex` / OpenCode / Copilot ACP login | ADOPT app-server as **delegate only** | unverified without artifacts | F; L awaiting `codex` |
+| L09 | Browser/Playwright screenshots/downloads | Navigate + hashed capture; optional Playwright/CDP/MCP | Live Playwright install | ADOPT Playwright | allowlist before bytes stored | F; L awaiting browser install |
 | L10 | Install/service/diagnostics | Generated systemd/launchd via `keli service install` | Linger/launchd enable | ADOPT OS service primitives | no committed `install/keli.service` | F; A native linger/launchd |
 | L11 | Responsibility controller | Occurrences, budgets, waits, verification, outbox | Improve only on eval failure | ADOPT existing Keli | ordinary chat does not loosen watches | F |
 | L12 | Rocket optional tool | `tools.rocket`; `integration_gap` if missing | Live CLI pin | ADOPT Rocket `ResearchResult` | `ROCKET_BIN` | F; L awaiting Rocket binary |
 | L13 | Dual-transport pairing, native four-target, five-user, live ≥95% | One-transport pairing fixture | Owner accounts / hardware | — | not an engineering loop | A |
 | L14 | Ordinary vs research conversation | CLI/inbox ordinary; watches research | — | BUILD Keli | greeting after required-collection correction | F |
+| L15 | Local-first memory contract | SQLite notes + conversations; Honcho fixture advisory | Stable Honcho HTTP | KEEP local authority | stale notes cannot override rules | F; L Honcho blocked |
+| L16 | Documents / OCR / speech | Uncompressed PDF + optional binaries + OpenAI audio | Live pdftotext/Tesseract/Whisper | BUILD owned processes; no npm PDF parser | never writes notes | F; L awaiting binaries |
 
-Honcho, OCR, speech, Hermes MoA, copilot-acp, and extra search backends are deferred.
+Honcho is fixture-only advisory memory (not a second authority). OCR and speech
+have fixture contracts; live Tesseract/Whisper/TTS remain owner milestones. Hermes
+MoA stays excluded. Extra search vendors stay unadded until a protocol/license check.
 Do not import Hermes/Nanobot runtimes.
 
 ## Earlier pass: ADOPT / ADAPT / BUILD summary

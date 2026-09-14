@@ -19,6 +19,7 @@ if needed. Those checks do not certify live models, transports, or Rocket.
 | Responsibility contract and scheduled slots | implemented, fixture-verified | `src/watches/review.ts`, `tests/integration/responsibility.test.ts` |
 | Bounded capability discovery | implemented, fixture-verified | `capabilities.lookup`; responsibility + scenario tests |
 | Portfolio / Augustine / maintenance scenarios | fixture-verified (scripted) | `tests/integration/responsibility-scenarios.test.ts` |
+| Provider inventory and setup | fixture-verified | `provider-manifest.json`; `keli setup`; contract suites under `tests/unit/*-providers.test.ts` |
 | Live Rocket daily brief | deferred | needs `ROCKET_BIN` / private state |
 | Live-model quality | deferred onboarding milestone | ChatGPT-account and Grok access remain intended, not assumed |
 | In-Keli wallet / portfolio engines | rejected | superseded by Rocket-as-tool |

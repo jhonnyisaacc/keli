@@ -9,6 +9,12 @@ import { addNote } from "../../src/memory/notes.ts";
 import { createTestEnv } from "../helpers/setup.ts";
 import "../../src/integrations/load.ts";
 
+async function tempDir(prefix: string): Promise<string> {
+  const dir = join(tmpdir(), `${prefix}-${crypto.randomUUID()}`);
+  await mkdir(dir, { recursive: true });
+  return dir;
+}
+
 function textPdf(text: string): Buffer {
   const stream = `BT /F1 12 Tf (${text}) Tj ET\n`;
   return Buffer.from(
@@ -19,7 +25,7 @@ function textPdf(text: string): Buffer {
 
 describe("modality providers", () => {
   test("extracts text files and uncompressed PDFs with source hashes", async () => {
-    const dir = await mkdir(join(tmpdir(), `keli-mod-${crypto.randomUUID()}`), { recursive: true });
+    const dir = await tempDir("keli-mod");
     const txt = join(dir, "note.txt");
     const pdf = join(dir, "note.pdf");
     await writeFile(txt, "plain document body");
@@ -41,7 +47,8 @@ describe("modality providers", () => {
 
   test("missing Tesseract is typed unavailable and does not write notes", async () => {
     const env = await createTestEnv();
-    const dir = await mkdir(join(env.stateDir, "ocr"), { recursive: true });
+    const dir = join(env.stateDir, "ocr");
+    await mkdir(dir, { recursive: true });
     const image = join(dir, "page.png");
     await writeFile(image, "not-an-image");
     const before = (env.db.query("SELECT COUNT(*) AS n FROM notes").get() as { n: number }).n;
@@ -62,7 +69,7 @@ describe("modality providers", () => {
   });
 
   test("OCR fixture returns text and confidence without leaking secrets", async () => {
-    const dir = await mkdir(join(tmpdir(), `keli-ocr-${crypto.randomUUID()}`), { recursive: true });
+    const dir = await tempDir("keli-ocr");
     const image = join(dir, "page.png");
     await writeFile(image, "png-bytes");
     const server = Bun.serve({
@@ -89,7 +96,7 @@ describe("modality providers", () => {
   });
 
   test("speech fixture transcribes, synthesizes, and types malformed JSON", async () => {
-    const dir = await mkdir(join(tmpdir(), `keli-speech-${crypto.randomUUID()}`), { recursive: true });
+    const dir = await tempDir("keli-speech");
     const wav = join(dir, "clip.wav");
     await writeFile(wav, "RIFF....");
     const server = Bun.serve({
@@ -143,7 +150,7 @@ describe("modality providers", () => {
     const missing = await speechSynthesize({ text: "hi" }, { config: defaultConfig() });
     expect(missing.ok).toBe(false);
     expect(missing.error?.code).toBe("missing_access");
-    const dir = await mkdir(join(tmpdir(), `keli-cancel-${crypto.randomUUID()}`), { recursive: true });
+    const dir = await tempDir("keli-cancel");
     const wav = join(dir, "clip.wav");
     await writeFile(wav, "x");
     const signal = AbortSignal.abort();

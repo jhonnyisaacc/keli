@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import { catalogDescriptor, catalogEntry, createCatalogProvider, providerCatalog } from "../../src/integrations/catalog-provider.ts";
 import { getIntegration } from "../../src/integrations/registry.ts";
 import { createModelProvider, isProviderFallbackEligible } from "../../src/model/provider-factory.ts";
+import { selectProviderForTurn } from "../../src/model/routing.ts";
 import { listProviders } from "../../src/model/provider-registry.ts";
 import { HttpModelProvider } from "../../src/model/http-provider.ts";
 import { SdkModelProvider, type ModelCompletion } from "../../src/model/sdk-provider.ts";
@@ -25,6 +26,7 @@ test("every bundled inference profile constructs through the shared factory; del
   }
   expect(getIntegration("codex")?.kind).toBe("delegate");
   expect(getIntegration("opencode")?.kind).toBe("delegate");
+  expect(getIntegration("copilot-acp-delegate")?.kind).toBe("delegate");
   expect(getIntegration("openai-codex")?.id).toBe("chatgpt");
   expect(getIntegration("anthropic")?.id).toBe("anthropic");
   expect(getIntegration("openai")?.id).toBe("openai-compatible");
@@ -188,6 +190,11 @@ test("live-verified applies only to the probed model, not a later replacement", 
     providers: { primary: { id: "chatgpt" as const, model: "gpt-5.5" } },
   };
   expect(listProviders(same).find((p) => p.id === "chatgpt")?.readiness).toBe("live-verified");
+});
+
+test("routing does not silently default to fixture without an explicit provider", () => {
+  expect(() => selectProviderForTurn({}, "action")).toThrow(/keli setup/);
+  expect(selectProviderForTurn({}, "action", "fixture")).toBe("fixture");
 });
 
 test("fallback is eligible only for typed transport failures, never missing secrets", () => {

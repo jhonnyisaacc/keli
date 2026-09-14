@@ -41,16 +41,20 @@ export async function createTestEnv(): Promise<TestEnv> {
   createProject(db, rocketId, ownerId, "Rocket", ["/tmp/rocket"]);
   createProject(db, otherId, ownerId, "Other", ["/tmp/other"]);
 
-  await writeConfig(
-    { ...defaultConfig(), ownerId, defaultProjectId: rocketId },
-    stateDir,
-  );
+  const config = {
+    ...defaultConfig(),
+    ownerId,
+    defaultProjectId: rocketId,
+    routing: { provider: "fixture" },
+    providers: { primary: { id: "fixture" } },
+  };
+  await writeConfig(config, stateDir);
 
   const fixture = startFixtureProvider();
   const provider = new FixtureModelProvider(fixture.endpoint);
   const behavior = new BehaviorService(db, ownerId);
   const gate = new GateService(db, behavior);
-  const loop = new ModelLoop(behavior, gate, rocketId, "Rocket", provider);
+  const loop = new ModelLoop(behavior, gate, rocketId, "Rocket", provider, undefined, "/tmp", config);
   setSkillPinDatabase(db);
 
   return {

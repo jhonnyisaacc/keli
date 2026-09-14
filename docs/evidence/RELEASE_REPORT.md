@@ -1,34 +1,49 @@
-# Release report (feat/v0.1.0 first-use pass)
+# Release report (feat/v0.1.0 bounded capability pass)
 
-Baseline: `ce51b3a` plus the first-use completion work. Plan:
+Baseline: `021ca10` plus the bounded capability slices on `feat/v0.1.0`. Plan:
 [general-purpose-autonomy.md](../../plans/general-purpose-autonomy.md). Ledger:
-[COMPLETION_LEDGER.md](COMPLETION_LEDGER.md).
+[COMPLETION_LEDGER.md](COMPLETION_LEDGER.md). Connection guide: [providers.md](../providers.md).
 
 This report does **not** tag `v0.1.0`. Catalog rows are not live connections. ChatGPT
 gpt-5.5 remains the known live conversation path
 ([LIVE_ACCOUNT_RESULTS.md](LIVE_ACCOUNT_RESULTS.md)).
 
-## First-use path
+## User command after this work
 
-`keli init` → `keli setup` (chatgpt / openai-compatible / anthropic / grok, or another
-catalog id) → optional search and one transport with `KELI-PAIR` → `keli chat` (ordinary)
-→ approve a responsibility → `keli watches tick` or `keli service run`. Missing search,
-MCP, or Rocket is a typed blocker, not invented output.
+`keli setup`
 
 ## Implemented and fixture-verified this pass
 
-Ordinary vs research conversation; provider readiness layers; grok A05 HTTP vs xai-oauth;
-wizard shortlist; `keli setup search`; one-transport pairing; browser screenshot/download
-artifacts; MCP/Rocket missing-access copy; generated systemd/launchd units.
+Neutral `provider-manifest.json` with protocol mapping; numbered one-session setup;
+bounded inference fallback (never silent fixture); shared Brave/generic search plus
+hashed web/browser artifacts; local-first memory contract (Honcho fixture-only);
+documents/OCR/speech behind the gate with optional binaries; MCP `tools/list` before
+`tools/call`; Copilot ACP as a distinct blocked delegate; `keli service` as lifecycle.
+
+Contract suites: `tests/unit/providers.test.ts`, `search-providers.test.ts`,
+`browser-providers.test.ts`, `memory-providers.test.ts`, `modality-providers.test.ts`,
+`transports.test.ts`. Autonomy scenarios remain on the same controller.
+
+Required checks on this pass: `bun test --timeout 20000` (312 pass, 1 skip),
+`bun run check` (types, adapter boundary, home-path, markdown links), and the
+production build. Held-out fixture rate remains 98.1% (103/105); H025/H026 are
+pre-existing override-parser mismatches, not a new architecture loop. Extra review
+paths (`src/state/`, `src/core/gate.ts`, `src/execution/`, `scripts/build.ts`,
+`install/`) were not rewritten for these slices.
 
 ## Awaiting owner sign-in, external access, or native hardware
 
-- Live Discord/Telegram tokens and dual-transport proof
-- Independent ChatGPT browser OAuth (Codex link already live-tested)
-- Live Brave/search, MCP server, Codex login, Rocket binary
-- Four-target native smoke, macOS notarization, five-user checklist, live held-out ≥95%
+- Non-ChatGPT keys/OAuth and live ≥95% held-out eval
+- Search/MCP/browser accounts or binaries
+- Honcho/Tesseract/Whisper/TTS access
+- Transport tokens, dual-transport proof
+- Codex/OpenCode/Copilot logins
+- Live Rocket, four-target native, five-user, notarization
 
-## Evaluation note
+A live check can move one row to `live-verified`. It cannot reopen the research plan.
 
-The three scripted scenarios remain on the same controller. No new paper. OCR, speech,
-Honcho, and extra catalog breadth are deferred.
+## Earlier first-use pass (preserved)
+
+Ordinary vs research conversation; provider readiness layers; grok A05 HTTP vs xai-oauth;
+wizard shortlist; one-transport pairing; generated systemd/launchd units. The three
+scripted scenarios remain on the same controller. No new paper.

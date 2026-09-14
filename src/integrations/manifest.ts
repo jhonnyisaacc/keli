@@ -69,7 +69,7 @@ export function resolveReadiness(row: ManifestRow, config?: KeliConfig | null): 
   const live = config?.setup?.liveChecked?.[row.id];
   if (live?.at && (live.model ?? "") === (model ?? "")) return "live-verified";
   if (isConfigured(config, row.id)) return "configured";
-  return row.status;
+  return row.status as InventoryStatus;
 }
 
 export function listByStatus(config?: KeliConfig | null, status?: ReadinessStatus): ManifestReadiness[] {

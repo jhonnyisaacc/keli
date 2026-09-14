@@ -36,6 +36,7 @@ export function setupCommand(globals: CliGlobals) {
       "pairing-code": { type: "string", description: "KELI-PAIR code from the bound chat" },
       "pairing-actor": { type: "string", description: "Transport actor id that sent the pairing code" },
       quick: { type: "boolean", default: false, description: "Only prompt for unset items" },
+      minimal: { type: "boolean", default: false, description: "Skip optional categories; CLI-only transport" },
       fixture: {
         type: "boolean",
         default: false,

@@ -34,7 +34,7 @@ All notable changes to Keli follow [SemVer](https://semver.org/).
 
 ### Current plan (general-purpose autonomy)
 
-- Current development plan is [general-purpose autonomy](plans/general-purpose-autonomy.md). Keli coordinates; domain tools such as Rocket return evidence. In-Keli wallet/portfolio engines are superseded.
+- Current development plan is [general-purpose autonomy](plans/general-purpose-autonomy.md). Bounded capability slices land as independently reviewable commits on `feat/v0.1.0`. Command after this work: `keli setup`.
 - 2026-fast-spike matrix, experiments, and architecture decisions are imported onto `feat/v0.1.0` as historical evidence. The research-watch slice remains implemented; its plan is retained as history.
 - Tracked docs no longer embed personal-home paths. Sanitized spike artifacts are labeled derivatives. `bun run check` rejects home-path leaks and broken local documentation links.
 
