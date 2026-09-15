@@ -36,8 +36,9 @@ const OVERRIDE: HeldOutCase[] = [
   { id: "H022", input: "use OpenCode this time", expect: "override", delegate: "OpenCode" },
   { id: "H023", input: "Use Codex this time", expect: "override", delegate: "Codex" },
   { id: "H024", input: "use opencode only this time", expect: "override", delegate: "OpenCode" },
-  { id: "H025", input: "Use Grok only this time", expect: "unknown" },
-  { id: "H026", input: "use grok this time", expect: "unknown" },
+  // PRD A05: "Use Grok only this time" is one run override; later work returns to the durable delegate.
+  { id: "H025", input: "Use Grok only this time", expect: "override", delegate: "Grok" },
+  { id: "H026", input: "use grok this time", expect: "override", delegate: "Grok" },
   { id: "H027", input: "Use OpenCode only this time", expect: "override", delegate: "OpenCode" },
   { id: "H028", input: "use codex only this time", expect: "override", delegate: "Codex" },
   { id: "H029", input: "Use Codex only this time please", expect: "unknown" },
