@@ -39,15 +39,19 @@ const env = {
   KELI_BROWSER_FIXTURE_URL: integrationUrl,
 };
 
-await $`${keli} init`.cwd(root).env(env);
-await $`${keli} doctor`.cwd(root).env(env);
-await $`${keli} -p ${"Rocket changes use Codex"} --fixture`.cwd(root).env(env);
-await $`${keli} -p ${"Perform the next Rocket coding action."} --fixture`.cwd(root).env(env);
+try {
+  // The smoke scenario teaches a project rule, so the temporary state is seeded with
+  // that project explicitly; new installs otherwise default to `personal`.
+  await $`${keli} init --project Rocket`.cwd(root).env(env);
+  await $`${keli} doctor`.cwd(root).env(env);
+  await $`${keli} -p ${"Rocket changes use Codex"} --fixture`.cwd(root).env(env);
+  await $`${keli} -p ${"Perform the next Rocket coding action."} --fixture`.cwd(root).env(env);
 
-await $`${keli} invoke web.fetch --url ${`${integrationUrl}/page`} --json`.cwd(root).env({
-  ...env,
-});
-
-fixtureProc.kill();
-integrationProc.kill();
+  await $`${keli} invoke web.fetch --url ${`${integrationUrl}/page`} --json`.cwd(root).env({
+    ...env,
+  });
+} finally {
+  fixtureProc.kill();
+  integrationProc.kill();
+}
 console.log("release: local artifacts prepared and 0.1-C smoke passed (no publish)");
