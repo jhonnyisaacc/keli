@@ -7,6 +7,9 @@ import { speechSynthesize, speechTranscribe } from "../../src/adapters/speech.ts
 import { defaultConfig } from "../../src/state/config.ts";
 import { addNote } from "../../src/memory/notes.ts";
 import { createTestEnv } from "../helpers/setup.ts";
+import { defaultRegistry } from "../../src/capabilities/registry.ts";
+import { dispatchCapability } from "../../src/execution/dispatch.ts";
+import { defaultNetworkPolicy } from "../../src/execution/dispatch-context.ts";
 import "../../src/integrations/load.ts";
 
 async function tempDir(prefix: string): Promise<string> {
@@ -171,5 +174,53 @@ describe("modality providers", () => {
     expect(result.ok).toBe(true);
     expect((env.db.query("SELECT COUNT(*) AS n FROM notes").get() as { n: number }).n).toBe(1);
     env.close();
+  });
+
+  test("gate dispatch uses modality fixture URLs without adapter env knobs", async () => {
+    const prevOcr = process.env.KELI_FIXTURE_OCR;
+    const prevSpeech = process.env.KELI_FIXTURE_SPEECH;
+    delete process.env.KELI_FIXTURE_OCR;
+    delete process.env.KELI_FIXTURE_SPEECH;
+    delete process.env.KELI_OCR_FIXTURE_URL;
+    delete process.env.KELI_SPEECH_FIXTURE_URL;
+    const dir = await tempDir("keli-dispatch-mod");
+    const image = join(dir, "page.png");
+    const wav = join(dir, "clip.wav");
+    const txt = join(dir, "note.txt");
+    await writeFile(image, "png-bytes");
+    await writeFile(wav, "RIFF....");
+    await writeFile(txt, "dispatched body");
+    const server = Bun.serve({
+      hostname: "127.0.0.1",
+      port: 0,
+      async fetch(req) {
+        const path = new URL(req.url).pathname;
+        if (path.endsWith("/extract")) {
+          return Response.json({ text: "from-dispatch", confidence: 0.8 });
+        }
+        if (path.endsWith("/audio/transcriptions")) {
+          return Response.json({ text: "spoken-via-gate" });
+        }
+        return new Response("no", { status: 404 });
+      },
+    });
+    const fixtures = { ocr: `http://127.0.0.1:${server.port}`, speech: `http://127.0.0.1:${server.port}` };
+    const ctx = {
+      policy: { readableRoots: [dir], writableRoots: [] },
+      network: defaultNetworkPolicy(),
+      fixtures,
+    };
+    const text = await dispatchCapability(defaultRegistry, { capabilityId: "documents.extract", input: { path: txt }, resources: [dir] }, ctx);
+    expect(text.ok).toBe(true);
+    expect((text.output as { text: string }).text).toContain("dispatched body");
+    const ocr = await dispatchCapability(defaultRegistry, { capabilityId: "ocr.extract", input: { path: image }, resources: [dir] }, ctx);
+    expect(ocr.ok).toBe(true);
+    expect((ocr.output as { text: string }).text).toBe("from-dispatch");
+    const spoken = await dispatchCapability(defaultRegistry, { capabilityId: "speech.transcribe", input: { path: wav }, resources: [dir] }, ctx);
+    expect(spoken.ok).toBe(true);
+    expect((spoken.output as { text: string }).text).toBe("spoken-via-gate");
+    server.stop(true);
+    if (prevOcr !== undefined) process.env.KELI_FIXTURE_OCR = prevOcr;
+    if (prevSpeech !== undefined) process.env.KELI_FIXTURE_SPEECH = prevSpeech;
   });
 });

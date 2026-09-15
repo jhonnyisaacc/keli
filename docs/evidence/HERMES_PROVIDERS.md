@@ -15,10 +15,8 @@ ADOPT → ADAPT → BUILD (I8, A05, A25, A35):
 | Keli authority/controller | KEEP | No new authorization, tool executor, research controller, portfolio engine or canonical state writer |
 
 The catalog includes the pinned canonical inference providers and bundled API-key
-plugins. The extractor reads committed Git objects with Python's AST; it never
-imports Hermes, runs its plugins, or reads its user configuration. Reproduce with
-`python3 scripts/import-hermes-catalog.py <hermes-checkout>` then
-`bun run scripts/import-provider-manifest.ts` and review the diff.
+plugins. Reproduce the inventory with `bun run scripts/import-provider-manifest.ts`
+and the compatibility ledger with `bun run scripts/write-compat-ledger.ts`.
 Helper-generated provider definitions are explicitly resolved in the extractor.
 Hermes's complete MIT notice is retained in the repository third-party notices.
 

@@ -61,8 +61,17 @@ function config(): KeliConfig {
   };
 }
 
+/** Before every scripted tick in this file (2026-09-15..17). Wall-clock create times make `every:1s` due-ness fail. */
+const SCENARIO_CREATED_AT = "2026-09-01T00:00:00.000Z";
+
 function activate(definition: WatchDefinition) {
-  return upsertWatch(db, { ownerId: "owner", scope, status: "active", definition }).watch;
+  return upsertWatch(db, {
+    ownerId: "owner",
+    scope,
+    status: "active",
+    definition,
+    createdAt: SCENARIO_CREATED_AT,
+  }).watch;
 }
 
 function loop(steps: ScriptedStep[]) {
@@ -127,7 +136,6 @@ describe("cross-domain responsibility scenarios (scripted, fixture-verified)", (
       },
       notify: { policy: "daily-brief" },
     });
-    db.run("UPDATE watches SET created_at=? WHERE id=?", ["2026-09-15T08:00:00.000Z", w.id]);
 
     const day1 = await tick("2026-09-15T09:00:00.000Z", [
       { type: "tool_call", capability: "capabilities.lookup", input: { query: "rocket" } },

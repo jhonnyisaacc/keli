@@ -41,6 +41,11 @@ export type ProviderResponse = {
   candidate?: DelegateCandidate;
   error?: string;
   usage?: ProviderUsage;
+  /** Set when a configured fallback served this proposal after a typed primary failure. */
+  fallbackFrom?: string;
+  fallbackReason?: string;
+  providerId?: string;
+  model?: string;
 };
 
 export class GateService {

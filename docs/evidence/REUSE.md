@@ -58,8 +58,18 @@ Upstream records above are issue reports and proposals, not reproduced defects i
 | Service | systemd user unit, launchd plist | — | `keli service run` composes existing ticks | A33, §9 |
 | Project default | — | — | `personal` unless supplied | product default |
 
-Hermes pin `93e2525a0b60c4e3f581ddf0bdf5ffe1bd977544` MIT. Nanobot pin
-`f49965445152361b779b465e8a5111549ac934c4` MIT. No Python channel runtime copied.
+## Provider onboarding (Hermes / OpenCode setup behavior)
+
+| Area | ADOPT | ADAPT | BUILD (Keli-owned) | PRD trace |
+|------|-------|-------|--------------------|-----------|
+| Compatibility ledger | Pinned Hermes/Nanobot/pi-ai attribution | OpenCode Zen/Go/Free family tables from Hermes `models.py` | `compat-ledger.ts` + generated `UPSTREAM_COMPAT.md` | I8, A05 |
+| Auth flows | pi-ai OAuth for Copilot/Anthropic | Hermes device-code (Nous/xAI/MiniMax), Qwen CLI link, ChatGPT/Codex split | `src/setup/flows.ts` over Keli credential refs; never Hermes Python | I8 |
+| Model setup | pi-ai `getModels` | Hermes defaults, base URLs, OpenCode id/API-mode normalization | Default model unless advanced; live `GET /models` only for local/compatible | I8 |
+| Optional tools | Brave/MCP/Playwright protocols | Hermes backend choice (search/browser) | `keli connect` / `keli setup advanced`; Rocket stays optional external | I9, A41 |
+
+Keli does not import the Hermes or OpenCode runtimes. Adapter status in the ledger is
+`implemented`, `fixture-verified`, or `deferred` — never live-verified from fixtures.
+
 
 ## Bounded capability integrations
 

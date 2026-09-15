@@ -4,6 +4,7 @@ import { defaultCredentialSource, type CredentialSource } from "../credentials/s
 import { KeliError } from "../core/errors.ts";
 import type { ResolvedIntegration } from "./types.ts";
 import { HERMES_PIN, inferenceCatalogEntries, type CatalogEntry } from "./manifest.ts";
+import { normalizeModelId, normalizeOpencodeBaseUrl, opencodeApiMode, opencodeFamily } from "./opencode-models.ts";
 
 export { HERMES_PIN, type CatalogEntry };
 /** Pinned Hermes import data. Keli-owned identities (grok, chatgpt/openai-codex) are not catalog runtime providers. */
@@ -27,8 +28,9 @@ export function catalogEndpoint(id: string, settings: Record<string, string>): s
 }
 export function catalogDescriptor(id: string, model: string, settings: Record<string, string> = {}): Model<Api> {
   const row = catalogEntry(id)!;
+  const normalized = normalizeModelId(id, model) || model;
   const provider = SDK_IDS[id] ?? id;
-  const known = getModels(provider as KnownProvider).find((m) => m.id === model);
+  const known = getModels(provider as KnownProvider).find((m) => m.id === normalized);
   let api: Api = row.api_mode === "anthropic_messages" ? "anthropic-messages" : row.api_mode === "codex_responses" ? "openai-responses" : "openai-completions";
   if (id === "gemini") api = "google-generative-ai";
   if (id === "vertex") api = "google-vertex";
@@ -38,10 +40,15 @@ export function catalogDescriptor(id: string, model: string, settings: Record<st
     if (settings.apiMode === "anthropic-messages") api = "anthropic-messages";
     else api = "azure-openai-responses";
   }
+  if (opencodeFamily(id)) {
+    const mode = opencodeApiMode(id, normalized);
+    api = mode === "anthropic_messages" ? "anthropic-messages" : mode === "codex_responses" ? "openai-responses" : "openai-completions";
+  }
   let baseUrl = catalogEndpoint(id, settings) ?? "";
+  if (opencodeFamily(id) && baseUrl) baseUrl = normalizeOpencodeBaseUrl(id, opencodeApiMode(id, normalized), baseUrl);
   if (id === "vertex" && baseUrl === "https://aiplatform.googleapis.com") baseUrl = "";
   if (!baseUrl && id !== "vertex") throw new KeliError(`${id} needs a base URL`, "invalid_request");
-  return { ...(known ?? { id: model, name: model, reasoning: false, input: ["text"], cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, contextWindow: 32768, maxTokens: 4096 }), provider, api, baseUrl, id: model, name: model };
+  return { ...(known ?? { id: normalized, name: normalized, reasoning: false, input: ["text"], cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, contextWindow: 32768, maxTokens: 4096 }), provider, api, baseUrl, id: normalized, name: normalized };
 }
 export async function createCatalogProvider(resolved: ResolvedIntegration, model: string, credentials: CredentialSource = defaultCredentialSource()): Promise<SdkModelProvider> {
   const { profile, settings, credentialRef } = resolved;
@@ -61,8 +68,9 @@ export async function createCatalogProvider(resolved: ResolvedIntegration, model
       return value;
     }
     const value = catalogEnvironment(profile.id);
-    if (!value && !["none", "external-cli"].includes(profile.auth.type)) throw new KeliError(`Run keli auth add ${profile.id}`, "secret_unavailable");
-    return value ?? (profile.auth.type === "none" ? "keli-keyless" : undefined);
+    const keyless = profile.auth.type === "none" || settings.keyless === "true";
+    if (!value && !keyless && profile.auth.type !== "external-cli") throw new KeliError(`Run keli auth add ${profile.id}`, "secret_unavailable");
+    return value ?? (keyless ? "keli-keyless" : undefined);
   };
   if (credentialRef?.id === "oauth") {
     const { providerOAuthSession } = await import("./provider-oauth.ts");

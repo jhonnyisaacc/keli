@@ -11,10 +11,10 @@ import { fixtureUrlFor } from "../integrations/env.ts";
 import { runLiveProbe } from "../integrations/live-probe.ts";
 import { confirmPairing, issuePairingCode, pairingAccepts, pairingExpiresAt, pairingPhrase } from "../transports/pairing.ts";
 import { createReadlineWizardIo, type WizardIo } from "./io.ts";
-import { runInteractiveCategories, sectionToCategory, type InteractiveDraft } from "./interactive.ts";
+import { runInteractiveCategories, runBootstrapModel, sectionToCategory, type InteractiveDraft } from "./interactive.ts";
 import "../integrations/load.ts";
 
-export type SetupSection = "provider" | "transport" | "delegate" | "memory" | "mcp" | "search";
+export type SetupSection = "provider" | "transport" | "delegate" | "memory" | "mcp" | "search" | "browser" | "documents" | "speech" | "advanced" | "connect";
 
 export type SetupOptions = {
   stateDir?: string;
@@ -100,10 +100,11 @@ async function runSetupBody(options: SetupOptions, io?: WizardIo): Promise<Setup
 
   if (!options.nonInteractive) {
     explain([
-      "Keli setup — choose connections by number.",
+      "Keli setup — connect one conversation model, then chat.",
+      "Optional tools use `keli connect` or `keli setup advanced`.",
       "Registration is not authorization. Grants stay in the gate.",
       "Secrets go to the OS keychain as refs; config never stores plaintext.",
-      returning ? "Returning-user mode: skip any category to keep current values." : "First-run wizard.",
+      returning ? "Returning-user mode: skip any prompt to keep current values." : "First-run bootstrap.",
     ], io);
   }
 
@@ -125,10 +126,21 @@ async function runSetupBody(options: SetupOptions, io?: WizardIo): Promise<Setup
   const section = options.section;
 
   if (!options.nonInteractive && io) {
-    await runInteractiveCategories(io, existing, stateDir, draft, allowFixture, sectionToCategory(section));
+    const connectSection = section === "advanced" || section === "connect";
+    if (!section || section === "provider") {
+      await runBootstrapModel(io, existing, stateDir, draft, allowFixture);
+    } else if (connectSection) {
+      await runInteractiveCategories(io, existing, stateDir, draft, allowFixture);
+    } else {
+      await runInteractiveCategories(io, existing, stateDir, draft, allowFixture, sectionToCategory(section));
+    }
     const reloaded = await readConfig(stateDir);
     if (reloaded?.integrations) existing.integrations = reloaded.integrations;
     if (reloaded?.memory) existing.memory = reloaded.memory;
+    if (reloaded?.browser) existing.browser = reloaded.browser;
+    if (reloaded?.mcp) existing.mcp = reloaded.mcp;
+    if (reloaded?.providers) existing.providers = reloaded.providers;
+    if (reloaded?.primaryModel) existing.primaryModel = reloaded.primaryModel;
   }
 
   let transport = draft.transport;
@@ -140,8 +152,9 @@ async function runSetupBody(options: SetupOptions, io?: WizardIo): Promise<Setup
   let fallbackModel = draft.fallbackModel;
   let skipCalibration = draft.skipCalibration ?? false;
 
+  const sectionSkipsTransport = Boolean(section) && section !== "transport";
   if (minimal && !transport) transport = "none";
-  if (section === "search" || section === "mcp" || section === "provider" || section === "memory") {
+  if (sectionSkipsTransport) {
     transport = transport ?? existing.setup?.transport ?? "none";
   }
   if (options.nonInteractive) {
@@ -150,10 +163,10 @@ async function runSetupBody(options: SetupOptions, io?: WizardIo): Promise<Setup
     transport = transport ?? existing.setup?.transport ?? "none";
   }
 
-  if (transport === "discord" && !discordChannel && section !== "provider" && section !== "search" && section !== "mcp" && section !== "memory" && options.nonInteractive) {
+  if (transport === "discord" && !discordChannel && !sectionSkipsTransport && options.nonInteractive) {
     throw new Error("Discord setup requires --discord-channel or an interactive channel id");
   }
-  if (transport === "telegram" && !telegramChat && section !== "provider" && section !== "search" && section !== "mcp" && section !== "memory" && options.nonInteractive) {
+  if (transport === "telegram" && !telegramChat && !sectionSkipsTransport && options.nonInteractive) {
     throw new Error("Telegram setup requires --telegram-chat or an interactive chat id");
   }
 
@@ -240,12 +253,7 @@ async function runSetupBody(options: SetupOptions, io?: WizardIo): Promise<Setup
   let pairingVerified = Boolean(existing.setup?.pairing?.verifiedAt);
   let pairingPending = Boolean(existing.setup?.pairing && !existing.setup.pairing.verifiedAt);
   let pairing = existing.setup?.pairing;
-  const skipThisTransport =
-    options.skipTransportTest ||
-    section === "search" ||
-    section === "mcp" ||
-    section === "provider" ||
-    section === "memory";
+  const skipThisTransport = options.skipTransportTest || sectionSkipsTransport;
   if (!skipThisTransport && transport !== "none") {
     if (transport === "discord") {
       try {
@@ -457,18 +465,18 @@ async function runSetupBody(options: SetupOptions, io?: WizardIo): Promise<Setup
         ? `Primary provider live-verified for this model (${providerDetail}). Catalog membership is not entitlement.`
         : primaryModel
           ? `Primary provider not yet connected: ${providerDetail || "run keli auth add <provider> then keli doctor"}.`
-          : "No conversation model configured — Chat/Models still needs an explicit choice.",
-      searchEndpoint ? `Search connected (${searchEndpoint}).` : "Search not connected — web investigation will explain the missing access.",
+          : "No conversation model configured — run keli setup and choose a Chat/Models provider.",
+      searchEndpoint ? `Search connected (${searchEndpoint}).` : "Search not connected — `keli connect search` when needed.",
       pairingVerified
         ? "Transport pairing verified."
         : pairingPending
           ? "Transport pairing pending — reply with the KELI-PAIR code from that chat."
           : transport === "none"
-            ? "CLI-only: notifications stay local."
+            ? "CLI-only: run `keli chat`. Optional messaging: `keli connect`."
             : "",
       skipCalibration
         ? "Optional calibration skipped — you can run a real task anytime."
-        : "Run a real conversation when ready.",
+        : "Run `keli chat` when ready.",
       "Routing roles and budgets stay on keli config — they are not part of onboarding.",
     ], io);
   }

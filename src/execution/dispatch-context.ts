@@ -11,6 +11,9 @@ export type FixtureEndpoints = {
   browser?: string;
   mcp?: string;
   delegate?: string;
+  documents?: string;
+  ocr?: string;
+  speech?: string;
 };
 
 export type RunDispatchContext = {
@@ -49,5 +52,8 @@ export function fixtureEndpointsFromEnv(): FixtureEndpoints {
     browser: fixtureUrlFor("browser"),
     mcp: fixtureUrlFor("mcp"),
     delegate: fixtureUrlFor("delegate"),
+    documents: fixtureUrlFor("documents"),
+    ocr: fixtureUrlFor("ocr"),
+    speech: fixtureUrlFor("speech"),
   };
 }

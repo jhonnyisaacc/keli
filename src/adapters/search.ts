@@ -3,6 +3,7 @@ import { KeliError } from "../core/errors.ts";
 import { fixtureUrlFor } from "../integrations/env.ts";
 import { defaultCredentialSource } from "../credentials/source.ts";
 import { tryResolveIntegration } from "../integrations/resolve.ts";
+import { missingAccessResult, SEARCH_MISSING_ACCESS } from "../integrations/missing-access.ts";
 import type { KeliConfig } from "../state/config.ts";
 
 export type SearchQueryOptions = {
@@ -28,14 +29,7 @@ export async function searchQuery(
   const resolved = tryResolveIntegration("search", { config: options.config, explicitId: "search" });
   const base = resolved?.settings.baseUrl ?? resolved?.fixtureUrl;
   if (!base) {
-    return {
-      capabilityId: "search.query",
-      ok: false,
-      error: {
-        code: "missing_access",
-        message: "Search is not connected. Run keli setup search to add Brave or a generic JSON endpoint, then retry. Conversation still works without web search.",
-      },
-    };
+    return missingAccessResult("search.query", SEARCH_MISSING_ACCESS);
   }
 
   let credential = options.credential;

@@ -30,7 +30,7 @@ export const mcpFixtureProfile: IntegrationProfile = {
       configured: Boolean(url || ctx.settings.command),
       reachable: Boolean(url),
       reason: url || ctx.settings.command ? "MCP server configured" : "Run keli setup mcp",
-      howToConfigure: "keli setup mcp  or set KELI_MCP_FIXTURE_URL",
+      howToConfigure: "keli connect mcp  or  keli setup mcp  or set KELI_MCP_FIXTURE_URL",
     });
   },
   async roundTrip(ctx) {
@@ -52,7 +52,7 @@ export const mcpFixtureProfile: IntegrationProfile = {
       });
     }
     if (ctx.settings.command) return { ok: true, detail: "MCP stdio command configured" };
-    return notConfigured("MCP is not connected. Run keli setup mcp.");
+    return notConfigured("MCP is not connected. Run keli connect mcp.");
   },
 };
 

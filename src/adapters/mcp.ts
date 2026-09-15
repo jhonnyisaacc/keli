@@ -1,7 +1,9 @@
+import { validateJsonSchema } from "../capabilities/json-schema.ts";
 import type { CapabilityResult } from "../capabilities/types.ts";
 import { KeliError } from "../core/errors.ts";
 import { fixtureUrlFor } from "../integrations/env.ts";
 import { JsonRpcStdioClient } from "../execution/jsonrpc-stdio.ts";
+import { MCP_MISSING_ACCESS, missingAccessResult } from "../integrations/missing-access.ts";
 import type { KeliConfig } from "../state/config.ts";
 
 export type McpTarget = {
@@ -15,10 +17,19 @@ export type McpTarget = {
 export function mcpTargetFrom(config?: KeliConfig | null, fixtureUrl?: string): McpTarget {
   const fixture = fixtureUrl ?? fixtureUrlFor("mcp");
   const server = config?.mcp?.servers?.[0];
+  const settings = config?.integrations?.mcp?.settings;
+  const httpUrl =
+    settings?.url ||
+    (server?.transport === "http" ? server.url : undefined) ||
+    (settings?.transport === "http" ? settings.url : undefined);
+  const command =
+    settings?.command ||
+    (server?.transport === "stdio" ? server.command : undefined) ||
+    (settings?.transport === "stdio" ? settings.command : undefined);
   return {
     fixtureUrl: fixture,
-    httpUrl: server?.transport === "http" ? server.url : undefined,
-    command: server?.transport === "stdio" ? server.command : undefined,
+    httpUrl,
+    command,
     args: server?.args,
   };
 }
@@ -52,9 +63,11 @@ export type McpToolSchema = {
   name: string;
   description?: string;
   inputSchema?: {
-    type?: string;
+    type?: string | string[];
     required?: string[];
     properties?: Record<string, unknown>;
+    additionalProperties?: boolean | Record<string, unknown>;
+    [key: string]: unknown;
   };
 };
 
@@ -84,21 +97,21 @@ export function validateMcpToolCall(
   }
   const schema = tool.inputSchema;
   if (!schema) return null;
-  if (schema.type && schema.type !== "object") {
+  const types = schema.type === undefined ? ["object"] : Array.isArray(schema.type) ? schema.type : [schema.type];
+  if (!types.includes("object")) {
     return {
       capabilityId: "mcp.tools/call",
       ok: false,
       error: { code: "invalid_request", message: `MCP tool '${name}' schema is not an object` },
     };
   }
-  for (const key of schema.required ?? []) {
-    if (!(key in args) || args[key] === undefined) {
-      return {
-        capabilityId: "mcp.tools/call",
-        ok: false,
-        error: { code: "invalid_request", message: `MCP tool '${name}' is missing required argument '${key}'` },
-      };
-    }
+  const invalid = validateJsonSchema(schema, args);
+  if (invalid) {
+    return {
+      capabilityId: "mcp.tools/call",
+      ok: false,
+      error: { code: "invalid_request", message: `MCP tool '${name}' ${invalid}` },
+    };
   }
   return null;
 }
@@ -216,12 +229,5 @@ async function jsonRpcStdio(
 }
 
 function unavailable(capabilityId: string): CapabilityResult {
-  return {
-    capabilityId,
-    ok: false,
-    error: {
-      code: "missing_access",
-      message: "MCP is not connected. Run keli setup mcp to add a stdio or HTTP server, or omit mcp.tools/* from this responsibility.",
-    },
-  };
+  return missingAccessResult(capabilityId, MCP_MISSING_ACCESS);
 }

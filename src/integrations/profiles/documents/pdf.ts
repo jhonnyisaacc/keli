@@ -1,6 +1,5 @@
 import { resolveBinary } from "../../../execution/bounded-process.ts";
 import { registerIntegration } from "../../registry.ts";
-import { notConfigured } from "../../round-trip.ts";
 import { statusOf } from "../../status.ts";
 import type { IntegrationProfile } from "../../types.ts";
 
@@ -40,7 +39,7 @@ export const documentsPdfProfile: IntegrationProfile = {
     if (ctx.fixtureUrl) return { ok: true, detail: "document fixture configured" };
     return resolveBinary(ctx.settings.bin ?? "pdftotext")
       ? { ok: true, detail: "pdftotext present" }
-      : notConfigured("pdftotext optional; uncompressed text PDFs still extract in-process");
+      : { ok: true, detail: "uncompressed text PDFs extract in-process; pdftotext optional" };
   },
 };
 

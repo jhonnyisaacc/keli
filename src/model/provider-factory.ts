@@ -1,6 +1,7 @@
 import { KeliError } from "../core/errors.ts";
 import { defaultCredentialSource, type CredentialSource } from "../credentials/source.ts";
 import { integrationEndpoint, resolveIntegration } from "../integrations/resolve.ts";
+import { defaultModelFor, normalizeModelId } from "../integrations/provider-behavior.ts";
 import type { ResolvedIntegration } from "../integrations/types.ts";
 import type { KeliConfig } from "../state/config.ts";
 import type { ChatModelProvider } from "./chat-provider.ts";
@@ -30,12 +31,13 @@ export type CreatedProvider = {
 };
 
 export function selectModel(resolved: ResolvedIntegration, requested?: string): string | undefined {
-  return (
+  const raw =
     requested ??
     resolved.model ??
     resolved.settings.model ??
-    resolved.profile.defaultModels?.[0]
-  );
+    resolved.profile.defaultModels?.[0] ??
+    defaultModelFor(resolved.profile.id);
+  return raw ? normalizeModelId(resolved.profile.id, raw) : undefined;
 }
 
 /**
@@ -47,21 +49,8 @@ export async function createModelProvider(options: CreateProviderOptions = {}): 
   try {
     return await createModelProviderOnce(options);
   } catch (error) {
-    const primaryId = options.config?.providers?.primary?.id;
-    const allowFallback = !options.explicitId || options.explicitId === primaryId;
-    if (!allowFallback) throw error;
-    const reason = fallbackReason(error);
-    if (!reason) throw error;
-    const fallbacks = options.config?.providers?.fallback ?? [];
-    for (const candidate of fallbacks) {
-      if (!candidate.id || candidate.id === "fixture") continue;
-      try {
-        const created = await createModelProviderOnce({ ...options, explicitId: candidate.id, model: candidate.model ?? options.model });
-        return { ...created, fallbackFrom: options.config?.providers?.primary?.id, fallbackReason: reason };
-      } catch {
-        continue;
-      }
-    }
+    const fallback = await createFallbackProvider(options, error);
+    if (fallback) return fallback;
     throw error;
   }
 }
@@ -78,6 +67,38 @@ function fallbackReason(error: unknown): string | undefined {
 
 export function isProviderFallbackEligible(error: unknown): boolean {
   return Boolean(fallbackReason(error));
+}
+
+/** A candidate or generated tokens means the primary already produced output; do not switch providers. */
+export function hasPartialProviderOutput(response: { candidate?: unknown; usage?: { reportedOut?: number } }): boolean {
+  return Boolean(response.candidate) || (response.usage?.reportedOut ?? 0) > 0;
+}
+
+/**
+ * Construct the next configured fallback after a typed transport/provider failure.
+ * Never silent fixture, never after the caller has already observed a partial response.
+ */
+export async function createFallbackProvider(
+  options: CreateProviderOptions,
+  error: unknown,
+  alreadyTried: string[] = [],
+): Promise<CreatedProvider | undefined> {
+  const primaryId = options.config?.providers?.primary?.id;
+  const allowFallback = !options.explicitId || options.explicitId === primaryId;
+  if (!allowFallback) return undefined;
+  const reason = fallbackReason(error);
+  if (!reason) return undefined;
+  const skip = new Set(["fixture", primaryId, options.explicitId, ...alreadyTried].filter(Boolean) as string[]);
+  for (const candidate of options.config?.providers?.fallback ?? []) {
+    if (!candidate.id || skip.has(candidate.id)) continue;
+    try {
+      const created = await createModelProviderOnce({ ...options, explicitId: candidate.id, model: candidate.model ?? options.model });
+      return { ...created, fallbackFrom: primaryId, fallbackReason: reason };
+    } catch {
+      continue;
+    }
+  }
+  return undefined;
 }
 
 async function createModelProviderOnce(options: CreateProviderOptions = {}): Promise<CreatedProvider> {
@@ -146,7 +167,7 @@ async function createModelProviderOnce(options: CreateProviderOptions = {}): Pro
       );
     }
     apiKey = value;
-  } else if (profile.auth.type !== "none" && resolved.source !== "fixture-env") {
+  } else if (profile.auth.type !== "none" && resolved.source !== "fixture-env" && resolved.settings.keyless !== "true") {
     const requiresKey = profile.settings.some((s) => s.secret && s.required);
     if (requiresKey) {
       throw new KeliError(

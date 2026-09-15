@@ -38,12 +38,12 @@ export const searchProfile: IntegrationProfile = {
       credentialState: ctx.credentialRef ? "resolvable" : url ? "n/a" : "missing",
       reachable: Boolean(url),
       reason: url ? "search endpoint configured" : "set KELI_FIXTURE_SEARCH or keli setup search",
-      howToConfigure: "keli setup search  or keli auth add search",
+      howToConfigure: "keli connect search  or  keli setup search  or  keli auth add search",
     });
   },
   async roundTrip(ctx) {
     const url = ctx.fixtureUrl ?? ctx.settings.baseUrl;
-    if (!url) return notConfigured("Search is not connected. Run keli setup search.");
+    if (!url) return notConfigured("Search is not connected. Run keli connect search.");
     if (isBrave(url)) {
       if (!ctx.credential) return notConfigured("Brave needs an API key");
       const endpoint = url.includes("/res/v1/web/search") ? url : `${url.replace(/\/$/, "")}/res/v1/web/search`;

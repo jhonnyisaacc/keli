@@ -2,9 +2,9 @@
 /**
  * Build the single portable provider manifest.
  *
- * Optional: KELI_HERMES_ROOT points at a pinned Hermes checkout. When set, the
- * existing Python extractor refreshes the Hermes inference snapshot. Nanobot is
- * attribution-only here (no runtime import). Output never contains personal paths.
+ * Hermes inference rows live in provider-manifest.json (`hermesInference`). Optional
+ * `KELI_HERMES_ROOT` may refresh that snapshot via an extractor that prints JSON to
+ * stdout. Never write `hermes-catalog.json`. Nanobot is attribution-only.
  *
  * Usage: bun run scripts/import-provider-manifest.ts
  */
@@ -370,7 +370,7 @@ function keliOwned(): ManifestRow[] {
       displayName: "MCP",
       authStrategy: "none",
       protocol: "other-http",
-      protocolNote: "JSON-RPC HTTP or owned stdio; schema inspect is a later slice",
+      protocolNote: "JSON-RPC HTTP or owned stdio; tools/call requires a prior tools/list schema check",
       runtimeAdapter: "mcp.ts",
       sourceCommit: keli,
       license: "MIT",
@@ -430,10 +430,25 @@ function keliOwned(): ManifestRow[] {
       displayName: "OpenCode CLI",
       authStrategy: "external-cli",
       protocol: "local-process",
-      protocolNote: "ACP delegate; opencode-zen is hosted inference",
+      protocolNote: "ACP coding delegate, distinct from opencode-zen inference. Fixture or ACP handshake required.",
       runtimeAdapter: "none",
       sourceCommit: keli,
       license: "Apache-2.0",
+      status: "blocked",
+      prdIds: ["A19", "A20", "A37"],
+      origin: "keli",
+    },
+    {
+      category: "delegate",
+      id: "copilot-acp-delegate",
+      aliases: ["copilot-acp-agent"],
+      displayName: "GitHub Copilot ACP",
+      authStrategy: "oauth-external-cli",
+      protocol: "oauth-external-cli",
+      protocolNote: "ACP coding delegate; distinct from Copilot Chat Completions. Child completion without artifacts stays unverified.",
+      runtimeAdapter: "delegateRun",
+      sourceCommit: keli,
+      license: "n/a",
       status: "blocked",
       prdIds: ["A19", "A20", "A37"],
       origin: "keli",
@@ -445,13 +460,13 @@ function keliOwned(): ManifestRow[] {
       displayName: "PDF text extraction",
       authStrategy: "none",
       protocol: "local-process",
-      runtimeAdapter: "none",
+      runtimeAdapter: "documentsExtract",
       sourceCommit: keli,
-      license: "n/a",
-      status: "blocked",
+      license: "Apache-2.0 (wrapper); no npm PDF parser adopted",
+      status: "fixture-verified",
       prdIds: ["I9"],
       origin: "keli",
-      protocolNote: "No runtime in this slice; parser chosen after license/API check",
+      protocolNote: "Uncompressed PDF strings in-process; optional pdftotext. No third-party PDF library until license/API is verified.",
     },
     {
       category: "ocr",
@@ -460,12 +475,13 @@ function keliOwned(): ManifestRow[] {
       displayName: "Tesseract OCR",
       authStrategy: "none",
       protocol: "local-process",
-      runtimeAdapter: "none",
+      runtimeAdapter: "ocrExtract",
       sourceCommit: keli,
       license: "Apache-2.0",
-      status: "blocked",
+      status: "fixture-verified",
       prdIds: ["I9"],
       origin: "keli",
+      protocolNote: "Optional tesseract binary; missing install is typed unavailable, not a CI dependency",
     },
     {
       category: "speech",
@@ -474,12 +490,13 @@ function keliOwned(): ManifestRow[] {
       displayName: "Speech transcription",
       authStrategy: "api-key",
       protocol: "openai-compatible-http",
-      runtimeAdapter: "none",
+      runtimeAdapter: "speechTranscribe",
       sourceCommit: keli,
       license: "n/a",
-      status: "blocked",
+      status: "fixture-verified",
       prdIds: ["I9"],
       origin: "keli",
+      protocolNote: "OpenAI-compatible POST /audio/transcriptions; fixture proves request shape",
     },
     {
       category: "speech",
@@ -488,11 +505,11 @@ function keliOwned(): ManifestRow[] {
       displayName: "Speech synthesis",
       authStrategy: "api-key",
       protocol: "openai-compatible-http",
-      protocolNote: "Optional; full upstream TTS plugin zoo is excluded",
-      runtimeAdapter: "none",
+      protocolNote: "Optional OpenAI-compatible POST /audio/speech; full TTS plugin zoo excluded",
+      runtimeAdapter: "speechSynthesize",
       sourceCommit: keli,
       license: "n/a",
-      status: "blocked",
+      status: "fixture-verified",
       prdIds: ["I9"],
       origin: "keli",
     },
@@ -526,38 +543,30 @@ function fromHermes(row: HermesRow): ManifestRow {
 }
 
 function loadHermesRows(root: string): HermesRow[] {
-  const catalogPath = join(root, "src/integrations/hermes-catalog.json");
+  const manifestPath = join(root, "src/integrations/provider-manifest.json");
+  if (!existsSync(manifestPath)) throw new Error("provider-manifest.json missing; it is the only inventory");
+  const existing = JSON.parse(readFileSync(manifestPath, "utf8")) as { hermesInference?: HermesRow[] };
   const hermesRoot = process.env.KELI_HERMES_ROOT;
   if (hermesRoot) {
-    const extractor = join(root, "scripts/import-hermes-catalog.py");
+    const extractor = join(root, "scripts/extract-hermes-inference.py");
     if (!existsSync(extractor)) {
-      throw new Error("Hermes extractor missing; commit the snapshot instead of inventing rows");
-    }
-    const result = spawnSync("python3", [extractor, hermesRoot], { encoding: "utf8" });
-    if (result.status !== 0) {
-      throw new Error(result.stderr || result.stdout || "Hermes extract failed");
+      if (!existing.hermesInference?.length) {
+        throw new Error("Hermes extractor missing; keep hermesInference inside provider-manifest.json");
+      }
+    } else {
+      const result = spawnSync("python3", [extractor, hermesRoot], { encoding: "utf8" });
+      if (result.status !== 0) {
+        throw new Error(result.stderr || result.stdout || "Hermes extract failed");
+      }
+      const rows = JSON.parse(result.stdout) as HermesRow[];
+      if (!Array.isArray(rows) || rows.length === 0) throw new Error("Hermes extractor returned no rows");
+      return rows;
     }
   }
-  if (existsSync(catalogPath)) {
-    return JSON.parse(readFileSync(catalogPath, "utf8")) as HermesRow[];
+  if (!existing.hermesInference?.length) {
+    throw new Error("hermesInference snapshot missing from provider-manifest.json");
   }
-  const manifestPath = join(root, "src/integrations/provider-manifest.json");
-  if (!existsSync(manifestPath)) throw new Error("No Hermes snapshot or provider-manifest.json");
-  const existing = JSON.parse(readFileSync(manifestPath, "utf8")) as { hermesInference?: HermesRow[]; providers: ManifestRow[] };
-  if (existing.hermesInference?.length) return existing.hermesInference;
-  return existing.providers
-    .filter((p) => p.origin === "hermes")
-    .map((p) => ({
-      name: p.id,
-      display_name: p.displayName,
-      aliases: p.aliases,
-      base_url: p.endpointDefaults,
-      env_vars: p.envVars,
-      auth_type: p.authStrategy,
-      api_mode: p.apiMode,
-      default_aux_model: p.defaultAuxModel,
-      fallback_models: p.fallbackModels,
-    }));
+  return existing.hermesInference;
 }
 
 export function buildManifest(root = process.cwd()) {

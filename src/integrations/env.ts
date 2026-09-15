@@ -21,8 +21,10 @@ const FIXTURE_KEYS = {
 
 export type FixtureSlot = keyof typeof FIXTURE_KEYS;
 
-export function fixtureUrlFor(slot: FixtureSlot): string | undefined {
-  for (const name of FIXTURE_KEYS[slot]) {
+export function fixtureUrlFor(slot: FixtureSlot | string): string | undefined {
+  const names = FIXTURE_KEYS[slot as FixtureSlot];
+  if (!names) return undefined;
+  for (const name of names) {
     const value = process.env[name];
     if (value) return value;
   }

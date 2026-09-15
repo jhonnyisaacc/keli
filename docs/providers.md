@@ -1,17 +1,20 @@
 # Connecting a model
 
-Run `keli setup`. First-use chat ids are `chatgpt`, `openai-compatible`, `anthropic`,
-and `grok`. Other catalog ids are valid when typed explicitly; they are not a completeness
+Run `keli setup`. That bootstrap connects **one** conversation model (authenticate,
+use the provider default or discovered model, probe), then you can `keli chat`.
+First-use chat ids are `chatgpt`, `openai-compatible`, `anthropic`, and `grok`.
+Other catalog ids are valid from More providers; they are not a completeness
 claim. Fixture providers are used only with `--fixture` or an explicit test flag.
+
+Optional tools use `keli connect` or `keli setup advanced` (Search, Memory,
+Browser, Documents/OCR, Speech, Messaging, External tools/delegates, Background
+service). Existing `keli setup search|browser|mcp|...` section commands remain
+aliases. `keli setup --transport none` keeps notifications on the CLI.
 
 `keli providers list` reports **catalogued**, **configured**, **fixture-verified**,
 **live-verified**, **blocked**, or **excluded**. Live-verified is scoped to the selected
-model and is cleared when the model or endpoint changes.
-
-Optional numbered categories: Search (Brave or generic JSON), Memory (local notes;
-Honcho is fixture-only), Browser, Documents/OCR, Speech, Messaging, External
-tools/delegates, Background service. `keli setup --transport none` keeps notifications
-on the CLI. Pair Discord or Telegram with a `KELI-PAIR` code from that chat.
+model and is cleared when the model or endpoint changes. Pair Discord or Telegram
+with a `KELI-PAIR` code from that chat.
 
 Documents extract uncompressed PDF text in-process. `pdftotext`, Tesseract, and
 OpenAI-compatible audio endpoints are optional and are not required by CI. Extraction
@@ -63,3 +66,6 @@ tools. Rocket and portfolio behavior are unrelated to provider onboarding.
 
 See the [implementation evidence](evidence/HERMES_PROVIDERS.md) for the upstream
 pin, coverage, and the distinction between fixture checks and live account checks.
+The generated [compatibility ledger](evidence/UPSTREAM_COMPAT.md) lists every
+advertised family with adapter status `implemented`, `fixture-verified`, or
+`deferred`. Catalog membership is not live-verified.

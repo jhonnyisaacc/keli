@@ -1,11 +1,19 @@
-import { addCredential } from "../integrations/auth.ts";
-import { catalogModels } from "../integrations/catalog-provider.ts";
 import { getIntegration } from "../integrations/registry.ts";
-import { runLiveProbe } from "../integrations/live-probe.ts";
+import { BRAVE_SEARCH_URL, authFlowType, isLoopbackUrl, requiresBaseUrlPrompt } from "../integrations/provider-behavior.ts";
 import type { KeliConfig } from "../state/config.ts";
-import { writeConfig } from "../state/config.ts";
+import { readConfig, writeConfig } from "../state/config.ts";
 import type { WizardIo } from "./io.ts";
-import { formatProviderChoice, providersForCategory, SETUP_CATEGORIES, type SetupCategory } from "./categories.ts";
+import {
+  OPTIONAL_CATEGORIES,
+  formatProviderChoice,
+  moreModelProviders,
+  providersForCategory,
+  SETUP_CATEGORIES,
+  setupBadge,
+  type SetupCategory,
+} from "./categories.ts";
+import type { ManifestRow } from "../integrations/manifest.ts";
+import { authenticateIntegration, configureModel, connectIntegration, persistIntegration } from "./flows.ts";
 
 export type InteractiveDraft = {
   primaryModel?: string;
@@ -26,64 +34,143 @@ async function pickNumber(io: WizardIo, prompt: string, max: number): Promise<nu
   const answer = await io.question(prompt);
   if (!answer || answer.toLowerCase() === "s" || answer.toLowerCase() === "skip") return undefined;
   const n = Number(answer);
+  if (n === 0) return undefined;
   if (!Number.isInteger(n) || n < 1 || n > max) throw new Error("Choose a listed number, or skip");
   return n;
 }
 
-async function configureModelProvider(io: WizardIo, config: KeliConfig, id: string, stateDir: string): Promise<void> {
+/** addCredential writes the ref to disk; probes use this object, so reload before live-check. */
+export async function syncIntegrationFromDisk(config: KeliConfig, stateDir: string, id: string): Promise<void> {
+  const persisted = await readConfig(stateDir);
+  const saved = persisted?.integrations?.[id];
+  if (!saved) return;
+  config.integrations = { ...config.integrations, [id]: { ...config.integrations?.[id], ...saved } };
+}
+
+function oauthCallbacks(io: WizardIo) {
+  return {
+    onAuth: ({ url, instructions }: { url: string; instructions?: string }) => {
+      io.println(`Sign in: ${url}`);
+      if (instructions) io.println(instructions);
+    },
+    onPrompt: ({ message }: { message: string }) => io.question(message),
+  };
+}
+
+async function configureModelProvider(io: WizardIo, config: KeliConfig, id: string, stateDir: string, advanced = false): Promise<void> {
   const profile = getIntegration(id);
   if (!profile || profile.availability === "named-later") throw new Error(`Provider '${id}' is not implemented`);
-  const entry = config.integrations?.[id] ?? { enabled: true, settings: {} };
-  const models = catalogModels(id);
-  if (models.length) io.println(`Suggested models: ${models.slice(0, 12).join(", ")} (other model IDs accepted)`);
-  const currentModel = entry.settings.model ?? profile.defaultModels?.[0] ?? "";
-  const chosen = (await io.question(`Model for ${profile.displayName} [${currentModel}]: `)) || currentModel;
-  if (!chosen) throw new Error(`A model is required for ${id}`);
-  if (chosen !== currentModel || entry.settings.baseUrl) {
-    const { clearLiveCheck } = await import("../integrations/live-probe.ts");
-    clearLiveCheck(config, id);
+  let type = authFlowType(id);
+  if (requiresBaseUrlPrompt(id) && !advanced) {
+    const current = config.integrations?.[id]?.settings.baseUrl ?? profile.baseUrl ?? "";
+    const typed = await io.question(`Base URL [${current}]: `);
+    const baseUrl = typed || current;
+    if (baseUrl) await persistIntegration({ config, stateDir, id, settings: { baseUrl } });
   }
-  entry.settings = { ...entry.settings, model: chosen };
-  for (const setting of profile.settings.filter((p) => !p.secret && p.key !== "model")) {
-    const current = entry.settings[setting.key] ?? (setting.key === "baseUrl" ? profile.baseUrl : setting.default) ?? "";
-    const value = (await io.question(`${setting.label} [${current}]: `)) || current;
-    if (!value && setting.required) throw new Error(`${setting.label} is required for ${id}`);
-    if (value) entry.settings[setting.key] = value;
+  const loopback = isLoopbackUrl(config.integrations?.[id]?.settings.baseUrl ?? profile.baseUrl ?? "");
+  if (id === "chatgpt" && !config.integrations?.[id]?.credentialRef) {
+    io.println("1. New ChatGPT login");
+    io.println("2. Existing Codex CLI");
+    const picked = await pickNumber(io, "ChatGPT sign-in [1]: ", 2);
+    if (picked === 2) type = "external-cli";
+    else type = "oauth-device";
+  } else if (id === "anthropic" && !config.integrations?.[id]?.credentialRef) {
+    io.println("1. API key");
+    io.println("2. Account login");
+    const picked = await pickNumber(io, "Anthropic authentication [1]: ", 2);
+    if (picked === 2) type = "oauth-device";
+    else type = "api-key";
+  } else if (type === "api-key" && loopback) {
+    type = "keyless";
   }
-  entry.enabled = true;
-  config.integrations = { ...config.integrations, [id]: entry };
-  await writeConfig(config, stateDir);
-  if (id === "chatgpt") {
-    if (!config.integrations?.chatgpt?.credentialRef) {
-      const { codexAccessToken } = await import("../integrations/chatgpt-auth.ts");
-      let linked = false;
-      try { await codexAccessToken(); linked = true; } catch { /* independent login */ }
-      const useExisting = linked && !(await io.question("Use your existing Codex ChatGPT login? [Y/n]: ")).toLowerCase().startsWith("n");
-      await addCredential("chatgpt", {
-        stateDir,
-        type: useExisting ? "external-cli" : "oauth-device",
-        oauthCallbacks: {
-          onAuth: ({ url, instructions }) => { io.println(`Sign in in your browser: ${url}`); if (instructions) io.println(instructions); },
-          onPrompt: ({ message }) => io.question(`${message}`),
-        },
-      });
-    }
+  const auth = await authenticateIntegration({
+    integrationId: id,
+    stateDir,
+    config,
+    io,
+    type,
+    oauthCallbacks: oauthCallbacks(io),
+    retryOnCancel: true,
+  });
+  if (!auth.ok) {
+    io.println(auth.cancelled ? "Cancelled." : auth.error.message);
+    if (auth.cancelled) return;
+    throw auth.error;
+  }
+  const model = await configureModel({
+    integrationId: id,
+    stateDir,
+    config,
+    io,
+    advanced,
+  });
+  if (!model.ok) {
+    io.println(model.cancelled ? "Cancelled." : model.error.message);
+    if (model.cancelled) return;
+    throw model.error;
+  }
+  io.println(model.probe.ok ? `Connected: ${model.probe.detail}` : `Not connected: ${model.probe.detail}`);
+}
+
+async function configureSearch(io: WizardIo, config: KeliConfig, stateDir: string, draft: InteractiveDraft): Promise<void> {
+  io.println("Search backends: Brave (API key) or generic JSON POST /search.");
+  io.println("0. Skip");
+  io.println("1. Brave Search");
+  io.println("2. Generic JSON");
+  const picked = await pickNumber(io, "Select search backend [0]: ", 2);
+  if (!picked) return;
+  if (picked === 1) {
+    await persistIntegration({
+      config,
+      stateDir,
+      id: "search",
+      settings: { baseUrl: BRAVE_SEARCH_URL },
+    });
+    const auth = await authenticateIntegration({
+      integrationId: "search",
+      stateDir,
+      config,
+      io,
+      type: "api-key",
+    });
+    io.println(auth.ok ? (auth.probe.ok ? `Connected: ${auth.probe.detail}` : `Not connected: ${auth.probe.detail}`) : auth.error.message);
+    draft.searchEndpoint = BRAVE_SEARCH_URL;
     return;
   }
-  if (!entry.credentialRef && profile.auth.type !== "none" && profile.auth.type !== "external-cli") {
-    let type = profile.auth.type;
-    if (id === "anthropic" && (await io.question("Authentication: API key or account login? [api-key/account]: ")) === "account") type = "oauth-device";
-    let value: string | undefined;
-    if (type === "api-key" || type === "token") value = await io.secret(`Credential for ${profile.displayName} (hidden): `);
-    await addCredential(id, {
-      stateDir,
-      type,
-      value,
-      oauthCallbacks: {
-        onAuth: ({ url, instructions }) => { io.println(`Sign in: ${url}`); if (instructions) io.println(instructions); },
-        onPrompt: ({ message }) => io.question(message),
-      },
-    });
+  const current = config.integrations?.search?.settings.baseUrl ?? "";
+  const endpoint = (await io.question(`Search endpoint (generic JSON) [${current}]: `)) || current;
+  if (!endpoint) return;
+  draft.searchEndpoint = endpoint;
+  await persistIntegration({ config, stateDir, id: "search", settings: { baseUrl: endpoint } });
+  const result = await connectIntegration({ integrationId: "search", stateDir, config, io, values: { baseUrl: endpoint } });
+  if (result.ok) io.println(result.probe.ok ? `Connected: ${result.probe.detail}` : `Not connected: ${result.probe.detail}`);
+}
+
+async function configureSelectedProvider(
+  io: WizardIo,
+  category: SetupCategory,
+  row: ManifestRow,
+  config: KeliConfig,
+  stateDir: string,
+): Promise<void> {
+  const result = await connectIntegration({
+    integrationId: row.id,
+    stateDir,
+    config,
+    io,
+    advanced: true,
+    oauthCallbacks: oauthCallbacks(io),
+  });
+  if (!result.ok) {
+    io.println(result.cancelled ? "Cancelled." : result.error.message);
+    return;
+  }
+  if (category.id === "browser" && row.id.startsWith("browser-")) {
+    const kind = row.id.slice("browser-".length);
+    if (kind === "fixture" || kind === "playwright" || kind === "cdp" || kind === "mcp") {
+      config.browser = { ...config.browser, primary: kind };
+      await writeConfig(config, stateDir);
+    }
   }
 }
 
@@ -94,36 +181,28 @@ async function configureCategory(
   stateDir: string,
   draft: InteractiveDraft,
   allowFixture: boolean,
+  advanced = false,
 ): Promise<void> {
   if (category.id === "service") {
     io.println("Background execution is a lifecycle command, not a provider.");
     io.println("Run `keli service install` then `keli service status` after setup.");
     return;
   }
-  const rows = providersForCategory(category, config, allowFixture);
-  io.println("");
-  io.println(category.label);
-  io.println("0. Skip");
-  rows.forEach((row, i) => io.println(formatProviderChoice(i + 1, row, config, allowFixture)));
-  const picked = await pickNumber(io, `Select ${category.label} provider [0]: `, rows.length);
-  if (!picked) return;
-  const row = rows[picked - 1]!;
-  if (row.status === "blocked") {
+  if (category.id === "search") {
+    await configureSearch(io, config, stateDir, draft);
+    return;
+  }
+  const row = category.id === "models"
+    ? await pickModelProvider(io, config, allowFixture)
+    : await pickCategoryProvider(io, category, config, allowFixture);
+  if (!row) return;
+  if (row.status === "blocked" || setupBadge(row, config, allowFixture) === "blocked") {
     io.println(`${row.displayName} is blocked until its protocol, binary, or access is available.`);
     return;
   }
   if (category.id === "models") {
-    await configureModelProvider(io, config, row.id, stateDir);
+    await configureModelProvider(io, config, row.id, stateDir, advanced);
     draft.primaryModel = row.id;
-    const probe = await runLiveProbe({ config, only: [row.id], timeoutMs: row.id === "chatgpt" ? 30_000 : 8000 });
-    const line = probe.lines.find((l) => l.id === row.id);
-    io.println(line?.outcome === "pass" ? `Connected: ${line.detail}` : `Not connected: ${line?.detail ?? "probe failed"}`);
-    return;
-  }
-  if (category.id === "search") {
-    const current = config.integrations?.search?.settings.baseUrl ?? "";
-    const endpoint = (await io.question(`Search endpoint (Brave or generic JSON) [${current}]: `)) || current;
-    if (endpoint) draft.searchEndpoint = endpoint;
     return;
   }
   if (category.id === "messaging") {
@@ -136,6 +215,7 @@ async function configureCategory(
       draft.telegramChat = (await io.question(`Telegram chat id [${draft.telegramChat ?? ""}]: `)) || draft.telegramChat;
       draft.telegramTopic = (await io.question(`Telegram topic id (optional) [${draft.telegramTopic ?? ""}]: `)) || draft.telegramTopic;
     }
+    await connectIntegration({ integrationId: row.id, stateDir, config, io, oauthCallbacks: oauthCallbacks(io) });
     const cal = await io.question("Skip optional calibration for now? [Y/n]: ");
     draft.skipCalibration = !cal || cal.toLowerCase().startsWith("y");
     return;
@@ -144,23 +224,51 @@ async function configureCategory(
     if (row.id === "mcp") {
       draft.mcpUrl = (await io.question(`MCP HTTP URL [${draft.mcpUrl ?? ""}]: `)) || draft.mcpUrl;
       draft.mcpCommand = (await io.question(`MCP stdio command [${draft.mcpCommand ?? ""}]: `)) || draft.mcpCommand;
+      await persistIntegration({
+        config,
+        stateDir,
+        id: "mcp",
+        settings: {
+          ...(draft.mcpUrl ? { url: draft.mcpUrl, transport: "http" } : {}),
+          ...(draft.mcpCommand ? { command: draft.mcpCommand, transport: "stdio" } : {}),
+        },
+      });
+      const probe = await connectIntegration({ integrationId: "mcp", stateDir, config, io, values: config.integrations?.mcp?.settings });
+      if (probe.ok) io.println(probe.probe.ok ? `Connected: ${probe.probe.detail}` : `Not connected: ${probe.probe.detail}`);
       return;
     }
-    if (row.id === "codex" || row.id === "opencode") {
-      const command = (await io.question(`CLI binary [${row.id}]: `)) || row.id;
-      const entry = config.integrations?.[row.id] ?? { enabled: true, settings: {} };
-      entry.enabled = true;
-      entry.settings = { ...entry.settings, command };
-      config.integrations = { ...config.integrations, [row.id]: entry };
-      await writeConfig(config, stateDir);
-    }
+    await connectIntegration({ integrationId: row.id, stateDir, config, io });
     return;
   }
   if (category.id === "memory") {
     draft.memoryProvider = row.id;
     config.memory = { ...config.memory, provider: row.id };
     await writeConfig(config, stateDir);
+    const result = await connectIntegration({ integrationId: row.id, stateDir, config, io, oauthCallbacks: oauthCallbacks(io) });
+    if (result.ok) io.println(result.probe.ok ? `Connected: ${result.probe.detail}` : `Not connected: ${result.probe.detail}`);
+    return;
   }
+  await configureSelectedProvider(io, category, row, config, stateDir);
+}
+
+export async function runBootstrapModel(
+  io: WizardIo,
+  config: KeliConfig,
+  stateDir: string,
+  draft: InteractiveDraft,
+  allowFixture: boolean,
+): Promise<void> {
+  io.println("");
+  io.println("Connect one conversation model, then chat. Optional tools: keli connect");
+  const row = await pickModelProvider(io, config, allowFixture);
+  if (!row) return;
+  if (row.status === "blocked" || setupBadge(row, config, allowFixture) === "blocked") {
+    io.println(`${row.displayName} is blocked until its protocol, binary, or access is available.`);
+    return;
+  }
+  await configureModelProvider(io, config, row.id, stateDir, false);
+  draft.primaryModel = row.id;
+  io.println("Run `keli chat` to start. Optional integrations: `keli connect`.");
 }
 
 export async function runInteractiveCategories(
@@ -171,7 +279,13 @@ export async function runInteractiveCategories(
   allowFixture: boolean,
   only?: SetupCategory["id"],
 ): Promise<void> {
-  const categories = only ? SETUP_CATEGORIES.filter((c) => c.id === only) : SETUP_CATEGORIES;
+  const categories = only
+    ? SETUP_CATEGORIES.filter((c) => c.id === only)
+    : OPTIONAL_CATEGORIES;
+  if (!only) {
+    io.println("");
+    io.println("Optional connections. Chat/Models is configured by `keli setup`.");
+  }
   let index = 0;
   while (index < categories.length) {
     if (!only) {
@@ -181,15 +295,59 @@ export async function runInteractiveCategories(
       categories.forEach((c, i) => io.println(`${i + 1}. ${c.label}`));
       const picked = await pickNumber(io, "Category number [0]: ", categories.length);
       if (!picked) break;
-      await configureCategory(io, categories[picked - 1]!, config, stateDir, draft, allowFixture);
+      await configureCategory(io, categories[picked - 1]!, config, stateDir, draft, allowFixture, true);
       const more = await io.question("Configure another category? [y/N]: ");
       if (!more.toLowerCase().startsWith("y")) break;
     } else {
-      await configureCategory(io, categories[0]!, config, stateDir, draft, allowFixture);
+      await configureCategory(io, categories[0]!, config, stateDir, draft, allowFixture, only !== "models");
       break;
     }
     index += 1;
   }
+}
+
+async function pickCategoryProvider(
+  io: WizardIo,
+  category: SetupCategory,
+  config: KeliConfig,
+  allowFixture: boolean,
+): Promise<ManifestRow | undefined> {
+  const rows = providersForCategory(category, config, allowFixture);
+  io.println("");
+  io.println(category.label);
+  io.println("0. Skip");
+  rows.forEach((row, i) => io.println(formatProviderChoice(i + 1, row, config, allowFixture)));
+  const picked = await pickNumber(io, `Select ${category.label} provider [0]: `, rows.length);
+  if (!picked) return undefined;
+  return rows[picked - 1];
+}
+
+async function pickModelProvider(
+  io: WizardIo,
+  config: KeliConfig,
+  allowFixture: boolean,
+): Promise<ManifestRow | undefined> {
+  const shortlist = providersForCategory(SETUP_CATEGORIES.find((c) => c.id === "models")!, config, allowFixture);
+  const more = moreModelProviders(allowFixture);
+  io.println("");
+  io.println("Chat/Models");
+  io.println("Recommended");
+  io.println("0. Skip");
+  shortlist.forEach((row, i) => io.println(formatProviderChoice(i + 1, row, config, allowFixture)));
+  const moreChoice = more.length ? shortlist.length + 1 : 0;
+  if (moreChoice) io.println(`${moreChoice}. More providers`);
+  const picked = await pickNumber(io, "Select Chat/Models provider [0]: ", moreChoice || shortlist.length);
+  if (!picked) return undefined;
+  if (moreChoice && picked === moreChoice) {
+    io.println("");
+    io.println("More providers");
+    io.println("0. Back");
+    more.forEach((row, i) => io.println(formatProviderChoice(i + 1, row, config, allowFixture)));
+    const morePicked = await pickNumber(io, "Select provider [0]: ", more.length);
+    if (!morePicked) return undefined;
+    return more[morePicked - 1];
+  }
+  return shortlist[picked - 1];
 }
 
 export function sectionToCategory(section?: string): SetupCategory["id"] | undefined {
@@ -199,5 +357,8 @@ export function sectionToCategory(section?: string): SetupCategory["id"] | undef
   if (section === "mcp") return "delegates";
   if (section === "delegate") return "delegates";
   if (section === "memory") return "memory";
+  if (section === "browser") return "browser";
+  if (section === "documents") return "documents";
+  if (section === "speech") return "speech";
   return undefined;
 }

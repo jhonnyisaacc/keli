@@ -15,8 +15,21 @@ function oauthProvider(id: string): OAuthProviderInterface {
 export async function loginProvider(id: string, callbacks: OAuthLoginCallbacks, source = defaultCredentialSource()): Promise<CredentialRef> {
   if (!source.available || !source.set) throw new KeliError("Unlock the OS credential store before signing in", "secret_unavailable");
   const ref = { service: `keli/${id}`, id: "oauth" };
+  if (callbacks.signal?.aborted) {
+    throw new KeliError(`Login cancelled for ${id}; retry keli auth add ${id}`, "cancelled");
+  }
   let credentials: OAuthCredentials;
-  try { credentials = await oauthProvider(id).login(callbacks); } catch { throw new KeliError(`Login failed or cancelled for ${id}; retry keli auth add ${id}`, "secret_unavailable"); }
+  try {
+    credentials = await oauthProvider(id).login(callbacks);
+  } catch (error) {
+    const aborted =
+      callbacks.signal?.aborted ||
+      (error instanceof Error && (error.name === "AbortError" || /cancel/i.test(error.message)));
+    throw new KeliError(
+      aborted ? `Login cancelled for ${id}; retry keli auth add ${id}` : `Login failed for ${id}; retry keli auth add ${id}`,
+      aborted ? "cancelled" : "secret_unavailable",
+    );
+  }
   await source.set(ref, JSON.stringify(credentials));
   return ref;
 }

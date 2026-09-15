@@ -5,7 +5,8 @@ import type { BehaviorService } from "../core/behavior.ts";
 import { CapabilityGate } from "../core/capability-gate.ts";
 import { KeliError } from "../core/errors.ts";
 import type { ResourcePolicy } from "../execution/policy.ts";
-import { fixtureUrlFor } from "../integrations/env.ts";
+import { browserConfigFromKeli } from "../execution/browser-backends.ts";
+import { fixtureEndpointsFromEnv } from "../execution/dispatch-context.ts";
 import { isChatModelProvider } from "../model/chat-provider.ts";
 import type { ModelLoop } from "../model/loop.ts";
 import { createModelProvider } from "../model/provider-factory.ts";
@@ -23,6 +24,8 @@ export type ConversationAppInput = {
   project: { id: string; name: string; resourceRoots: string[] };
   codingLoop?: ModelLoop;
   networkHosts?: string[];
+  /** Tests inject a scripted factory; production uses saved config credentials. */
+  model?: ChatModelFactory;
 };
 
 /** Chat-capable provider from saved config and credentials; fixtures are not chat providers. */
@@ -54,11 +57,11 @@ export function createConversationApp(input: ConversationAppInput) {
   const capabilityGate = new CapabilityGate(input.db, registry, input.stateDir, input.ownerId);
   const policy = policyFor(input.project.resourceRoots, input.stateDir);
   const sources = createSourceReader(input.db);
+  const envFixtures = fixtureEndpointsFromEnv();
+  const browser = browserConfigFromKeli(input.config);
   const fixtures = {
-    search: fixtureUrlFor("search"),
-    browser: fixtureUrlFor("browser"),
-    mcp: fixtureUrlFor("mcp"),
-    delegate: fixtureUrlFor("delegate"),
+    ...envFixtures,
+    browser: browser.fixtureUrl ?? envFixtures.browser,
   };
   const loop = new ConversationLoop({
     db: input.db,
@@ -66,11 +69,12 @@ export function createConversationApp(input: ConversationAppInput) {
     capabilityGate,
     registry,
     policy,
-    model: chatModelFactory(input.config),
+    model: input.model ?? chatModelFactory(input.config),
     config: input.config,
     sources,
     networkHosts: input.networkHosts ?? input.config.network?.allowedHosts,
     fixtures,
+    browser,
     codingLoop: input.codingLoop,
     options: { retryBaseMs: input.config.budgets?.retryBaseMs },
   });
@@ -83,5 +87,5 @@ export function createConversationApp(input: ConversationAppInput) {
     origin: { transport: "cli" },
     mode: "ordinary",
   });
-  return { loop, capabilityGate, policy, sources, cliContext };
+  return { loop, capabilityGate, policy, sources, cliContext, browser, fixtures };
 }

@@ -7,6 +7,7 @@ import { KeliError } from "../core/errors.ts";
 import { checkEvidence, policyFromRules, type AnswerDraft, type ResearchPolicy, type SourceEvidence } from "../core/evidence.ts";
 import { estimateTokens } from "../core/budgets.ts";
 import { createRun, finishRun, getRun } from "../core/run-control.ts";
+import type { BrowserBackendConfig } from "../execution/browser-backends.ts";
 import type { FixtureEndpoints } from "../execution/dispatch-context.ts";
 import type { ResourcePolicy } from "../execution/policy.ts";
 import { writeCheckpoint } from "../memory/checkpoints.ts";
@@ -40,6 +41,7 @@ export type ConversationDeps = {
   sources?: SourceReader;
   networkHosts?: string[];
   fixtures?: FixtureEndpoints;
+  browser?: BrowserBackendConfig;
   /** Existing coding-delegate loop; kept as one supported capability behind the same entry point. */
   codingLoop?: ModelLoop;
   options?: {
@@ -506,6 +508,7 @@ export class ConversationLoop {
         sources,
         networkHosts: this.deps.networkHosts,
         fixtures: this.deps.fixtures,
+        browser: this.deps.browser,
         config: this.deps.config,
         allowedCapabilities: control?.allowedCapabilities,
       },

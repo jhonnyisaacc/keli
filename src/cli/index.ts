@@ -12,6 +12,7 @@ import { discordCommand } from "./commands/discord.ts";
 import { telegramCommand } from "./commands/telegram.ts";
 import { routesCommand } from "./commands/routes.ts";
 import { setupCommand } from "./commands/setup.ts";
+import { connectCommand } from "./commands/connect.ts";
 import { backupCommand, restoreCommand } from "./commands/backup.ts";
 import { pauseCommand, resumeCommand, stopCommand } from "./commands/pause.ts";
 import { updateCommand } from "./commands/update.ts";
@@ -113,6 +114,7 @@ function createMain(globals: CliGlobals) {
       telegram: telegramCommand(globals),
       routes: routesCommand(globals),
       setup: setupCommand(globals),
+      connect: connectCommand(globals),
       backup: backupCommand(globals),
       restore: restoreCommand(globals),
       pause: pauseCommand(globals),
@@ -143,7 +145,8 @@ function printRootHelp() {
   console.log("");
   console.log("Commands:");
   console.log("  keli init              Initialize state");
-  console.log("  keli setup             Registry-driven onboarding");
+  console.log("  keli setup             Connect one conversation model, then chat");
+  console.log("  keli connect           Optional integrations (search, browser, memory, MCP, …)");
   console.log("  keli doctor            Health checks");
   console.log("  keli chat              Research chat with cited evidence and corrections");
   console.log("  keli sources           add | index | list | search (read-only collections)");

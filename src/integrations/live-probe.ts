@@ -1,4 +1,4 @@
-import { credentialService, type CredentialSource } from "../credentials/source.ts";
+import { credentialService, defaultCredentialSource, type CredentialSource } from "../credentials/source.ts";
 import { KeliError } from "../core/errors.ts";
 import type { KeliConfig } from "../state/config.ts";
 import { fixtureUrlFor, type FixtureSlot } from "./env.ts";
@@ -96,9 +96,10 @@ export async function runLiveProbe(options: {
       (profile.auth.type !== "none" && profile.auth.type !== "external-cli"
         ? { id: profile.settings.find((s) => s.secret)?.key ?? "api-key", service: credentialService(profile.id) }
         : undefined);
-    if (ref && options.credentials) {
+    const credentials = options.credentials ?? defaultCredentialSource();
+    if (ref) {
       try {
-        credential = (await options.credentials.get(ref)) ?? undefined;
+        credential = (await credentials.get(ref)) ?? undefined;
         if (!credential && entry?.credentialRef) credentialDetail = "credential ref set but value missing";
       } catch (e) {
         credentialDetail =
@@ -111,7 +112,7 @@ export async function runLiveProbe(options: {
       const { catalogEntry } = await import("./catalog-provider.ts");
       if (profile.kind === "model-provider" && catalogEntry(profile.id) && !fixtureUrl) {
         const { createModelProvider } = await import("../model/provider-factory.ts");
-        const created = await createModelProvider({ config: options.config, explicitId: profile.id, credentials: options.credentials });
+        const created = await createModelProvider({ config: options.config, explicitId: profile.id, credentials });
         const response = await created.provider.complete!([{ role: "user", content: 'Reply with exactly {"connected":true}' }], { responseFormat: "json_object", maxTokens: 128, timeoutMs: options.timeoutMs ?? 30_000 });
         let ok = false;
         try { ok = !response.error && JSON.parse(response.content!).connected === true; } catch { /* malformed */ }
@@ -122,7 +123,7 @@ export async function runLiveProbe(options: {
         fixtureUrl,
         needsReauth: entry?.status?.needsReauth,
         credential,
-        credentialSource: options.credentials,
+        credentialSource: credentials,
         timeoutMs: options.timeoutMs,
       });
     } catch (e) {

@@ -9,7 +9,7 @@ import { projectScope } from "../state/repos.ts";
 import type { CodingDelegate, RunOverrideDelegate } from "../core/types.ts";
 import type { KeliConfig } from "../state/config.ts";
 import { routingFromConfig, selectProviderForTurn } from "./routing.ts";
-import { createModelProvider } from "./provider-factory.ts";
+import { createFallbackProvider, createModelProvider, hasPartialProviderOutput, isProviderFallbackEligible } from "./provider-factory.ts";
 import { searchNotes } from "../memory/notes.ts";
 import { listActiveSkills } from "../skills/store.ts";
 import { maybeRecordSkillUse } from "../skills/activation.ts";
@@ -25,6 +25,9 @@ export type TurnResult = {
   action?: unknown;
   explanation?: ReturnType<typeof explainSelection>;
   costUnknown?: boolean;
+  fallbackFrom?: string;
+  fallbackReason?: string;
+  providerId?: string;
 };
 
 export class ModelLoop {
@@ -137,6 +140,9 @@ export class ModelLoop {
     }
     const usedDelegate = (result as { delegateExecution?: { usedFallback: boolean; delegate: string } })
       .delegateExecution;
+    const fallbackFrom = (result as { fallbackFrom?: string }).fallbackFrom;
+    const fallbackReason = (result as { fallbackReason?: string }).fallbackReason;
+    const usedProviderId = (result as { providerId?: string }).providerId;
     const delegateLabel = usedDelegate
       ? `${usedDelegate.delegate}${usedDelegate.usedFallback ? " (fallback)" : ""}`
       : effectiveValue;
@@ -152,6 +158,9 @@ export class ModelLoop {
       costUnknown: costKnown === undefined
         ? !this.config?.pricing?.[String(providerIdForConfig(this.config, runOverride))]
         : !costKnown,
+      fallbackFrom,
+      fallbackReason,
+      providerId: usedProviderId,
       rule: {
         scope,
         key,
@@ -179,6 +188,8 @@ export class ModelLoop {
     let providerId = "fixture";
     let model: string | undefined;
     let costKnown = false;
+    let fallbackFrom: string | undefined;
+    let fallbackReason: string | undefined;
     if (runOverride === "Grok" || routedId !== "fixture" || !provider) {
       const created = await createModelProvider({
         config: this.config,
@@ -190,6 +201,8 @@ export class ModelLoop {
       providerId = created.providerId;
       model = created.model;
       costKnown = created.costKnown;
+      fallbackFrom = created.fallbackFrom;
+      fallbackReason = created.fallbackReason;
     }
     if (!provider) {
       throw new KeliError("Provider required for action turns", "provider_required");
@@ -226,36 +239,66 @@ export class ModelLoop {
           ...(runOverride ? { value: String(delegate) } : {}),
           advisoryContext,
         };
-        const outcome = await runBudgetedModelCall(
-          {
-            db,
-            runId,
-            providerId,
-            model,
-            actionId: req.id,
-            pricing: this.config?.pricing?.[providerId],
-            estimateTokens: estimateTokens(JSON.stringify(payload)),
-            retryBaseMs: this.options.retryBaseMs ?? budgets?.retryBaseMs,
-          },
-          () => provider!.propose(payload, mode),
-        );
+        const call = (id: string, modelName: string | undefined, current: ModelProvider) =>
+          runBudgetedModelCall(
+            {
+              db,
+              runId,
+              providerId: id,
+              model: modelName,
+              actionId: req.id,
+              pricing: this.config?.pricing?.[id],
+              estimateTokens: estimateTokens(JSON.stringify(payload)),
+              retryBaseMs: this.options.retryBaseMs ?? budgets?.retryBaseMs,
+            },
+            () => current.propose(payload, mode),
+          );
+        let outcome = await call(providerId, model, provider!);
+        if (
+          outcome.result.error &&
+          !hasPartialProviderOutput(outcome.result) &&
+          isProviderFallbackEligible(outcome.result.error)
+        ) {
+          const switched = await createFallbackProvider(
+            {
+              config: this.config,
+              explicitId: runOverride === "Grok" ? "grok" : providerId,
+              credentials: this.options.credentials,
+            },
+            outcome.result.error,
+            [providerId],
+          );
+          if (switched) {
+            provider = switched.provider;
+            providerId = switched.providerId;
+            model = switched.model;
+            costKnown = switched.costKnown;
+            fallbackFrom = switched.fallbackFrom;
+            fallbackReason = switched.fallbackReason;
+            outcome = await call(providerId, model, provider);
+          }
+        }
         if (outcome.stop === "aborted" && outcome.abortError) {
-          return { id: req.id, error: `blocked: ${outcome.abortError.message}` };
+          return { id: req.id, error: `blocked: ${outcome.abortError.message}`, fallbackFrom, fallbackReason, providerId, model };
         }
         if (outcome.stop === "no_progress") {
           return {
             id: req.id,
             error: `blocked: no progress after ${outcome.attempts} attempts (${outcome.result.error})`,
             usage: outcome.result.usage,
+            fallbackFrom,
+            fallbackReason,
+            providerId,
+            model,
           };
         }
-        return outcome.result;
+        return { ...outcome.result, fallbackFrom, fallbackReason, providerId, model };
       },
       { effectiveDelegate: runOverride === "Grok" ? "Grok" : runOverride },
     );
     const status = (result.action as { status: string }).status;
     finishRun(db, runId, status === "executed" ? "completed" : "failed");
-    return { ...result, costKnown, runId };
+    return { ...result, costKnown, runId, fallbackFrom, fallbackReason, providerId, model };
   }
 }
 

@@ -13,9 +13,9 @@ ADOPT → ADAPT → BUILD (I8, A05, A25, A35, A29, A41–A42):
 | `@mariozechner/pi-ai@0.73.1`, MIT | ADOPT | Native protocol transport already used by catalog inference rows |
 | Keli registry, local notes, Discord/Telegram REST, MCP JSON-RPC | KEEP | Authority, evidence, and fixture-verified adapters stay in Keli |
 
-Regenerate with `bun run scripts/import-provider-manifest.ts`. When `KELI_HERMES_ROOT`
-points at the pinned Hermes checkout, `scripts/import-hermes-catalog.py` refreshes the
-inference snapshot first. The public file is always
+Regenerate with `bun run scripts/import-provider-manifest.ts`. The compatibility
+ledger is generated from that inventory by `bun run scripts/write-compat-ledger.ts`
+into [UPSTREAM_COMPAT.md](UPSTREAM_COMPAT.md). The public inventory is always
 [`src/integrations/provider-manifest.json`](../../src/integrations/provider-manifest.json).
 Do not commit personal paths or a second diverging catalog.
 

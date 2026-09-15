@@ -33,6 +33,8 @@ export const SETUP_CATEGORIES: SetupCategory[] = [
   { id: "service", label: "Background service" },
 ];
 
+export const OPTIONAL_CATEGORIES: SetupCategory[] = SETUP_CATEGORIES.filter((c) => c.id !== "models");
+
 export type SetupBadge = "ready" | "needs credentials" | "fixture only" | "blocked";
 
 export function setupBadge(row: ManifestRow, config?: KeliConfig | null, allowFixture = false): SetupBadge {
@@ -41,7 +43,7 @@ export function setupBadge(row: ManifestRow, config?: KeliConfig | null, allowFi
   if (row.protocol === "fixture-only" || row.id === "fixture") return allowFixture ? "fixture only" : "blocked";
   if (readiness === "live-verified" || readiness === "configured") return "ready";
   if (row.authStrategy === "none" && readiness === "fixture-verified") return "ready";
-  if (row.authStrategy !== "none" && !config?.integrations?.[row.id]?.credentialRef && !fixtureUrlFor(row.id as never)) {
+  if (row.authStrategy !== "none" && !config?.integrations?.[row.id]?.credentialRef && !fixtureUrlFor(row.id)) {
     return "needs credentials";
   }
   if (readiness === "fixture-verified" && !config?.integrations?.[row.id]) return allowFixture ? "fixture only" : "needs credentials";
@@ -55,19 +57,37 @@ export function providersForCategory(
 ): ManifestRow[] {
   if (!category.manifestCategory) return [];
   const rows = listByCategory(category.manifestCategory).filter((row) => row.status !== "excluded");
+  const visible = (list: ManifestRow[]) =>
+    list.filter((row) => allowFixture || (row.protocol !== "fixture-only" && row.id !== "fixture"));
   if (category.id === "models") {
-    const preferred = FIRST_USE_PROVIDERS.map((id) => rows.find((row) => row.id === id)).filter(Boolean) as ManifestRow[];
-    const rest = rows.filter((row) => !FIRST_USE_PROVIDERS.includes(row.id as (typeof FIRST_USE_PROVIDERS)[number]) && (allowFixture || row.id !== "fixture"));
-    const first = allowFixture ? preferred : preferred.filter((row) => row.id !== "fixture");
-    return [...first, ...rest.filter((row) => row.status !== "blocked")];
+    return recommendedModelProviders(allowFixture);
   }
   if (category.id === "documents") {
-    return [...listByCategory("documents"), ...listByCategory("ocr")].filter((row) => row.status !== "excluded");
+    return visible([...listByCategory("documents"), ...listByCategory("ocr")].filter((row) => row.status !== "excluded"));
   }
   if (category.id === "delegates") {
-    return [...listByCategory("delegate"), ...listByCategory("mcp-server")].filter((row) => row.status !== "excluded");
+    return visible([...listByCategory("delegate"), ...listByCategory("mcp-server")].filter((row) => row.status !== "excluded"));
   }
-  return rows;
+  return visible(rows);
+}
+
+function modelRows(allowFixture: boolean): ManifestRow[] {
+  return listByCategory("model-provider").filter((row) => {
+    if (row.status === "excluded" || row.status === "blocked") return false;
+    return allowFixture || (row.protocol !== "fixture-only" && row.id !== "fixture");
+  });
+}
+
+/** First-use shortlist only. The rest is behind `moreModelProviders`. */
+export function recommendedModelProviders(allowFixture = false): ManifestRow[] {
+  const rows = modelRows(allowFixture);
+  return FIRST_USE_PROVIDERS.map((id) => rows.find((row) => row.id === id)).filter(Boolean) as ManifestRow[];
+}
+
+export function moreModelProviders(allowFixture = false): ManifestRow[] {
+  return modelRows(allowFixture).filter(
+    (row) => !FIRST_USE_PROVIDERS.includes(row.id as (typeof FIRST_USE_PROVIDERS)[number]),
+  );
 }
 
 export function formatProviderChoice(index: number, row: ManifestRow, config?: KeliConfig | null, allowFixture = false): string {

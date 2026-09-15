@@ -61,6 +61,37 @@ export function browserConfigFromEnv(): BrowserBackendConfig {
   };
 }
 
+type BrowserConfigSlice = {
+  browser?: { primary?: BrowserBackendKind; fallback?: BrowserBackendKind };
+  integrations?: Record<string, { settings?: Record<string, string> }>;
+};
+
+function integrationSetting(config: BrowserConfigSlice | null | undefined, id: string, key: string): string | undefined {
+  const value = config?.integrations?.[id]?.settings?.[key];
+  return typeof value === "string" && value.trim() ? value : undefined;
+}
+
+/** Saved setup (`keli setup` Browser) plus env fixtures. Saved URLs win when both are set. */
+export function browserConfigFromKeli(config?: BrowserConfigSlice | null): BrowserBackendConfig {
+  return {
+    ...browserConfigFromEnv(),
+    primary: config?.browser?.primary,
+    fallback: config?.browser?.fallback,
+    fixtureUrl:
+      integrationSetting(config, "browser-fixture", "url") ??
+      integrationSetting(config, "browser-fixture", "baseUrl") ??
+      fixtureUrlFor("browser"),
+    cdpUrl:
+      integrationSetting(config, "browser-cdp", "url") ??
+      integrationSetting(config, "browser-cdp", "baseUrl") ??
+      fixtureUrlFor("browser-cdp"),
+    mcpUrl:
+      integrationSetting(config, "browser-mcp", "url") ??
+      integrationSetting(config, "browser-mcp", "baseUrl") ??
+      fixtureUrlFor("browser-mcp"),
+  };
+}
+
 export async function probeBrowserBackend(
   kind: BrowserBackendKind,
   config: BrowserBackendConfig = {},

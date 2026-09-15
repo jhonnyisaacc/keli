@@ -1,8 +1,10 @@
 import { expect, test } from "bun:test";
 import { catalogDescriptor, catalogEntry, createCatalogProvider, providerCatalog } from "../../src/integrations/catalog-provider.ts";
 import { getIntegration } from "../../src/integrations/registry.ts";
-import { createModelProvider, isProviderFallbackEligible } from "../../src/model/provider-factory.ts";
+import { createModelProvider, hasPartialProviderOutput, isProviderFallbackEligible } from "../../src/model/provider-factory.ts";
 import { selectProviderForTurn } from "../../src/model/routing.ts";
+import { ModelLoop } from "../../src/model/loop.ts";
+import { createTestEnv } from "../helpers/setup.ts";
 import { listProviders } from "../../src/model/provider-registry.ts";
 import { HttpModelProvider } from "../../src/model/http-provider.ts";
 import { SdkModelProvider, type ModelCompletion } from "../../src/model/sdk-provider.ts";
@@ -202,6 +204,79 @@ test("fallback is eligible only for typed transport failures, never missing secr
   expect(isProviderFallbackEligible(new KeliError("missing key", "secret_unavailable"))).toBe(false);
   expect(isProviderFallbackEligible(new KeliError("bad json", "invalid_request"))).toBe(false);
   expect(isProviderFallbackEligible("timeout: Model request cancelled or timed out")).toBe(true);
+  expect(hasPartialProviderOutput({ candidate: { id: "1", scope: "s", key: "k", revision: 1, delegate: "Codex" } })).toBe(true);
+  expect(hasPartialProviderOutput({ usage: { reportedOut: 4 } })).toBe(true);
+  expect(hasPartialProviderOutput({})).toBe(false);
+});
+
+test("a typed request failure switches to the configured fallback and keeps that on the receipt", async () => {
+  let fallbackHits = 0;
+  const down = Bun.serve({
+    hostname: "127.0.0.1",
+    port: 0,
+    fetch() {
+      return new Response("unavailable", { status: 503 });
+    },
+  });
+  const up = Bun.serve({
+    hostname: "127.0.0.1",
+    port: 0,
+    async fetch(req) {
+      fallbackHits += 1;
+      const body = (await req.json()) as { messages: Array<{ content: string }> };
+      const user = JSON.parse(body.messages[0]!.content) as {
+        action: { id: string; scope: string; key: string; revision: number };
+        rule: { value: string };
+      };
+      const candidate = {
+        id: user.action.id,
+        scope: user.action.scope,
+        key: user.action.key,
+        revision: user.action.revision,
+        delegate: user.rule.value,
+      };
+      return Response.json({
+        choices: [{ finish_reason: "stop", message: { content: JSON.stringify(candidate) } }],
+      });
+    },
+  });
+  const env = await createTestEnv();
+  await env.loop.runTurn("Rocket changes use Codex");
+  const credentials = { name: "test", available: true, get: async () => "sk-test" };
+  const config = {
+    ...defaultConfig(),
+    ownerId: env.ownerId,
+    defaultProjectId: env.rocketId,
+    providers: {
+      primary: { id: "openai-compatible", model: "primary-m" },
+      fallback: [{ id: "grok", model: "grok-m" }],
+    },
+    integrations: {
+      "openai-compatible": {
+        enabled: true,
+        settings: { baseUrl: `http://127.0.0.1:${down.port}/v1` },
+        credentialRef: { service: "keli/openai-compatible", id: "api-key" },
+      },
+      grok: {
+        enabled: true,
+        settings: { baseUrl: `http://127.0.0.1:${up.port}/v1` },
+        credentialRef: { service: "keli/grok", id: "api-key" },
+      },
+    },
+  };
+  const loop = new ModelLoop(env.behavior, env.gate, env.rocketId, "Rocket", undefined, undefined, "/tmp", config, {
+    credentials,
+    retryBaseMs: 0,
+  });
+  const result = await loop.runTurn("perform");
+  expect(result.kind).toBe("action");
+  expect(result.fallbackFrom).toBe("openai-compatible");
+  expect(result.fallbackReason).toMatch(/transport|503/);
+  expect(result.providerId).toBe("grok");
+  expect(fallbackHits).toBeGreaterThan(0);
+  down.stop(true);
+  up.stop(true);
+  env.close();
 });
 
 test("changing the selected model clears live-verified state", () => {

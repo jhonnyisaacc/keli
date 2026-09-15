@@ -196,23 +196,27 @@ export async function dispatchCapability(
       result = await documentsExtract(proposal.input as { path: string }, policy, {
         config: ctx.config,
         cwd,
+        fixtureUrl: fixtures.documents ?? fixtureUrlFor("documents"),
       });
       break;
     case "ocr.extract":
       result = await ocrExtract(proposal.input as { path: string }, policy, {
         config: ctx.config,
         cwd,
+        fixtureUrl: fixtures.ocr ?? fixtureUrlFor("ocr"),
       });
       break;
     case "speech.transcribe":
       result = await speechTranscribe(proposal.input as { path: string; model?: string }, policy, {
         config: ctx.config,
         cwd,
+        fixtureUrl: fixtures.speech ?? fixtureUrlFor("speech"),
       });
       break;
     case "speech.synthesize":
       result = await speechSynthesize(proposal.input as { text: string; model?: string; voice?: string }, {
         config: ctx.config,
+        fixtureUrl: fixtures.speech ?? fixtureUrlFor("speech"),
       });
       break;
     case "mcp.tools/list":

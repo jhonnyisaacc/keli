@@ -80,4 +80,22 @@ describe("provider manifest", () => {
     });
     expect(new Set(ids).size).toBe(ids.length);
   });
+
+  test("generator matches the committed inventory and does not revive hermes-catalog.json", async () => {
+    const { buildManifest } = await import("../../scripts/import-provider-manifest.ts");
+    const built = buildManifest();
+    const committed = manifest.providers as Array<{ id: string; status: string; runtimeAdapter: string; category: string }>;
+    expect(built.providers.map((row) => row.id)).toEqual(committed.map((row) => row.id));
+    for (const row of committed) {
+      const got = built.providers.find((p) => p.id === row.id);
+      expect(got?.status as string).toBe(row.status);
+      expect(got?.runtimeAdapter).toBe(row.runtimeAdapter);
+      expect(got?.category as string).toBe(row.category);
+    }
+    expect(built.providers.find((row) => row.id === "copilot-acp-delegate")?.status).toBe("blocked");
+    expect(built.providers.find((row) => row.id === "documents-pdf")?.runtimeAdapter).toBe("documentsExtract");
+    const generator = await Bun.file(new URL("../../scripts/import-provider-manifest.ts", import.meta.url)).text();
+    expect(generator).not.toContain("src/integrations/hermes-catalog.json");
+    expect(generator).not.toContain("import-hermes-catalog.py");
+  });
 });

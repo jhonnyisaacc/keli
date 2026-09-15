@@ -41,7 +41,8 @@ Contains `state.sqlite`, `config.json`, and cache subdirectories.
 | Command | Purpose |
 |---------|---------|
 | `keli init` | Create state, run migrations, seed owner/project (`personal` unless `--project`) |
-| `keli setup` | Registry-driven wizard: project name, provider round-trip, one transport, optional delegate; `--quick` / `--minimal` |
+| `keli setup` | Connect one conversation model (auth, default model, probe), then chat |
+| `keli connect` | Optional integrations: search, browser, memory, speech, messaging, MCP |
 | `keli doctor [--fix]` | Health checks plus integration probes (safe repairs only) |
 | `keli integrations` | `list [--kind]` and `discover` (static catalog; never installs) |
 | `keli auth` | `add` / `list` / `status` / `remove` / `logout` (keychain refs) |

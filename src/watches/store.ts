@@ -96,12 +96,20 @@ export function definitionHash(def: WatchDefinition): string {
  */
 export function upsertWatch(
   db: Database,
-  input: { ownerId: string; scope: string; definition: WatchDefinition; sourceRef?: string; status?: WatchStatus },
+  input: {
+    ownerId: string;
+    scope: string;
+    definition: WatchDefinition;
+    sourceRef?: string;
+    status?: WatchStatus;
+    /** Tests inject this so due-ness does not depend on wall-clock Date.now(). */
+    createdAt?: string;
+  },
 ): { watch: WatchRecord; created: boolean; changed: boolean } {
   validateDefinition(input.definition);
   const def = input.definition;
   const id = watchId(input.scope, def.name);
-  const now = new Date().toISOString();
+  const now = input.createdAt ?? new Date().toISOString();
   const budget = { maxConsecutiveFailures: DEFAULT_MAX_FAILURES, ...(def.budget ?? {}) };
   const notify = { policy: "material-change" as const, ...(def.notify ?? {}) };
   const existing = getWatch(db, id);

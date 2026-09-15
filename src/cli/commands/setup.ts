@@ -5,11 +5,11 @@ import type { CliGlobals } from "../context.ts";
 
 export function setupCommand(globals: CliGlobals) {
   return defineCommand({
-    meta: { description: "Selection-first setup driven by the provider registry" },
+    meta: { description: "Connect one conversation model, then chat. Optional tools: keli connect" },
     args: {
       section: {
         type: "positional",
-        description: "provider | transport | search | mcp | delegate | memory",
+        description: "provider | transport | search | mcp | delegate | memory | browser | documents | speech | advanced | connect",
         required: false,
       },
       "non-interactive": {

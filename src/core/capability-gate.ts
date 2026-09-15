@@ -4,6 +4,7 @@ import type { CapabilityProposal, CapabilityResult } from "../capabilities/types
 import { dispatchCapability } from "../execution/dispatch.ts";
 import type { DispatchContext } from "../execution/dispatch-context.ts";
 import { defaultNetworkPolicy, fixtureEndpointsFromEnv } from "../execution/dispatch-context.ts";
+import { browserConfigFromKeli } from "../execution/browser-backends.ts";
 import type { ResourcePolicy } from "../execution/policy.ts";
 import { storeArtifact } from "../state/artifacts.ts";
 import { KeliError } from "./errors.ts";
@@ -153,7 +154,7 @@ export class CapabilityGate {
       policy,
       network: defaultNetworkPolicy(options?.networkHosts),
       fixtures: options?.fixtures ?? fixtureEndpointsFromEnv(),
-      browser: options?.browser,
+      browser: options?.browser ?? (options?.config ? browserConfigFromKeli(options.config) : undefined),
       cwd,
       run: { db: this.db, runId, cancelEpoch },
       jobId: options?.jobId,
