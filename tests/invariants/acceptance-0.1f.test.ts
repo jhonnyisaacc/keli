@@ -29,6 +29,23 @@ describe("0.1-F memory, Honcho, providers, browser", () => {
     env.close();
   });
 
+  test("note search treats punctuation and FTS operators as literal text", async () => {
+    const env = await createTestEnv();
+    const scope = projectScope(env.rocketId);
+    addNote(env.db, {
+      id: "n-punct",
+      scope,
+      title: "Checklist",
+      body: "zebra-marmalade sentinel for release: row 7",
+    });
+    // Hyphens, colons, quotes, and operator words used to reach FTS5 raw and throw.
+    expect(searchNotes(env.db, scope, "zebra-marmalade").length).toBe(1);
+    expect(searchNotes(env.db, scope, 'release: "row 7"').length).toBe(1);
+    expect(searchNotes(env.db, scope, "sentinel AND missing-term").length).toBe(0);
+    expect(searchNotes(env.db, scope, "   ").length).toBe(0);
+    env.close();
+  });
+
   test("Honcho absent when disabled (A29)", () => {
     const prev = process.env.KELI_HONCHO_ENABLED;
     delete process.env.KELI_HONCHO_ENABLED;

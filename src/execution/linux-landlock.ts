@@ -1,14 +1,29 @@
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { createHash } from "node:crypto";
 import type { ShellResult } from "./sandbox.ts";
+// Embedded into the compiled executable so a binary-only install (bootstrap, update)
+// still has the worker; see resolveWorkerPath.
+import embeddedWorker from "./landlock-worker.py" with { type: "file" };
 
-function resolveWorkerPath(): string {
+async function resolveWorkerPath(): Promise<string> {
   const besideBinary = join(dirname(process.execPath), "landlock-worker.py");
   if (existsSync(besideBinary)) return besideBinary;
   const besideSource = join(dirname(fileURLToPath(import.meta.url)), "landlock-worker.py");
   if (existsSync(besideSource)) return besideSource;
-  return besideSource;
+  // python3 cannot open the virtual `/$bunfs` path, so materialize the embedded copy
+  // under a content-addressed file that is rewritten only when the content changes.
+  const source = await Bun.file(embeddedWorker).text();
+  const digest = createHash("sha256").update(source).digest("hex").slice(0, 16);
+  const dir = join(tmpdir(), "keli-landlock");
+  const target = join(dir, `worker-${digest}.py`);
+  if (!existsSync(target)) {
+    mkdirSync(dir, { recursive: true, mode: 0o700 });
+    writeFileSync(target, source, { mode: 0o600 });
+  }
+  return target;
 }
 
 export type LandlockProbe = {
@@ -23,7 +38,7 @@ export async function probeLandlock(): Promise<LandlockProbe> {
     return { available: false, platform: process.platform, error: "not linux" };
   }
   try {
-    const proc = Bun.spawn(["python3", resolveWorkerPath(), "--probe"], {
+    const proc = Bun.spawn(["python3", await resolveWorkerPath(), "--probe"], {
       stdout: "pipe",
       stderr: "pipe",
     });
@@ -44,7 +59,7 @@ export async function runLandlocked(
   readonlyRoots: string[],
   timeoutMs = 60_000,
 ): Promise<ShellResult> {
-  const proc = Bun.spawn(["python3", resolveWorkerPath()], {
+  const proc = Bun.spawn(["python3", await resolveWorkerPath()], {
     stdin: "pipe",
     stdout: "pipe",
     stderr: "pipe",

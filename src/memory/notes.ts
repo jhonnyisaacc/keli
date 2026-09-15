@@ -26,6 +26,19 @@ export function addNote(
   return { ...note, createdAt };
 }
 
+/**
+ * Turn free text into a safe FTS5 MATCH expression: each whitespace-separated term is a
+ * quoted string (so `-`, `:`, `*`, and operators are literal), terms are implicitly ANDed.
+ */
+export function ftsMatchExpression(query: string): string {
+  const terms = query
+    .split(/\s+/)
+    .map((term) => term.replace(/"/g, ""))
+    .filter((term) => term.length > 0);
+  if (terms.length === 0) return '""';
+  return terms.map((term) => `"${term}"`).join(" ");
+}
+
 export function searchNotes(
   db: Database,
   scope: string,
@@ -41,7 +54,7 @@ export function searchNotes(
        ORDER BY rank
        LIMIT ?`,
     )
-    .all(query, scope, limit) as Array<Record<string, string | null>>;
+    .all(ftsMatchExpression(query), scope, limit) as Array<Record<string, string | null>>;
   return rows.map((row) => ({
     id: row.id!,
     scope: row.scope!,
