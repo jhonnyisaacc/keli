@@ -45,11 +45,15 @@ What "configured" means per surface, and what has actually been exercised:
 
 Live probe: `bun run scripts/live-probe.ts` performs real round trips; required integrations that are skipped are reported as not passing.
 
-## Human-only leftovers (do not tag v0.1.0 until recorded)
+## Open owner milestones after v0.1.0
+
+`v0.1.0` was tagged with fixture-only evidence by owner decision (see the
+[release report](evidence/RELEASE_REPORT.md)). These items remain open and are not
+engineering loops:
 
 - Apple notarization / release signing keys in secure CI
-- Held-out correction eval ≥95% with **live** provider (fixture suite runs in CI)
-- Five-user assisted onboarding checklist (`docs/RELEASE_CHECKLIST.md`)
+- Held-out correction eval ≥95% with **live** provider (fixture suite is 105/105 in CI)
+- Five-user assisted onboarding check on both OS families (`docs/RELEASE_CHECKLIST.md` records one agent-run fixture pass on Linux)
 - Four-target **native** runner evidence on real hardware
 
 ## Evidence-driven research autonomy (opt-in)

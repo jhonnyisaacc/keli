@@ -1,7 +1,10 @@
 # Plan: complete Keli's capability integrations without diluting its autonomy core
 
-Status: slices 1–8 implemented on `feat/v0.1.0` from baseline `021ca10`. Engineering
-stop is fixture contracts plus required checks; remaining work is owner live checks.
+Status: slices 1–8 plus the provider-onboarding slice (`keli setup` bootstrap, `keli connect`,
+upstream compatibility ledger) implemented on `feat/v0.1.0` from baseline `021ca10`. The
+engineering stop conditions below are met; `v0.1.0` was tagged on 2026-09-15 with
+fixture-only evidence by owner decision. Remaining work is owner live checks recorded in the
+[release report](../docs/evidence/RELEASE_REPORT.md); they do not reopen this plan.
 This plan replaced the old "first-use only" stop and the unbounded provider-parity draft.
 It keeps the existing responsibility, evidence, and authority architecture.
 

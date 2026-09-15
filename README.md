@@ -2,7 +2,7 @@
 
 Keli (כלי) is a personal-first agent: teach it how to work once, and durable scoped corrections govern future execution across restarts and upgrades.
 
-This repository implements the **v0.1.0** product on branch `feat/v0.1.0` in vertical increments. **0.1-A through 0.1-I** are implemented in code (core runtime, capabilities, jobs/transports, packaging/ops, memory/providers, routing/budgets/skills, helper fan-out, release harness). **Do not tag `v0.1.0`** until human gates are recorded (notarization, live held-out eval, five-user check, native four-target smoke).
+This repository implements the **v0.1.0** product, developed on branch `feat/v0.1.0` in vertical increments. **0.1-A through 0.1-I** are implemented in code (core runtime, capabilities, jobs/transports, packaging/ops, memory/providers, routing/budgets/skills, helper fan-out, release harness). `v0.1.0` is tagged with fixture-only evidence by owner decision; the open owner milestones (notarization, live held-out eval, five-user check, native four-target smoke, live accounts) are listed in the [release report](docs/evidence/RELEASE_REPORT.md).
 
 Current code includes: Bun runtime, SQLite state, authority gates, Linux Landlock sandbox, capability dispatch (files/shell/HTTP/web/search/browser/MCP/delegate/jobs/helpers), local notes and optional Honcho fixture adapter, provider routing and run budgets, durable skill pins, durable jobs and transports (Discord/Telegram stubs), install/update/backup/restore, global pause, delegate conformance in the gate loop, fixture provider, and a Grok Build-style CLI.
 

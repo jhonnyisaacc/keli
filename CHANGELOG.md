@@ -2,9 +2,16 @@
 
 All notable changes to Keli follow [SemVer](https://semver.org/).
 
-## 0.1.0-alpha (unreleased)
+## 0.1.0 — 2026-09-15
 
-**Release policy:** the full initial PRD product ships as **v0.1.0**. Increments 0.1-A–I are complete in code, including the integration/onboarding layer. **Do not tag v0.1.0** until human gates are recorded. See [PRD.md](PRD.md) §11.
+**Release policy:** the full initial PRD product ships as **v0.1.0**. Increments 0.1-A–I are complete in code, including the integration/onboarding layer. **Tagged by owner decision with fixture-only evidence.** [PRD.md](PRD.md) §11/§14 asked for live evidence before the tag; the owner accepted tagging without it. The open PRD §14 items are listed in [RELEASE_REPORT.md](docs/evidence/RELEASE_REPORT.md) and stay open owner milestones; a later live check may move a ledger row to live-verified but does not reopen the architecture.
+
+### Release close-out (this tag)
+
+- Held-out correction fixture suite: 105/105 after aligning H025/H026 with PRD A05 ("Use Grok only this time" is one run override). The fixture rate is not the live ≥95% target.
+- [Release checklist](docs/RELEASE_CHECKLIST.md) rows 1–10 executed against the bootstrap-installed Linux binary with fixture servers; two defects found and fixed: `keli notes search` passed raw text to FTS5 (punctuation raised `SQLiteError`), and a binary-only install had no `landlock-worker.py`, so `doctor` failed its sandbox probe. The worker is now embedded in the executable.
+- `bun run release` seeds the smoke project explicitly (new installs default to `personal`) and always stops its fixture servers.
+- Four cross-compiled artifacts (`linux`/`darwin` × `x64`/`arm64`) with `SHA256SUMS` and a manifest carrying the tagged git SHA. Native smoke and notarization remain owner milestones.
 
 ## Completion pass (reuse + onboarding)
 
@@ -81,7 +88,7 @@ Replays (fixture corpora + scripted model): Augustine vs Shaul (thread 154816821
 - `scripts/build.ts --all-targets` emits four cross-compiled artifacts + `SHA256SUMS` (signing hook when `KELI_RELEASE_SIGNING_KEY` set)
 - Held-out fixture suite (≥100 cases) under `tests/acceptance/held-out/` with pass-rate report
 - `docs/SUPPORT_MATRIX.md`, `docs/BOUNDARY_MATRIX.md`, `docs/RELEASE_CHECKLIST.md`
-- **Do not tag v0.1.0** until human gates recorded (notarization, live eval, five-user check, native four-target smoke)
+- **Do not tag v0.1.0** until human gates recorded (notarization, live eval, five-user check, native four-target smoke) — superseded by the 2026-09-15 owner decision recorded at the top of this release
 
 ### 0.1-H
 

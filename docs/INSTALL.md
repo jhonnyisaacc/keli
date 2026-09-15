@@ -49,4 +49,4 @@ macOS release signing/notarization requires Apple credentials outside CI (increm
 
 ## Roadmap
 
-The first public release is **v0.1.0** and includes the full initial PRD. Increments **0.1-F–I** (Honcho/integrations, routing/budgets/skills, helper fan-out, release evidence) remain before the tag. See [PRD.md](../PRD.md) §11.
+The first release is **v0.1.0** and includes the full initial PRD. Increments **0.1-F–I** (Honcho/integrations, routing/budgets/skills, helper fan-out, release evidence) are implemented; the tag carries fixture-only evidence and the open owner milestones are recorded in the [release report](evidence/RELEASE_REPORT.md). See [PRD.md](../PRD.md) §11.
